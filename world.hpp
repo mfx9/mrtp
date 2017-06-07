@@ -43,7 +43,7 @@ class Camera {
     double  perspective;
     double  rotation;
 public:
-    Camera (Vector &origin, Vector &target,
+    Camera (Vector *origin, Vector *target,
         unsigned int w, unsigned int h, double fov, 
         double rot);
     ~Camera ();
@@ -68,13 +68,13 @@ class World {
 public:
     World (char *filename);
     ~World ();
-    unsigned int AddPlane (Vector &center, Vector &normal,
-        Color &colora, Color &colorb, double texscale);
-    unsigned int AddSphere (Vector &center, double radius,
-        Color &color);
+    unsigned int AddPlane (Vector *center, Vector *normal,
+        Color *colora, Color *colorb, double texscale);
+    unsigned int AddSphere (Vector *center, double radius,
+        Color *color);
     unsigned int PopPlane ();
     unsigned int PopSphere ();
-    void TraceRay (Vector &origin, Vector &direction,
+    void TraceRay (Vector *origin, Vector *direction,
         Color *color);
     void Render ();
     void WritePNG (char *filename);

@@ -113,7 +113,7 @@ void Buffer::WriteToPNG (char *filename) {
 }
 
 void Buffer::Text (char *text, unsigned int x,
-        unsigned int y, Color &color) {
+        unsigned int y, Color *color) {
     unsigned char *fp, letter, idx, byte;
     char *tp;
     Color *bp, *sav;
@@ -132,7 +132,7 @@ void Buffer::Text (char *text, unsigned int x,
             byte = *(fp++);
             for (col = 7; col >= 0; col--) {
                 if ((byte >> col) & 1)
-                    color.CopyTo (bp);
+                    color->CopyTo (bp);
                 bp++;
             }
             bp += (width - 8);

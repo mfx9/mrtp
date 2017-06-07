@@ -28,11 +28,11 @@ Actor::~Actor () {
 /*
  * . Planes.
  */
-Plane::Plane (Vector &c, Vector &n, Color &cola, 
-        Color &colb, double texscale) {
+Plane::Plane (Vector *c, Vector *n, Color *cola, 
+        Color *colb, double texscale) {
     next = NULL;
-    c.CopyTo (&center);
-    n.CopyTo (&normal);
+    c->CopyTo (&center);
+    n->CopyTo (&normal);
     normal.Normalize_InPlace ();
 #ifdef DEBUG_ACTORS
     printf ("%s: Plane center and normal\n", __FILE__);
@@ -42,8 +42,8 @@ Plane::Plane (Vector &c, Vector &n, Color &cola,
     /*
      * . Texturing.
      */
-    cola.CopyTo (&colora);
-    colb.CopyTo (&colorb);
+    cola->CopyTo (&colora);
+    colb->CopyTo (&colorb);
     tscale = texscale;
 
     Vector k;
@@ -72,14 +72,14 @@ void Plane::SetNext (Plane *plane) {
     next = plane;
 }
 
-void Plane::DetermineColor (Vector &inter, 
+void Plane::DetermineColor (Vector *inter, 
         Color *col) {
     Vector v;
     double vx, vy, scale;
     int tx, ty;
     Color *cp;
 
-    v = inter - center;
+    v = *(inter) - center;
     /*
      * . Calculate components of v (dot
      *  products).
@@ -107,13 +107,13 @@ void Plane::DetermineColor (Vector &inter,
     cp->CopyTo (col);
 }
 
-double Plane::Solve (Vector &origin, Vector &direction, 
+double Plane::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
     double bar, d = -1.;
 
-    bar = direction * normal;
+    bar = *(direction) * normal;
     if (bar != 0.) {
-        d = -((origin - center) * normal) / bar;
+        d = -((*(origin) - center) * normal) / bar;
         if ((d < mind) || (d > maxd))
             d = -1.;
     }
@@ -127,12 +127,12 @@ void Plane::GetNormal (Vector *n) {
 /*
  * . Spheres.
  */
-Sphere::Sphere (Vector &c, double radius,
-        Color &col) {
-    c.CopyTo (&center);
+Sphere::Sphere (Vector *c, double radius,
+        Color *col) {
+    c->CopyTo (&center);
     next = NULL;
     R = radius;
-    col.CopyTo (&color);
+    col->CopyTo (&color);
 }
 
 Sphere *Sphere::GetNext () {
@@ -147,16 +147,16 @@ void Sphere::DetermineColor (Color *col) {
     color.CopyTo (col);
 }
 
-double Sphere::Solve (Vector &origin, Vector &direction, 
+double Sphere::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
-    Vector foo;
+    Vector oc;
     double d = -1.;
     double a, b, c, delta, sd, t, da, db;
 
-    foo = origin - center;
-    a   = direction.DotSelf ();
-    b   = 2. * (foo * direction);
-    c   = foo.DotSelf () - (R * R);
+    oc = *(origin) - center;
+    a  = direction->DotSelf ();
+    b  = 2. * (*(direction) * oc);
+    c  = oc.DotSelf () - (R * R);
 
     delta = b * b - 4. * a * c;
     if (delta >= 0.) {
@@ -168,7 +168,7 @@ double Sphere::Solve (Vector &origin, Vector &direction,
             t  = .5 / a;
             da = (-b - sd) * t;
             db = (-b + sd) * t;
-            d  = da ? (da < db) : db;
+            d = (da < db) ? da : db;
         }
         if ((d < mind) || (d > maxd))
             d = -1.;
@@ -176,22 +176,23 @@ double Sphere::Solve (Vector &origin, Vector &direction,
     return d;
 }
 
-void Sphere::GetNormal (Vector &hit, Vector *n) {
-    Vector subtract = (hit - center);
+void Sphere::GetNormal (Vector *hit, Vector *n) {
+    Vector subtract = (*(hit) - center);
+    subtract.Normalize_InPlace ();
     subtract.CopyTo (n);
 }
 
 /*
  * . Light.
  */
-Light::Light (Vector &origin) {
-    origin.CopyTo (&position);
+Light::Light (Vector *origin) {
+    origin->CopyTo (&position);
 }
 
 Light::~Light () {
 }
 
-void Light::GetToLight (Vector &hit, Vector *tolight) {
-    Vector subtract = (position - hit);
+void Light::GetToLight (Vector *hit, Vector *tolight) {
+    Vector subtract = (position - *(hit));
     subtract.CopyTo (tolight);
 }

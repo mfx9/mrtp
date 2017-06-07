@@ -35,7 +35,7 @@ public:
     void Clear ();
     void WriteToPNG (char *filename);
     void Text (char *text, unsigned int x,
-        unsigned int y, Color &color);
+        unsigned int y, Color *color);
     Color *GetPointer ();
 };
 

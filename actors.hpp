@@ -39,12 +39,12 @@ class Sphere : public Actor {
     Color color;
     Sphere *next;
 public:
-    Sphere (Vector &c, double radius,
-        Color &col);
-    double Solve (Vector &origin, Vector &direction, 
+    Sphere (Vector *c, double radius,
+        Color *col);
+    double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
     Sphere *GetNext ();
-    void GetNormal (Vector &hit, Vector *n);
+    void GetNormal (Vector *hit, Vector *n);
     void SetNext (Sphere *sphere);
     void DetermineColor (Color *col);
 };
@@ -56,14 +56,14 @@ class Plane : public Actor {
     double tscale;
     Plane *next;
 public:
-    Plane (Vector &c, Vector &n, Color &cola, 
-        Color &colb, double texscale);
-    double Solve (Vector &origin, Vector &direction, 
+    Plane (Vector *c, Vector *n, Color *cola, 
+        Color *colb, double texscale);
+    double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
     Plane *GetNext ();
     void GetNormal (Vector *n);
     void SetNext (Plane *plane);
-    void DetermineColor (Vector &inter, Color *col);
+    void DetermineColor (Vector *inter, Color *col);
 };
 
 class Cylinder : public Actor {
@@ -76,9 +76,9 @@ public:
 class Light {
     Vector  position;
 public:
-    Light (Vector &origin);
+    Light (Vector *origin);
     ~Light ();
-    void GetToLight (Vector &hit, 
+    void GetToLight (Vector *hit, 
         Vector *tolight);
 };
 

@@ -19,11 +19,11 @@
 #include "world.hpp"
 
 
-Camera::Camera (Vector &origin, Vector &target,
+Camera::Camera (Vector *origin, Vector *target,
         unsigned int w, unsigned int h, double fov, 
         double rot) {
-    origin.CopyTo (&eye);
-    target.CopyTo (&lookat);
+    origin->CopyTo (&eye);
+    target->CopyTo (&lookat);
     width  = (double) w;
     heigth = (double) h;
     ratio  = w / h;
@@ -165,25 +165,23 @@ World::World (char *filename) {
     Color   red (1., 0., 0.);
 
 
-    Vector vcam (15., 0., 5.), vlook (0., 0., 0.);
-    camera = new Camera (vcam, vlook, 
+    Vector vcam (15., 0., 10.), vlook (0., 0., 0.);
+    camera = new Camera (&vcam, &vlook, 
         640, 480, 70., 0.);
 
-    Vector vlight (10., 10., 5.);
-    light = new Light (vlight);
+    Vector vlight (-5., 5., 5.);
+    light = new Light (&vlight);
 
     buffer = new Buffer (640, 480);
 
     Vector pcenter (0., 0., 0.), pnormal (0., 0., 1.);
-    AddPlane (pcenter, pnormal, blue, green, 2.);
+    AddPlane (&pcenter, &pnormal, &blue, &green, 2.);
 
-    /*
-    Vector pcenter1 (-20., 0., 0.), pnormal1 (-1., 0., 0.5);
-    AddPlane (pcenter1, pnormal1, red, white, 2.);
-    */
+    Vector pcenter1 (-10., 0., 0.), pnormal1 (1., 0., 0.5);
+    AddPlane (&pcenter1, &pnormal1, &red, &white, 2.);
 
     Vector scenter (0., 0., 1.);
-    AddSphere (scenter, 1., white);
+    AddSphere (&scenter, 1., &white);
 
     /*
     Vector scenter1 (-5., 5., 1.);
@@ -255,8 +253,8 @@ unsigned int World::PopSphere () {
     return nspheres;
 }
 
-unsigned int World::AddPlane (Vector &center, Vector &normal,
-        Color &colora, Color &colorb, double texscale) {
+unsigned int World::AddPlane (Vector *center, Vector *normal,
+        Color *colora, Color *colorb, double texscale) {
     Plane *next, *last, *plane;
 
     plane = new Plane (center, normal, colora, 
@@ -278,8 +276,8 @@ unsigned int World::AddPlane (Vector &center, Vector &normal,
     return (++nplanes);
 }
 
-unsigned int World::AddSphere (Vector &center, double radius,
-        Color &color) {
+unsigned int World::AddSphere (Vector *center, double radius,
+        Color *color) {
     Sphere *next, *last, *sphere;
 
     sphere = new Sphere (center, radius, color);
@@ -300,7 +298,7 @@ unsigned int World::AddSphere (Vector &center, double radius,
     return (++nspheres);
 }
 
-void World::TraceRay (Vector &origin, Vector &direction,
+void World::TraceRay (Vector *origin, Vector *direction,
         Color *color) {
     Plane   *plane, *hitplane;
     Sphere  *sphere, *hitsphere;
@@ -346,15 +344,15 @@ void World::TraceRay (Vector &origin, Vector &direction,
         /*
          * . Intersection of the ray and object.
          */
-        inter = (direction * currd) + origin;
+        inter = (*(direction) * currd) + *(origin);
 
         switch (hit) {
             case HIT_PLANE:
                 hitplane->GetNormal (&normal);
-                hitplane->DetermineColor (inter, &objcol);
+                hitplane->DetermineColor (&inter, &objcol);
                 break;
             case HIT_SPHERE:
-                hitsphere->GetNormal (inter, &normal);
+                hitsphere->GetNormal (&inter, &normal);
                 hitsphere->DetermineColor (&objcol);
                 break;
             case HIT_CYLINDER:
@@ -365,13 +363,11 @@ void World::TraceRay (Vector &origin, Vector &direction,
          * . Find a vector between the intersection
          *  and light.
          */
-        light->GetToLight (inter, &tl);
+        light->GetToLight (&inter, &tl);
         tl.Normalize_InPlace ();
 
         dot = normal * tl;
-        if (dot >= 0.) {
-            objcol.Scale_InPlace (dot);
-        }
+        objcol.Scale_InPlace (dot);
         /*
          * . Put a pixel in the frame buffer.
          */
@@ -405,7 +401,7 @@ void World::Render () {
             direction = origin - eye;
             direction.Normalize_InPlace ();
 
-            TraceRay (origin, direction, bp++);
+            TraceRay (&origin, &direction, bp++);
         }
     }
 }
@@ -413,6 +409,6 @@ void World::Render () {
 void World::WritePNG (char *filename) {
     Color blue (0., 0., 1.);
 
-    buffer->Text ("BUFFER TEST.", 0, 0, blue);
+    buffer->Text ("BUFFER TEST.", 0, 0, &blue);
     buffer->WriteToPNG (filename);
 }
