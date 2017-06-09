@@ -19,6 +19,9 @@
 #include "vector.hpp"
 
 
+Vector::~Vector () {
+}
+
 Vector::Vector () {
 }
 
@@ -29,15 +32,15 @@ Vector::Vector (double newx,
     z = newz;
 }
 
-Vector::~Vector () {
+void Vector::Set (double newx,
+        double newy, double newz) {
+    x = newx;
+    y = newy;
+    z = newz;
 }
 
 void Vector::Print () {
-    printf ("x=%7.3f  y=%7.3f  z=%7.3f\n", x, y, z);
-}
-
-void Vector::PrintXX () {
-    printf ("Xx  %7.3f   %7.3f   %7.3f\n", x, y, z);
+    printf ("x=%7.3f   y=%7.3f   z=%7.3f\n", x, y, z);
 }
 
 double Vector::Len () {

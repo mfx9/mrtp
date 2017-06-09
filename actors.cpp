@@ -36,8 +36,8 @@ Plane::Plane (Vector *c, Vector *n, Color *cola,
     normal.Normalize_InPlace ();
 #ifdef DEBUG_ACTORS
     printf ("%s: Plane center and normal\n", __FILE__);
-    center.PrintXX ();
-    normal.PrintXX ();
+    center.Print ();
+    normal.Print ();
 #endif
     /*
      * . Texturing.
@@ -59,8 +59,8 @@ Plane::Plane (Vector *c, Vector *n, Color *cola,
     i.CopyTo (&texx);
 #ifdef DEBUG_ACTORS
     printf ("%s: Plane texturing (texx, texy)\n", __FILE__);
-    texx.PrintXX ();
-    texy.PrintXX ();
+    texx.Print ();
+    texy.Print ();
 #endif
 }
 

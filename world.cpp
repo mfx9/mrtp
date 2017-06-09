@@ -19,131 +19,6 @@
 #include "world.hpp"
 
 
-Camera::Camera (Vector *origin, Vector *target,
-        unsigned int w, unsigned int h, double fov, 
-        double rot) {
-    origin->CopyTo (&eye);
-    target->CopyTo (&lookat);
-    width  = (double) w;
-    heigth = (double) h;
-    ratio  = w / h;
-    perspective = ratio / (2. * tan (fov / 2. * M_PI / 180.));
-    rotation = rot;
-}
-
-Camera::~Camera () {
-}
-
-void Camera::GetDimensions (unsigned int *w, 
-        unsigned int *h) {
-    *w = width;
-    *h = heigth;
-}
-
-void Camera::GetEye (Vector *vector) {
-    eye.CopyTo (vector);
-}
-
-void Camera::CalculateVectors (Vector *vw, Vector *vh,
-        Vector *vo) {
-    /*
-     * . Method calculates vectors that span the window.
-     */
-
-    /*
-     * . i is the vector between the camera and
-     *  the center of the window.
-     */
-    Vector i;
-    i = lookat - eye;
-    i.Normalize_InPlace ();
-#ifdef DEBUG_WORLD
-    printf ("%s: Basis vectors\n", __FILE__);
-    Vector bi (1., 0., 0.), bj (0., 1., 0.), 
-        bk (0., 0., 1.);
-    bi.PrintXX ();
-    bj.PrintXX ();
-    bk.PrintXX ();
-    printf ("%s: Camera position and target\n", __FILE__);
-    eye.PrintXX ();
-    lookat.PrintXX ();
-#endif
-    /*
-     * if (i.x == 0. && i.y == 0.)
-     *     return false;
-     */
-
-    Vector j, k (0., 0., 1.);
-    j = i ^ k;
-    j.Normalize_InPlace ();
-    /*
-     * . Flip the cross-product instead?
-     */
-    j.Scale_InPlace (-1.);
-    k = i ^ j;
-    k.Normalize_InPlace ();
-#ifdef DEBUG_WORLD
-    Vector temp;
-    printf ("%s: Camera coordinate system (i, j, k)\n", __FILE__);
-    temp = eye + i;
-    temp.PrintXX ();
-    temp = eye + j;
-    temp.PrintXX ();
-    temp = eye + k;
-    temp.PrintXX ();
-#endif
-
-    /*
-     * . Apply camera rotation around
-     *  the axis of i.
-     */
-
-    /*
-     * . Calculate the central point of
-     *  the window.
-     */
-    Vector center;
-    center = (i * perspective) + eye;
-#ifdef DEBUG_WORLD
-    /*
-    printf ("** Center of screen **\n");
-    center.PrintXX ();
-    */
-#endif
-
-    /*
-     * . Modify vectors.
-     */
-    j.Scale_InPlace (ratio * .5);
-    k.Scale_InPlace (.5);
-
-    /*
-     * . Find 3 corners of the window.
-     */
-    Vector wo, ww, wh;
-    wo = center + j + k;
-    ww = center - j + k;
-    wh = center + j - k;
-#ifdef DEBUG_WORLD
-    /*
-    printf ("** Corners of window **\n");
-    wo.PrintXX ();
-    ww.PrintXX ();
-    wh.PrintXX ();
-    */
-#endif
-
-    /*
-     * . Find vectors spanning the window.
-     */
-    Vector horiz, verti;
-    horiz = (ww - wo) * (1. / width );
-    horiz.CopyTo (vw);
-    verti = (wh - wo) * (1. / heigth);
-    verti.CopyTo (vh);
-    wo.CopyTo (vo);
-}
-
 World::World (char *filename) {
     /* . Initialize. */
     nplanes    = 0;
@@ -167,12 +42,12 @@ World::World (char *filename) {
 
     Vector vcam (15., 0., 10.), vlook (0., 0., 0.);
     camera = new Camera (&vcam, &vlook, 
-        640, 480, 70., 0.);
+        800, 600, 70., 0.);
 
-    Vector vlight (-5., 5., 5.);
+    Vector vlight (5., -5., 5.);
     light = new Light (&vlight);
 
-    buffer = new Buffer (640, 480);
+    buffer = new Buffer (800, 600);
 
     Vector pcenter (0., 0., 0.), pnormal (0., 0., 1.);
     AddPlane (&pcenter, &pnormal, &blue, &green, 2.);
@@ -180,19 +55,25 @@ World::World (char *filename) {
     Vector pcenter1 (-10., 0., 0.), pnormal1 (1., 0., 0.5);
     AddPlane (&pcenter1, &pnormal1, &red, &white, 2.);
 
-    Vector scenter (0., 0., 1.);
+
+    Vector scenter (0., -3., 1.);
     AddSphere (&scenter, 1., &white);
 
-    /*
-    Vector scenter1 (-5., 5., 1.);
-    AddSphere (scenter1, 1., black);
+    Vector scenter1 (4., -3., 1.);
+    AddSphere (&scenter1, 1., &white);
 
-    Vector scenter2 (-5., 5., 1.);
-    AddSphere (scenter2, 1., green);
+    Vector scenter2 (8., -3., 1.);
+    AddSphere (&scenter2, 1., &white);
 
-    Vector scenter3 (5., -5., 1.);
-    AddSphere (scenter3, 1., red);
-    */
+
+    Vector scenter3 (0., 3., 1.);
+    AddSphere (&scenter3, 1., &white);
+
+    Vector scenter4 (4., 3., 1.);
+    AddSphere (&scenter4, 1., &white);
+
+    Vector scenter5 (8., 3., 1.);
+    AddSphere (&scenter5, 1., &white);
 }
 
 World::~World () {
@@ -208,22 +89,18 @@ World::~World () {
 }
 
 unsigned int World::PopPlane () {
-    Plane *prev, *curr, *next;
+    Plane *prev, *next, *last;
 
     if (nplanes > 0) {
-        if (nplanes < 2) {
-            delete planes;
+        last = planes;
+        prev = NULL;
+        while ((next = last->GetNext ()) != NULL) {
+            prev = last;
+            last = next;
         }
-        else {
-            prev = planes;
-            curr = prev->GetNext ();
-            do {
-                prev = curr;
-                next = curr->GetNext ();
-            } while (next != NULL);
-            delete curr;
+        if (prev != NULL)
             prev->SetNext (NULL);
-        }
+        delete last;
         nplanes--;
     }
     /* . Returns zero if there are no planes left. */ 
@@ -231,22 +108,18 @@ unsigned int World::PopPlane () {
 }
 
 unsigned int World::PopSphere () {
-    Sphere *prev, *curr, *next;
+    Sphere *prev, *next, *last;
 
     if (nspheres > 0) {
-        if (nspheres < 2) {
-            delete spheres;
+        last = spheres;
+        prev = NULL;
+        while ((next = last->GetNext ()) != NULL) {
+            prev = last;
+            last = next;
         }
-        else {
-            prev = spheres;
-            curr = prev->GetNext ();
-            do {
-                prev = curr;
-                next = curr->GetNext ();
-            } while (next != NULL);
-            delete curr;
+        if (prev != NULL)
             prev->SetNext (NULL);
-        }
+        delete last;
         nspheres--;
     }
     /* . Returns zero if there are no spheres left. */ 
@@ -270,9 +143,6 @@ unsigned int World::AddPlane (Vector *center, Vector *normal,
         } while (next != NULL);
         last->SetNext (plane);
     }
-#ifdef DEBUG_WORLD
-    printf ("%s: Added plane %d\n", __FILE__, (nplanes + 1));
-#endif
     return (++nplanes);
 }
 
@@ -292,9 +162,6 @@ unsigned int World::AddSphere (Vector *center, double radius,
         } while (next != NULL);
         last->SetNext (sphere);
     }
-#ifdef DEBUG_WORLD
-    printf ("%s: Added sphere %d\n", __FILE__, (nspheres + 1));
-#endif
     return (++nspheres);
 }
 
@@ -302,10 +169,11 @@ void World::TraceRay (Vector *origin, Vector *direction,
         Color *color) {
     Plane   *plane, *hitplane;
     Sphere  *sphere, *hitsphere;
-    double  dist, currd, dot;
+    double  dist, currd, dot, raylen, fade;
     char    hit;
     Vector  inter, tl, normal;
     Color   objcol;
+    bool    isshadow;
 
     /* . Initialize. */
     color->Set (0., 0., 0.);
@@ -313,7 +181,8 @@ void World::TraceRay (Vector *origin, Vector *direction,
     hit    = HIT_NULL;
 
     /* . Search for planes. */
-    plane  = planes;
+    plane    = planes;
+    hitplane = NULL;
     while (plane != NULL) {
         dist = plane->Solve (origin, direction, 0., MAX_DISTANCE);
         if ((dist > 0.) && (dist < currd)) {
@@ -325,7 +194,8 @@ void World::TraceRay (Vector *origin, Vector *direction,
     }
 
     /* . Search for spheres. */
-    sphere = spheres;
+    sphere    = spheres;
+    hitsphere = NULL;
     while (sphere != NULL) {
         dist  = sphere->Solve (origin, direction, 0., MAX_DISTANCE);
         if ((dist > 0.) && (dist < currd)) {
@@ -344,7 +214,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
         /*
          * . Intersection of the ray and object.
          */
-        inter = (*(direction) * currd) + *(origin);
+        inter = (*(direction) * currd) + (*(origin));
 
         switch (hit) {
             case HIT_PLANE:
@@ -365,8 +235,31 @@ void World::TraceRay (Vector *origin, Vector *direction,
          */
         light->GetToLight (&inter, &tl);
         tl.Normalize_InPlace ();
-
         dot = normal * tl;
+        raylen = tl.Len ();
+
+        /*
+         * . Planes cannot cast shadows so check
+         *    only for spheres.
+         */
+        isshadow = false;
+
+        sphere = spheres;
+        while (sphere != NULL) {
+            if (sphere != hitsphere) {
+                dist = sphere->Solve (&inter, &tl, 0., raylen);
+                if (dist > 0.) {
+                    isshadow = true;
+                    break;
+                }
+            }
+            sphere = sphere->GetNext ();
+        }
+
+        if (isshadow)
+            dot *= SHADOW_FACTOR;
+        fade = (1. / sqr (MAX_DISTANCE)) * sqr (currd);
+
         objcol.Scale_InPlace (dot);
         /*
          * . Put a pixel in the frame buffer.

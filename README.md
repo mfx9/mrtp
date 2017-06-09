@@ -10,8 +10,7 @@ that I wrote back in 2005 in pure C. The "P" in the name indicates
 
 Essentially, the purpose of writing Mrtp was to refresh my knowledge 
 of C++, raytracing and computer graphics. Also to experiment with 
-linking of a project to third-party libraries, for example png++ and 
-tinyxml2.
+linking of a project to third-party libraries, for example png++.
 
 As of now, the program is not fully functional and is under
 development.

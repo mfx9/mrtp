@@ -26,12 +26,13 @@
 class Vector {
     double x, y, z;
 public:
+    ~Vector ();
+    Vector ();
     Vector (double newx, double newy,
         double newz);
-    Vector ();
-    ~Vector ();
+    void Set (double newx, double newy,
+        double newz);
     void Print ();
-    void PrintXX ();
     double Len ();
     double DotSelf ();
     void Scale_InPlace (double scale);

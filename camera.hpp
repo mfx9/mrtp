@@ -16,28 +16,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef _BUFFER_H
-#define _BUFFER_H
+#ifndef _CAMERA_H
+#define _CAMERA_H
 
-#include "png.hpp"
-#include "color.hpp"
-#include "fontdata.hpp"
+#include <cmath>
+#include <cstdio>
+#include "vector.hpp"
 
-using namespace png;
+#define DEBUG_CAMERA  1
 
 
-class Buffer {
-    Color *data;
-    unsigned int width, heigth;
+class Camera {
+    Vector  eye, lookat;
+    double  width, heigth;
+    double  ratio;   /*  width/height  */
+    double  perspective;
+    double  rotation;
 public:
-    Buffer (unsigned int w,
-        unsigned int h);
-    ~Buffer ();
-    void Clear ();
-    void WriteToPNG (char *filename);
-    void Text (char *text, unsigned int x,
-        unsigned int y, Color *color);
-    Color *GetPointer ();
+    Camera (Vector *origin, Vector *target,
+        unsigned int w, unsigned int h, double fov, 
+        double rot);
+    ~Camera ();
+    void CalculateVectors (Vector *vw, Vector *vh,
+        Vector *vo);
+    void GetDimensions (unsigned int *w,
+        unsigned int *h);
+    void GetEye (Vector *vector);
 };
 
-#endif /* _BUFFER_H */
+#endif /* _CAMERA_H */

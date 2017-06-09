@@ -16,28 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef _BUFFER_H
-#define _BUFFER_H
-
-#include "png.hpp"
-#include "color.hpp"
-#include "fontdata.hpp"
-
-using namespace png;
+#ifndef _FONTDATA_H
+#define _FONTDATA_H
 
 
-class Buffer {
-    Color *data;
-    unsigned int width, heigth;
-public:
-    Buffer (unsigned int w,
-        unsigned int h);
-    ~Buffer ();
-    void Clear ();
-    void WriteToPNG (char *filename);
-    void Text (char *text, unsigned int x,
-        unsigned int y, Color *color);
-    Color *GetPointer ();
-};
+extern unsigned char fontdata[];
 
-#endif /* _BUFFER_H */
+#endif /* _FONTDATA_H */

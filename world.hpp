@@ -25,34 +25,20 @@
 #include "actors.hpp"
 #include "buffer.hpp"
 #include "color.hpp"
+#include "camera.hpp"
 
 
-#define DEBUG_WORLD    1
+#define DEBUG_WORLD     1
+#define sqr(x) (x * x)
 
-#define HIT_NULL       0
-#define HIT_PLANE      1
-#define HIT_SPHERE     2
-#define HIT_CYLINDER   3
-#define MAX_DISTANCE  60.0
+#define HIT_NULL        0
+#define HIT_PLANE       1
+#define HIT_SPHERE      2
+#define HIT_CYLINDER    3
 
+#define MAX_DISTANCE   60.
+#define SHADOW_FACTOR    .5
 
-class Camera {
-    Vector  eye, lookat;
-    double  width, heigth;
-    double  ratio;   /*  width/height  */
-    double  perspective;
-    double  rotation;
-public:
-    Camera (Vector *origin, Vector *target,
-        unsigned int w, unsigned int h, double fov, 
-        double rot);
-    ~Camera ();
-    void CalculateVectors (Vector *vw, Vector *vh,
-        Vector *vo);
-    void GetDimensions (unsigned int *w,
-        unsigned int *h);
-    void GetEye (Vector *vector);
-};
 
 class World {
     Camera    *camera;
