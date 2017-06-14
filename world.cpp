@@ -212,9 +212,10 @@ void World::TraceRay (Vector *origin, Vector *direction,
 
     if (hit != HIT_NULL) {
         /*
-         * . Intersection of the ray and object.
+         * Found intersection of the current ray 
+         *   and an object.
          */
-        inter = (*(direction) * currd) + (*(origin));
+        inter = ((*direction) * currd) + (*origin);
 
         switch (hit) {
             case HIT_PLANE:
@@ -228,10 +229,10 @@ void World::TraceRay (Vector *origin, Vector *direction,
             case HIT_CYLINDER:
                 break;
         }
-
         /*
-         * . Find a vector between the intersection
-         *  and light.
+         * Find a vector between the intersection
+         *   and light.
+         *
          */
         light->GetToLight (&inter, &tl);
         tl.Normalize_InPlace ();
@@ -239,12 +240,12 @@ void World::TraceRay (Vector *origin, Vector *direction,
         raylen = tl.Len ();
 
         /*
-         * . Planes cannot cast shadows so check
-         *    only for spheres.
+         * Planes cannot cast shadows so check
+         *   only for spheres.
+         *
          */
         isshadow = false;
-
-        sphere = spheres;
+        sphere   = spheres;
         while (sphere != NULL) {
             if (sphere != hitsphere) {
                 dist = sphere->Solve (&inter, &tl, 0., raylen);
@@ -255,36 +256,34 @@ void World::TraceRay (Vector *origin, Vector *direction,
             }
             sphere = sphere->GetNext ();
         }
-
         if (isshadow)
             dot *= SHADOW_FACTOR;
         fade = (1. / sqr (MAX_DISTANCE)) * sqr (currd);
 
         objcol.Scale_InPlace (dot);
         /*
-         * . Put a pixel in the frame buffer.
+         * Put a pixel in the frame buffer.
          */
         objcol.CopyTo (color); 
     }
 }
 
 void World::Render () {
-    Vector vw, vh, vo;
+    Color *bp;
+    Vector vw, vh, vo, eye,
+        horiz, verti, origin, direction;
+    unsigned int width, heigth, i, j;
+    /*
+     * Initialize.
+     */
     camera->CalculateVectors (&vw, &vh, &vo);
-
-    unsigned int width, heigth;
     camera->GetDimensions (&width, &heigth);
-
-    Vector eye;
     camera->GetEye (&eye);
 
-    Color *bp;
     bp = buffer->GetPointer ();
-
-    Vector horiz, verti, origin, 
-        direction;
-    unsigned int i, j;
-
+    /*
+     * Trace a ray for every pixel.
+     */
     for (j = 0; j < heigth; j++) {
         for (i = 0; i < width; i++) {
             horiz  = vw * (double) i;

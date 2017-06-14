@@ -37,7 +37,7 @@
 #define HIT_CYLINDER    3
 
 #define MAX_DISTANCE   60.
-#define SHADOW_FACTOR    .5
+#define SHADOW_FACTOR    .25
 
 
 class World {

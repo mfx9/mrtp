@@ -27,6 +27,11 @@
 
 #define DEBUG_ACTORS   1
 
+#define TOLERANCE  .000001
+#define IS_ZERO(x) ((x > -TOLERANCE) && (x < TOLERANCE))
+#define IS_NOT_ZERO(x) ((x <= -TOLERANCE) || (x >= TOLERANCE))
+
+
 class Actor {
 public:
     Actor ();

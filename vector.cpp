@@ -40,7 +40,7 @@ void Vector::Set (double newx,
 }
 
 void Vector::Print () {
-    printf ("x=%7.3f   y=%7.3f   z=%7.3f\n", x, y, z);
+    printf ("x=%7.3f    y=%7.3f    z=%7.3f\n", x, y, z);
 }
 
 double Vector::Len () {

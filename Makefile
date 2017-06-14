@@ -9,8 +9,8 @@ CC  = g++
 
 default: mrtp
 
-mrtp: main.o actors.o vector.o world.o camera.o color.o buffer.o fontdata.o
-	$(CC) $(CFLAGS) main.o actors.o vector.o world.o camera.o color.o buffer.o fontdata.o -lpng -lm -o mrtp
+mrtp: main.o actors.o vector.o world.o camera.o color.o buffer.o fontdata.o parser.o
+	$(CC) $(CFLAGS) main.o actors.o vector.o world.o camera.o color.o buffer.o fontdata.o parser.o -lpng -lm -o mrtp
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp -o main.o
@@ -35,6 +35,9 @@ buffer.o: buffer.cpp buffer.hpp png++/png++-${pngver}
 
 fontdata.o: fontdata.cpp fontdata.hpp
 	$(CC) $(CFLAGS) -c fontdata.cpp -o fontdata.o
+
+parser.o: parser.cpp parser.hpp
+	$(CC) $(CFLAGS) -c parser.cpp -o parser.o
 
 png++/png++-${pngver}:
 	+$(MAKE) -C png++
