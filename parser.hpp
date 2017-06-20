@@ -22,19 +22,87 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
-#define MAX_TOKENS 32
-
+#include <sstream>  /* Converting strings to doubles. */
+#include "color.hpp"
 
 using namespace std;
 
-class Parser {
-    char *filename;
+
+#define MODE_SEARCH   1
+#define MODE_OPEN     2
+#define MODE_READ     3
+
+#define MAX_PARM      16
+#define DEBUG_PARSER  1
+
+#define STATUS_FAIL   0
+#define STATUS_NEW    1
+#define STATUS_OK     2
+
+
+class ParsedSphere {
+    double x0, y0, z0;
+    double R;
+    Color  color;
+    ParsedSphere *next;
 public:
-    Parser (char *filename);
+    ParsedSphere ();
+    ~ParsedSphere ();
+    void SetNext (ParsedSphere *n);
+    ParsedSphere *GetNext ();
+    bool Init (string *labels, double *params, 
+        unsigned int npairs);
+};
+
+class ParsedPlane {
+    double x0, y0, z0;
+    double A, B, C;
+    double scale;
+    Color  colora, colorb;
+    ParsedPlane *next;
+public:
+    ParsedPlane ();
+    ~ParsedPlane ();
+    void SetNext (ParsedPlane *n);
+    ParsedPlane *GetNext ();
+    bool Init (string *labels, double *params, 
+        unsigned int npairs);
+};
+
+class ParsedLight {
+    double x0, y0, z0;
+public:
+    ParsedLight (ParsedLight *temp);
+    ParsedLight ();
+    ~ParsedLight ();
+    bool Init (string *labels, double *params, 
+        unsigned int npairs);
+};
+
+class ParsedCamera {
+    double x0, y0, z0;
+    double lx, ly, lz;
+    double rot;
+public:
+    ParsedCamera (ParsedCamera *temp);
+    ParsedCamera ();
+    ~ParsedCamera ();
+    bool Init (string *labels, double *params, 
+        unsigned int npairs);
+};
+
+class Parser {
+    string filename;
+    int status;
+    ParsedLight   *light;
+    ParsedCamera  *camera;
+    ParsedPlane   *planeroot;
+    ParsedSphere  *sphereroot;
+public:
+    Parser (string fn);
     ~Parser ();
-    unsigned int TokenizeLine (string line, 
-        string *tokens);
+    void Parse ();
+    int GetStatus ();
 };
 
 #endif /* _PARSER_H */

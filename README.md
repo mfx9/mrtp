@@ -5,7 +5,7 @@ Author: Mikolaj Feliks <mikolaj [dot] feliks [at] gmail [dot] com><br>
 Released as open source software under the GNU GPL v3.0 license (see COPYING).
 
 Mrtp builds up on the idea of my earlier program, mrt, 
-that I wrote back in 2005 in pure C. The "P" in the name indicates 
+that I wrote back in 2005 in pure C. The "p" in the name indicates 
 "plus" or "progress".
 
 Essentially, the purpose of writing Mrtp was to refresh my knowledge 
@@ -27,5 +27,5 @@ make
 An executable file "mrtp" will be generated that is ready to run:
 
 ```
-./mrtp [config.xml]
+./mrtp [config.txt]
 ```

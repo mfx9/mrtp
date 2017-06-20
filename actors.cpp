@@ -159,7 +159,6 @@ double Sphere::Solve (Vector *origin, Vector *direction,
 
     double delta, d;
     delta = b * b - 4. * a * c;
-
     if (delta < 0.) {
         d = -1;
     }

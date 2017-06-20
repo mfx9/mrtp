@@ -3,14 +3,14 @@
 pngver = 0.2.9
 
 # CFLAGS  = -O2 -fPIC -c -W -Wall -pedantic -I$(PDYNAMO_PCORE)/extensions/cinclude -I../cinclude
-CFLAGS = -Ipng++/png++-${pngver}
+CFLAGS = -Ipng++/png++-${pngver} -g
 CC  = g++
 
 
 default: mrtp
 
-mrtp: main.o actors.o vector.o world.o camera.o color.o buffer.o fontdata.o parser.o
-	$(CC) $(CFLAGS) main.o actors.o vector.o world.o camera.o color.o buffer.o fontdata.o parser.o -lpng -lm -o mrtp
+mrtp:  main.o  actors.o  vector.o  world.o  camera.o  color.o  buffer.o  parser.o  fontdata.o  png++/png++-${pngver}
+	$(CC)  $(CFLAGS)  main.o  actors.o  vector.o  world.o  camera.o  color.o  buffer.o  parser.o  fontdata.o  -lpng  -lm  -o  mrtp
 
 main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp -o main.o
@@ -33,11 +33,11 @@ color.o: color.cpp color.hpp
 buffer.o: buffer.cpp buffer.hpp png++/png++-${pngver}
 	$(CC) $(CFLAGS) -c buffer.cpp -o buffer.o
 
-fontdata.o: fontdata.cpp fontdata.hpp
-	$(CC) $(CFLAGS) -c fontdata.cpp -o fontdata.o
-
 parser.o: parser.cpp parser.hpp
 	$(CC) $(CFLAGS) -c parser.cpp -o parser.o
+
+fontdata.o: fontdata.cpp fontdata.hpp
+	$(CC) $(CFLAGS) -c fontdata.cpp -o fontdata.o
 
 png++/png++-${pngver}:
 	+$(MAKE) -C png++
@@ -51,6 +51,7 @@ clean:
 	if [ -e camera.o   ] ; then rm camera.o    ; fi
 	if [ -e color.o    ] ; then rm color.o     ; fi
 	if [ -e buffer.o   ] ; then rm buffer.o    ; fi
+	if [ -e parser.o   ] ; then rm parser.o    ; fi
 	if [ -e fontdata.o ] ; then rm fontdata.o  ; fi
 
 clean_all: clean

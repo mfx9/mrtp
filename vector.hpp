@@ -39,7 +39,8 @@ public:
     void Normalize_InPlace ();
     void CopyTo (Vector *other);
     /*
-     * . Operators:
+     * Operators:
+     *
      *    (+) Sum of two vectors
      *    (-) Difference of two vectors
      *    (^) Cross product
