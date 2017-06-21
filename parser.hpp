@@ -23,7 +23,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>  /* Converting strings to doubles. */
-#include "color.hpp"
 
 using namespace std;
 
@@ -39,70 +38,104 @@ using namespace std;
 #define STATUS_NEW    1
 #define STATUS_OK     2
 
+/*
+ *  1     1     0x1     0b1
+ *  2     2     0x2     0b10
+ *  3     4     0x4     0b100
+ *  4     8     0x8     0b1000
+ *  5     16    0x10    0b10000
+ *  6     32    0x20    0b100000
+ *  7     64    0x40    0b1000000
+ *  8     128   0x80    0b10000000
+ *  9     256   0x100   0b100000000
+ *  10    512   0x200   0b1000000000
+ *  11    1024  0x400   0b10000000000
+ *  12    2048  0x800   0b100000000000
+ *  13    4096  0x1000  0b1000000000000
+ *
+ */
+#define CAMERA_X     0x1
+#define CAMERA_Y     0x2
+#define CAMERA_Z     0x4
+#define CAMERA_LX    0x8
+#define CAMERA_LY    0x10
+#define CAMERA_LZ    0x20
+#define CAMERA_ROT   0x40
+#define CAMERA_COMPLETE  (CAMERA_X | CAMERA_Y | CAMERA_Z \
+    | CAMERA_LX | CAMERA_LY | CAMERA_LZ | CAMERA_ROT)
 
-class ParsedSphere {
-    double x0, y0, z0;
-    double R;
-    Color  color;
-    ParsedSphere *next;
-public:
-    ParsedSphere ();
-    ~ParsedSphere ();
-    void SetNext (ParsedSphere *n);
-    ParsedSphere *GetNext ();
-    bool Init (string *labels, double *params, 
-        unsigned int npairs);
-};
+#define LIGHT_X     0x1
+#define LIGHT_Y     0x2
+#define LIGHT_Z     0x4
+#define LIGHT_COMPLETE  (LIGHT_X | LIGHT_Y | LIGHT_Z)
 
-class ParsedPlane {
-    double x0, y0, z0;
-    double A, B, C;
-    double scale;
-    Color  colora, colorb;
-    ParsedPlane *next;
-public:
-    ParsedPlane ();
-    ~ParsedPlane ();
-    void SetNext (ParsedPlane *n);
-    ParsedPlane *GetNext ();
-    bool Init (string *labels, double *params, 
-        unsigned int npairs);
-};
+#define PLANE_X0      0x1
+#define PLANE_Y0      0x2
+#define PLANE_Z0      0x4
+#define PLANE_A       0x8
+#define PLANE_B       0x10
+#define PLANE_C       0x20
+#define PLANE_SCALE   0x40
+#define PLANE_COLA_R  0x80
+#define PLANE_COLA_G  0x100
+#define PLANE_COLA_B  0x200
+#define PLANE_COLB_R  0x400
+#define PLANE_COLB_G  0x800
+#define PLANE_COLB_B  0x1000
+#define PLANE_COMPLETE  (PLANE_X0 | PLANE_Y0 | PLANE_Z0 |  \
+    PLANE_A | PLANE_B | PLANE_C | PLANE_SCALE | PLANE_COLA_R |  \
+    PLANE_COLA_G | PLANE_COLA_B | PLANE_COLB_R |  \
+    PLANE_COLB_G | PLANE_COLB_B)
 
-class ParsedLight {
-    double x0, y0, z0;
-public:
-    ParsedLight (ParsedLight *temp);
-    ParsedLight ();
-    ~ParsedLight ();
-    bool Init (string *labels, double *params, 
-        unsigned int npairs);
-};
+#define SPHERE_X0      0x1
+#define SPHERE_Y0      0x2
+#define SPHERE_Z0      0x4
+#define SPHERE_R       0x8
+#define SPHERE_COL_R   0x10
+#define SPHERE_COL_G   0x20
+#define SPHERE_COL_B   0x40
+#define SPHERE_COMPLETE  (SPHERE_X0 | SPHERE_Y0 | SPHERE_Z0  \
+    | SPHERE_R | SPHERE_COL_R | SPHERE_COL_G | SPHERE_COL_B)
 
-class ParsedCamera {
-    double x0, y0, z0;
-    double lx, ly, lz;
-    double rot;
+
+class Entry {
+    string *keys;
+    double *values;
+    unsigned int nitems;
+    Entry *next;
 public:
-    ParsedCamera (ParsedCamera *temp);
-    ParsedCamera ();
-    ~ParsedCamera ();
-    bool Init (string *labels, double *params, 
+    Entry (string *labels, double *params,
         unsigned int npairs);
+    ~Entry ();
+    Entry *GetNext ();
+    void SetNext (Entry *n);
+    void CopyTo (Entry *other);
 };
 
 class Parser {
     string filename;
     int status;
-    ParsedLight   *light;
-    ParsedCamera  *camera;
-    ParsedPlane   *planeroot;
-    ParsedSphere  *sphereroot;
+    /*
+     * Spheres and planes are one-directional
+     *   lists.
+     */
+    Entry *spheres, *planes;
+    Entry *camera, *light;
+
+    bool CheckPlane (string *labels, double *params,
+        unsigned int npairs);
+    bool CheckSphere (string *labels, double *params,
+        unsigned int npairs);
+    bool CheckLight (string *labels, double *params,
+        unsigned int npairs);
+    bool CheckCamera (string *labels, double *params,
+        unsigned int npairs);
 public:
     Parser (string fn);
     ~Parser ();
     void Parse ();
     int GetStatus ();
+    unsigned int PopEntry (Entry *entry);
 };
 
 #endif /* _PARSER_H */

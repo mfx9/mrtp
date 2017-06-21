@@ -19,38 +19,26 @@
 #include "parser.hpp"
 
 
-ParsedCamera::ParsedCamera () {
-}
-
-ParsedCamera::~ParsedCamera () {
-}
-
-ParsedCamera::ParsedCamera (ParsedCamera *temp) {
-    x0  = temp->x0;
-    y0  = temp->y0;
-    z0  = temp->z0;
-    lx  = temp->lx;
-    ly  = temp->ly;
-    lz  = temp->lz;
-    rot = temp->rot;
-}
-
-bool ParsedCamera::Init (string *labels, double *params, 
+bool Parser::CheckCamera (string *labels, double *params, 
         unsigned int npairs) {
-    unsigned int j;
+    unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x"  ) x0  = params[j];
-        else if (labels[j] == "y"  ) y0  = params[j];
-        else if (labels[j] == "z"  ) z0  = params[j];
-        else if (labels[j] == "lx" ) lx  = params[j];
-        else if (labels[j] == "ly" ) ly  = params[j];
-        else if (labels[j] == "lz" ) lz  = params[j];
-        else if (labels[j] == "rot") rot = params[j];
+        if      (labels[j] == "x"  ) flags |= CAMERA_X;
+        else if (labels[j] == "y"  ) flags |= CAMERA_Y;
+        else if (labels[j] == "z"  ) flags |= CAMERA_Z;
+        else if (labels[j] == "lx" ) flags |= CAMERA_LX;
+        else if (labels[j] == "ly" ) flags |= CAMERA_LY;
+        else if (labels[j] == "lz" ) flags |= CAMERA_LZ;
+        else if (labels[j] == "rot") flags |= CAMERA_ROT;
         else {
             cout << "Undefined parameter in camera: \"" << labels[j] 
                 << "\"" << endl;
             return false;
         }
+    }
+    if (flags != CAMERA_COMPLETE) {
+        cout << "Incomplete camera definition." << endl;
+        return false;
     }
     #ifdef DEBUG_PARSER
     cout << "Completed camera." << endl;
@@ -58,30 +46,22 @@ bool ParsedCamera::Init (string *labels, double *params,
     return true;
 }
 
-ParsedLight::ParsedLight () {
-}
-
-ParsedLight::~ParsedLight () {
-}
-
-ParsedLight::ParsedLight (ParsedLight *temp) {
-    x0  = temp->x0;
-    y0  = temp->y0;
-    z0  = temp->z0;
-}
-
-bool ParsedLight::Init (string *labels, double *params, 
+bool Parser::CheckLight (string *labels, double *params, 
         unsigned int npairs) {
-    unsigned int j;
+    unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x"  ) x0  = params[j];
-        else if (labels[j] == "y"  ) y0  = params[j];
-        else if (labels[j] == "z"  ) z0  = params[j];
+        if      (labels[j] == "x"  ) flags |= LIGHT_X;
+        else if (labels[j] == "y"  ) flags |= LIGHT_Y;
+        else if (labels[j] == "z"  ) flags |= LIGHT_Z;
         else {
             cout << "Undefined parameter in light: \"" << labels[j] 
                 << "\"" << endl;
             return false;
         }
+    }
+    if (flags != LIGHT_COMPLETE) {
+        cout << "Incomplete light definition." << endl;
+        return false;
     }
     #ifdef DEBUG_PARSER
     cout << "Completed light." << endl;
@@ -89,88 +69,60 @@ bool ParsedLight::Init (string *labels, double *params,
     return true;
 }
 
-ParsedPlane::ParsedPlane () {
-}
-
-ParsedPlane::~ParsedPlane () {
-}
-
-void ParsedPlane::SetNext (ParsedPlane *n) {
-    next = n;
-}
-
-ParsedPlane *ParsedPlane::GetNext () {
-    return next;
-}
-
-bool ParsedPlane::Init (string *labels, double *params, 
+bool Parser::CheckPlane (string *labels, double *params, 
         unsigned int npairs) {
-    unsigned int j;
-    float cola_r, cola_g, cola_b, colb_r, 
-        colb_g, colb_b;
-
+    unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x0"  ) x0  = params[j];
-        else if (labels[j] == "y0"  ) y0  = params[j];
-        else if (labels[j] == "z0"  ) z0  = params[j];
-        else if (labels[j] == "A"   ) A   = params[j];
-        else if (labels[j] == "B"   ) B   = params[j];
-        else if (labels[j] == "C"   ) C   = params[j];
-        else if (labels[j] == "texscale") scale   = params[j];
-        else if (labels[j] == "cola_r"  ) cola_r  = (float) params[j];
-        else if (labels[j] == "cola_g"  ) cola_g  = (float) params[j];
-        else if (labels[j] == "cola_b"  ) cola_b  = (float) params[j];
-        else if (labels[j] == "colb_r"  ) colb_r  = (float) params[j];
-        else if (labels[j] == "colb_g"  ) colb_g  = (float) params[j];
-        else if (labels[j] == "colb_b"  ) colb_b  = (float) params[j];
+        if      (labels[j] == "x0"  )  flags |= PLANE_X0;
+        else if (labels[j] == "y0"  )  flags |= PLANE_Y0;
+        else if (labels[j] == "z0"  )  flags |= PLANE_Z0;
+        else if (labels[j] == "A"   )  flags |= PLANE_A;
+        else if (labels[j] == "B"   )  flags |= PLANE_B;
+        else if (labels[j] == "C"   )  flags |= PLANE_C;
+        else if (labels[j] == "texscale")  flags |= PLANE_SCALE;
+        else if (labels[j] == "cola_r"  )  flags |= PLANE_COLA_R;
+        else if (labels[j] == "cola_g"  )  flags |= PLANE_COLA_G;
+        else if (labels[j] == "cola_b"  )  flags |= PLANE_COLA_B;
+        else if (labels[j] == "colb_r"  )  flags |= PLANE_COLB_R;
+        else if (labels[j] == "colb_g"  )  flags |= PLANE_COLB_G;
+        else if (labels[j] == "colb_b"  )  flags |= PLANE_COLB_B;
         else {
             cout << "Undefined parameter in plane: \"" << labels[j] 
                 << "\"" << endl;
             return false;
         }
     }
-    colora.Set (cola_r, cola_g, cola_b);
-    colorb.Set (colb_r, colb_g, colb_b);
+    if (flags != PLANE_COMPLETE) {
+        cout << "Incomplete plane definition." << endl;
+        return false;
+    }
     #ifdef DEBUG_PARSER
     cout << "Completed plane." << endl;
     #endif
     return true;
 }
 
-ParsedSphere::ParsedSphere () {
-}
-
-ParsedSphere::~ParsedSphere () {
-}
-
-void ParsedSphere::SetNext (ParsedSphere *n) {
-    next = n;
-}
-
-ParsedSphere *ParsedSphere::GetNext () {
-    return next;
-}
-
-bool ParsedSphere::Init (string *labels, double *params, 
+bool Parser::CheckSphere (string *labels, double *params, 
         unsigned int npairs) {
-    unsigned int j;
-    float r, g, b;
-
+    unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x0"  ) x0  = params[j];
-        else if (labels[j] == "y0"  ) y0  = params[j];
-        else if (labels[j] == "z0"  ) z0  = params[j];
-        else if (labels[j] == "R"   ) R   = params[j];
-        else if (labels[j] == "col_r" )  r = (float) params[j];
-        else if (labels[j] == "col_g" )  g = (float) params[j];
-        else if (labels[j] == "col_b" )  b = (float) params[j];
+        if      (labels[j] == "x0"  ) flags |= SPHERE_X0;
+        else if (labels[j] == "y0"  ) flags |= SPHERE_Y0;
+        else if (labels[j] == "z0"  ) flags |= SPHERE_Z0;
+        else if (labels[j] == "R"   ) flags |= SPHERE_R;
+        else if (labels[j] == "col_r" )  flags |= SPHERE_COL_R;
+        else if (labels[j] == "col_g" )  flags |= SPHERE_COL_G;
+        else if (labels[j] == "col_b" )  flags |= SPHERE_COL_B;
         else {
             cout << "Undefined parameter in sphere: \"" << labels[j] 
                 << "\"" << endl;
             return false;
         }
     }
-    color.Set (r, g, b);
+    if (flags != SPHERE_COMPLETE) {
+        cout << "Incomplete sphere definition." << endl;
+        return false;
+    }
     #ifdef DEBUG_PARSER
     cout << "Completed sphere." << endl;
     #endif
@@ -183,22 +135,6 @@ Parser::Parser (string fn) {
 }
 
 Parser::~Parser () {
-    if (light != NULL) {
-        delete light;
-        #ifdef DEBUG_PARSER
-        cout << "Freed parsed light." << endl;
-        #endif
-    }
-    if (camera != NULL) {
-        delete camera;
-        #ifdef DEBUG_PARSER
-        cout << "Freed parsed camera." << endl;
-        #endif
-    }
-    if (planeroot != NULL) {
-    }
-    if (sphereroot != NULL) {
-    }
 }
 
 int Parser::GetStatus () {
@@ -219,23 +155,8 @@ void Parser::Parse () {
     double test, params[MAX_PARM];
     stringstream convert ("test");
 
-    bool check;
-    ParsedCamera  tempCamera;
-    ParsedLight   tempLight;
-    ParsedPlane   tempPlane;
-    ParsedSphere  tempSphere;
+    status = STATUS_FAIL;
 
-    /*
-     * Initialize.
-     *
-     * Assigning pointers to NULL causes segmentation 
-     *   faults in the constructor (?).
-     */
-    light      = NULL;
-    camera     = NULL;
-    planeroot  = NULL;
-    sphereroot = NULL;
-    status     = STATUS_FAIL;
 
     if (config.is_open ()) {
         mode   = MODE_SEARCH;
@@ -307,31 +228,25 @@ void Parser::Parse () {
                             #endif
 
                             if (item == "camera") {
-                                check = tempCamera.Init (labels, params, nlabel);
-                                if (!check) {
+                                if (!CheckCamera (labels, params, nlabel)) {
                                     config.close ();
                                     return;
                                 }
-                                camera = new ParsedCamera (&tempCamera);
                             }
                             else if (item == "light") {
-                                check = tempLight.Init (labels, params, nlabel);
-                                if (!check) {
+                                if (!CheckLight (labels, params, nlabel)) {
                                     config.close ();
                                     return;
                                 }
-                                light = new ParsedLight (&tempLight);
                             }
                             else if (item == "plane") {
-                                check = tempPlane.Init (labels, params, nlabel);
-                                if (!check) {
+                                if (!CheckPlane (labels, params, nlabel)) {
                                     config.close ();
                                     return;
                                 }
                             }
                             else if (item == "sphere") {
-                                check = tempSphere.Init (labels, params, nlabel);
-                                if (!check) {
+                                if (!CheckSphere (labels, params, nlabel)) {
                                     config.close ();
                                     return;
                                 }
