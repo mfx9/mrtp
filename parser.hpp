@@ -54,6 +54,14 @@ using namespace std;
  *  13    4096  0x1000  0b1000000000000
  *
  */
+#define LABEL_CAMERA_X    "x"
+#define LABEL_CAMERA_Y    "y"
+#define LABEL_CAMERA_Z    "z"
+#define LABEL_CAMERA_LX   "lx"
+#define LABEL_CAMERA_LY   "ly"
+#define LABEL_CAMERA_LZ   "lz"
+#define LABEL_CAMERA_ROT  "rot"
+
 #define CAMERA_X     0x1
 #define CAMERA_Y     0x2
 #define CAMERA_Z     0x4
@@ -64,10 +72,30 @@ using namespace std;
 #define CAMERA_COMPLETE  (CAMERA_X | CAMERA_Y | CAMERA_Z \
     | CAMERA_LX | CAMERA_LY | CAMERA_LZ | CAMERA_ROT)
 
+
+#define LABEL_LIGHT_X  "x"
+#define LABEL_LIGHT_Y  "y"
+#define LABEL_LIGHT_Z  "z"
+
 #define LIGHT_X     0x1
 #define LIGHT_Y     0x2
 #define LIGHT_Z     0x4
 #define LIGHT_COMPLETE  (LIGHT_X | LIGHT_Y | LIGHT_Z)
+
+
+#define LABEL_PLANE_X0      "x0"
+#define LABEL_PLANE_Y0      "y0"
+#define LABEL_PLANE_Z0      "z0"
+#define LABEL_PLANE_A       "A"
+#define LABEL_PLANE_B       "B"
+#define LABEL_PLANE_C       "C"
+#define LABEL_PLANE_SCALE   "texscale"
+#define LABEL_PLANE_COLA_R  "cola_r"
+#define LABEL_PLANE_COLA_G  "cola_g"
+#define LABEL_PLANE_COLA_B  "cola_b"
+#define LABEL_PLANE_COLB_R  "colb_r"
+#define LABEL_PLANE_COLB_G  "colb_g"
+#define LABEL_PLANE_COLB_B  "colb_b"
 
 #define PLANE_X0      0x1
 #define PLANE_Y0      0x2
@@ -87,6 +115,15 @@ using namespace std;
     PLANE_COLA_G | PLANE_COLA_B | PLANE_COLB_R |  \
     PLANE_COLB_G | PLANE_COLB_B)
 
+
+#define LABEL_SPHERE_X0      "x0"
+#define LABEL_SPHERE_Y0      "y0"
+#define LABEL_SPHERE_Z0      "z0"
+#define LABEL_SPHERE_R       "R"
+#define LABEL_SPHERE_COL_R   "col_r"
+#define LABEL_SPHERE_COL_G   "col_g"
+#define LABEL_SPHERE_COL_B   "col_b"
+
 #define SPHERE_X0      0x1
 #define SPHERE_Y0      0x2
 #define SPHERE_Z0      0x4
@@ -99,28 +136,32 @@ using namespace std;
 
 
 class Entry {
-    string *keys;
+    string  label;
     double *values;
+    string *keys;
     unsigned int nitems;
     Entry *next;
 public:
-    Entry (string *labels, double *params,
-        unsigned int npairs);
+    Entry (string title, string *labels,
+        double *params, unsigned int npairs);
+    Entry ();
     ~Entry ();
     Entry *GetNext ();
     void SetNext (Entry *n);
     void CopyTo (Entry *other);
+    unsigned int GetData (string *labels,
+        double *params);
+    void GetLabel (string *title);
 };
 
 class Parser {
     string filename;
     int status;
     /*
-     * Spheres and planes are one-directional
-     *   lists.
+     * Entries are a linked list.
      */
-    Entry *spheres, *planes;
-    Entry *camera, *light;
+    Entry *entries;
+    unsigned int nentries;
 
     bool CheckPlane (string *labels, double *params,
         unsigned int npairs);
@@ -130,6 +171,8 @@ class Parser {
         unsigned int npairs);
     bool CheckCamera (string *labels, double *params,
         unsigned int npairs);
+    unsigned int AddEntry (string title, string *lab,
+        double *par, unsigned int np);
 public:
     Parser (string fn);
     ~Parser ();

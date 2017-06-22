@@ -18,25 +18,18 @@
  */
 #include <cstdio>
 #include "world.hpp"
-#include "color.hpp"
 #include "parser.hpp"
 
 
 int main () {
-    /*
-     * . Read the command line.
-     */
-    //World world ("config.xml");
-
-    /*
-     * . Rendering and writing.
-     */
-    //world.Render ();
-    //world.WritePNG ("test.png");
-
-
     Parser parser ("example.txt");
     parser.Parse ();
 
+    if (parser.GetStatus () == STATUS_OK) {
+        World world (&parser);
+
+        //world.Render ();
+        //world.WritePNG ("test.png");
+    }
     return 0;
 }

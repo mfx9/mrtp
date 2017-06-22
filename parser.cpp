@@ -23,13 +23,13 @@ bool Parser::CheckCamera (string *labels, double *params,
         unsigned int npairs) {
     unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x"  ) flags |= CAMERA_X;
-        else if (labels[j] == "y"  ) flags |= CAMERA_Y;
-        else if (labels[j] == "z"  ) flags |= CAMERA_Z;
-        else if (labels[j] == "lx" ) flags |= CAMERA_LX;
-        else if (labels[j] == "ly" ) flags |= CAMERA_LY;
-        else if (labels[j] == "lz" ) flags |= CAMERA_LZ;
-        else if (labels[j] == "rot") flags |= CAMERA_ROT;
+        if      (labels[j] == LABEL_CAMERA_X   )  flags |= CAMERA_X;
+        else if (labels[j] == LABEL_CAMERA_Y   )  flags |= CAMERA_Y;
+        else if (labels[j] == LABEL_CAMERA_Z   )  flags |= CAMERA_Z;
+        else if (labels[j] == LABEL_CAMERA_LX  )  flags |= CAMERA_LX;
+        else if (labels[j] == LABEL_CAMERA_LY  )  flags |= CAMERA_LY;
+        else if (labels[j] == LABEL_CAMERA_LZ  )  flags |= CAMERA_LZ;
+        else if (labels[j] == LABEL_CAMERA_ROT )  flags |= CAMERA_ROT;
         else {
             cout << "Undefined parameter in camera: \"" << labels[j] 
                 << "\"" << endl;
@@ -50,9 +50,9 @@ bool Parser::CheckLight (string *labels, double *params,
         unsigned int npairs) {
     unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x"  ) flags |= LIGHT_X;
-        else if (labels[j] == "y"  ) flags |= LIGHT_Y;
-        else if (labels[j] == "z"  ) flags |= LIGHT_Z;
+        if      (labels[j] == LABEL_LIGHT_X  ) flags |= LIGHT_X;
+        else if (labels[j] == LABEL_LIGHT_Y  ) flags |= LIGHT_Y;
+        else if (labels[j] == LABEL_LIGHT_Z  ) flags |= LIGHT_Z;
         else {
             cout << "Undefined parameter in light: \"" << labels[j] 
                 << "\"" << endl;
@@ -73,19 +73,19 @@ bool Parser::CheckPlane (string *labels, double *params,
         unsigned int npairs) {
     unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x0"  )  flags |= PLANE_X0;
-        else if (labels[j] == "y0"  )  flags |= PLANE_Y0;
-        else if (labels[j] == "z0"  )  flags |= PLANE_Z0;
-        else if (labels[j] == "A"   )  flags |= PLANE_A;
-        else if (labels[j] == "B"   )  flags |= PLANE_B;
-        else if (labels[j] == "C"   )  flags |= PLANE_C;
-        else if (labels[j] == "texscale")  flags |= PLANE_SCALE;
-        else if (labels[j] == "cola_r"  )  flags |= PLANE_COLA_R;
-        else if (labels[j] == "cola_g"  )  flags |= PLANE_COLA_G;
-        else if (labels[j] == "cola_b"  )  flags |= PLANE_COLA_B;
-        else if (labels[j] == "colb_r"  )  flags |= PLANE_COLB_R;
-        else if (labels[j] == "colb_g"  )  flags |= PLANE_COLB_G;
-        else if (labels[j] == "colb_b"  )  flags |= PLANE_COLB_B;
+        if      (labels[j] == LABEL_PLANE_X0  )  flags |= PLANE_X0;
+        else if (labels[j] == LABEL_PLANE_Y0  )  flags |= PLANE_Y0;
+        else if (labels[j] == LABEL_PLANE_Z0  )  flags |= PLANE_Z0;
+        else if (labels[j] == LABEL_PLANE_A   )  flags |= PLANE_A;
+        else if (labels[j] == LABEL_PLANE_B   )  flags |= PLANE_B;
+        else if (labels[j] == LABEL_PLANE_C   )  flags |= PLANE_C;
+        else if (labels[j] == LABEL_PLANE_SCALE   )  flags |= PLANE_SCALE;
+        else if (labels[j] == LABEL_PLANE_COLA_R  )  flags |= PLANE_COLA_R;
+        else if (labels[j] == LABEL_PLANE_COLA_G  )  flags |= PLANE_COLA_G;
+        else if (labels[j] == LABEL_PLANE_COLA_B  )  flags |= PLANE_COLA_B;
+        else if (labels[j] == LABEL_PLANE_COLB_R  )  flags |= PLANE_COLB_R;
+        else if (labels[j] == LABEL_PLANE_COLB_G  )  flags |= PLANE_COLB_G;
+        else if (labels[j] == LABEL_PLANE_COLB_B  )  flags |= PLANE_COLB_B;
         else {
             cout << "Undefined parameter in plane: \"" << labels[j] 
                 << "\"" << endl;
@@ -106,13 +106,13 @@ bool Parser::CheckSphere (string *labels, double *params,
         unsigned int npairs) {
     unsigned int j, flags = 0x00;
     for (j = 0; j < npairs; j++) {
-        if      (labels[j] == "x0"  ) flags |= SPHERE_X0;
-        else if (labels[j] == "y0"  ) flags |= SPHERE_Y0;
-        else if (labels[j] == "z0"  ) flags |= SPHERE_Z0;
-        else if (labels[j] == "R"   ) flags |= SPHERE_R;
-        else if (labels[j] == "col_r" )  flags |= SPHERE_COL_R;
-        else if (labels[j] == "col_g" )  flags |= SPHERE_COL_G;
-        else if (labels[j] == "col_b" )  flags |= SPHERE_COL_B;
+        if      (labels[j] == LABEL_SPHERE_X0  )  flags |= SPHERE_X0;
+        else if (labels[j] == LABEL_SPHERE_Y0  )  flags |= SPHERE_Y0;
+        else if (labels[j] == LABEL_SPHERE_Z0  )  flags |= SPHERE_Z0;
+        else if (labels[j] == LABEL_SPHERE_R   )  flags |= SPHERE_R;
+        else if (labels[j] == LABEL_SPHERE_COL_R )  flags |= SPHERE_COL_R;
+        else if (labels[j] == LABEL_SPHERE_COL_G )  flags |= SPHERE_COL_G;
+        else if (labels[j] == LABEL_SPHERE_COL_B )  flags |= SPHERE_COL_B;
         else {
             cout << "Undefined parameter in sphere: \"" << labels[j] 
                 << "\"" << endl;
@@ -130,15 +130,62 @@ bool Parser::CheckSphere (string *labels, double *params,
 }
 
 Parser::Parser (string fn) {
-    filename = fn;
     status   = STATUS_NEW;
+    filename = fn;
+    nentries = 0;
 }
 
 Parser::~Parser () {
+    if (nentries > 0) {
+        /*
+         * Remove all entries.
+         *
+         */
+        Entry tmp;
+        while (PopEntry (&tmp));
+    }
 }
 
 int Parser::GetStatus () {
     return status;
+}
+
+unsigned int Parser::AddEntry (string title, string *lab, 
+        double *par, unsigned int np) {
+    Entry *entry, *next, *last;
+
+    entry = new Entry (title, lab, par, np);
+    if (nentries < 1) {
+        entries = entry;
+    }
+    else {
+        next = entries;
+        do {
+            last = next;
+            next = last->GetNext ();
+        } while (next != NULL);
+        last->SetNext (entry);
+    }
+    return (++nentries);
+}
+
+unsigned int Parser::PopEntry (Entry *entry) {
+    Entry *prev, *next, *last;
+
+    if (nentries > 0) {
+        last = entries;
+        prev = NULL;
+        while ((next = last->GetNext ()) != NULL) {
+            prev = last;
+            last = next;
+        }
+        if (prev != NULL)
+            prev->SetNext (NULL);
+        last->CopyTo (entry);
+        delete last;
+        nentries--;
+    }
+    return nentries;
 }
 
 void Parser::Parse () {
@@ -232,24 +279,28 @@ void Parser::Parse () {
                                     config.close ();
                                     return;
                                 }
+                                AddEntry (item, labels, params, nlabel);
                             }
                             else if (item == "light") {
                                 if (!CheckLight (labels, params, nlabel)) {
                                     config.close ();
                                     return;
                                 }
+                                AddEntry (item, labels, params, nlabel);
                             }
                             else if (item == "plane") {
                                 if (!CheckPlane (labels, params, nlabel)) {
                                     config.close ();
                                     return;
                                 }
+                                AddEntry (item, labels, params, nlabel);
                             }
                             else if (item == "sphere") {
                                 if (!CheckSphere (labels, params, nlabel)) {
                                     config.close ();
                                     return;
                                 }
+                                AddEntry (item, labels, params, nlabel);
                             }
                             else if (item == "cylinder") {
                                 /* Skip cylinders for now. */
@@ -275,4 +326,77 @@ void Parser::Parse () {
         return;
     }
     status = STATUS_OK;
+}
+
+Entry::Entry (string title, string *labels, double *params,
+        unsigned int npairs) {
+    unsigned int i;
+
+    keys   = new string [npairs];
+    values = new double [npairs];
+    nitems = npairs;
+    label  = title;
+    for (i = 0; i < npairs; i++) {
+        keys[i] = labels[i];
+        values[i] = params[i];
+    }
+    #ifdef DEBUG_PARSER
+    cout << "Created entry: " << label << endl;
+    #endif
+}
+
+Entry::Entry () {
+    nitems = 0;
+    #ifdef DEBUG_PARSER
+    cout << "Created uninitialized entry." << endl;
+    #endif
+}
+
+Entry::~Entry () {
+    if (nitems > 0) {
+        delete[] keys;
+        delete[] values;
+    }
+    #ifdef DEBUG_PARSER
+    cout << "Removed entry: " << label << endl;
+    #endif
+}
+
+Entry *Entry::GetNext () {
+    return next;
+}
+
+void Entry::SetNext (Entry *n) {
+    next = n;
+}
+
+void Entry::CopyTo (Entry *other) {
+    unsigned int i;
+
+    if (other->nitems != nitems) {
+        if (other->nitems > 0) {
+            delete[] other->keys;
+            delete[] other->values;
+        }
+        other->keys   = new string [nitems];
+        other->values = new double [nitems];
+        other->nitems = nitems;
+    }
+    other->label = label;
+    other->next  = next;
+    for (i = 0; i < nitems; i++) {
+        other->keys[i] = keys[i];
+        other->values[i] = values[i];
+    }
+}
+
+unsigned int Entry::GetData (string *labels, 
+        double *params) {
+    labels = keys;
+    params = values;
+    return nitems;
+}
+
+void Entry::GetLabel (string *title) {
+    title = &label;
 }

@@ -19,8 +19,10 @@
 #include "world.hpp"
 
 
-World::World (char *filename) {
-    /* . Initialize. */
+World::World (Parser *parser) {
+    /* 
+     * Initialize. 
+     */
     nplanes    = 0;
     nspheres   = 0;
     ncylinders = 0;
@@ -28,11 +30,32 @@ World::World (char *filename) {
     planes     = NULL;
     spheres    = NULL;
     cylinders  = NULL;
-    /*
-        Parsing file...
-    */
 
-    /* . Create temporary world. */
+    buffer = NULL;
+    camera = NULL;
+    light  = NULL;
+
+
+    buffer = new Buffer (800, 600);
+
+    Entry entry;
+    string label;
+
+    while (parser->PopEntry (&entry)) {
+        entry.GetLabel (&label);
+        /*
+        if (label == "camera") {
+        }
+        else if (label == "light") {
+        }
+        else if (label == "plane")
+            AddPlane_FromEntry (&entry);
+        else if (label == "sphere")
+            AddSphere_FromEntry (&entry);
+        */
+    }
+
+    /*
     Color black (0., 0., 0.);
     Color  blue (0., 0., 1.);
     Color green (0., 1., 0.);
@@ -74,12 +97,16 @@ World::World (char *filename) {
 
     Vector scenter5 (8., 3., 1.);
     AddSphere (&scenter5, 1., &white);
+    */
 }
 
 World::~World () {
-    delete camera;
-    delete light;
-    delete buffer;
+    if (camera != NULL)
+        delete camera;
+    if (light  != NULL)
+        delete light;
+    if (buffer != NULL)
+        delete buffer;
 
     /* . Clear all planes. */
     while (PopPlane ());
@@ -163,6 +190,12 @@ unsigned int World::AddSphere (Vector *center, double radius,
         last->SetNext (sphere);
     }
     return (++nspheres);
+}
+
+unsigned int World::AddPlane_FromEntry (Entry *entry) {
+}
+
+unsigned int World::AddSphere_FromEntry (Entry *entry) {
 }
 
 void World::TraceRay (Vector *origin, Vector *direction,

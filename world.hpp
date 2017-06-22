@@ -26,6 +26,7 @@
 #include "buffer.hpp"
 #include "color.hpp"
 #include "camera.hpp"
+#include "parser.hpp"
 
 
 #define DEBUG_WORLD     1
@@ -52,12 +53,14 @@ class World {
         ncylinders;
     Buffer    *buffer;
 public:
-    World (char *filename);
+    World (Parser *parser);
     ~World ();
     unsigned int AddPlane (Vector *center, Vector *normal,
         Color *colora, Color *colorb, double texscale);
     unsigned int AddSphere (Vector *center, double radius,
         Color *color);
+    unsigned int AddPlane_FromEntry (Entry *entry);
+    unsigned int AddSphere_FromEntry (Entry *entry);
     unsigned int PopPlane ();
     unsigned int PopSphere ();
     void TraceRay (Vector *origin, Vector *direction,
