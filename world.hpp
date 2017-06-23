@@ -20,7 +20,8 @@
 #define _WORLD_H
 
 #include <cmath>
-#include <cstdio>
+#include <string>
+#include <iostream>
 #include "vector.hpp"
 #include "actors.hpp"
 #include "buffer.hpp"
@@ -61,6 +62,8 @@ public:
         Color *color);
     unsigned int AddPlane_FromEntry (Entry *entry);
     unsigned int AddSphere_FromEntry (Entry *entry);
+    unsigned int AddLight_FromEntry (Entry *entry);
+    unsigned int AddCamera_FromEntry (Entry *entry);
     unsigned int PopPlane ();
     unsigned int PopSphere ();
     void TraceRay (Vector *origin, Vector *direction,

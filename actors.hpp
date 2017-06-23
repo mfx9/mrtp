@@ -25,7 +25,7 @@
 #include "color.hpp"
 
 
-#define DEBUG_ACTORS   1
+// #define DEBUG_ACTORS   1
 
 #define TOLERANCE  .000001
 #define IS_ZERO(x) ((x > -TOLERANCE) && (x < TOLERANCE))

@@ -28,8 +28,8 @@ int main () {
     if (parser.GetStatus () == STATUS_OK) {
         World world (&parser);
 
-        //world.Render ();
-        //world.WritePNG ("test.png");
+        world.Render ();
+        world.WritePNG ("test.png");
     }
     return 0;
 }

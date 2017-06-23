@@ -43,61 +43,18 @@ World::World (Parser *parser) {
 
     while (parser->PopEntry (&entry)) {
         entry.GetLabel (&label);
-        /*
-        if (label == "camera") {
-        }
-        else if (label == "light") {
-        }
+        #ifdef DEBUG_WORLD
+        cout << "World: Reading entry \"" << label << "\"" << endl;
+        #endif
+        if (label == "camera")
+            AddCamera_FromEntry (&entry);
+        else if (label == "light")
+            AddLight_FromEntry (&entry);
         else if (label == "plane")
             AddPlane_FromEntry (&entry);
         else if (label == "sphere")
             AddSphere_FromEntry (&entry);
-        */
     }
-
-    /*
-    Color black (0., 0., 0.);
-    Color  blue (0., 0., 1.);
-    Color green (0., 1., 0.);
-    Color white (1., 1., 1.);
-    Color   red (1., 0., 0.);
-
-
-    Vector vcam (15., 0., 10.), vlook (0., 0., 0.);
-    camera = new Camera (&vcam, &vlook, 
-        800, 600, 70., 0.);
-
-    Vector vlight (5., -5., 5.);
-    light = new Light (&vlight);
-
-    buffer = new Buffer (800, 600);
-
-    Vector pcenter (0., 0., 0.), pnormal (0., 0., 1.);
-    AddPlane (&pcenter, &pnormal, &blue, &green, 2.);
-
-    Vector pcenter1 (-10., 0., 0.), pnormal1 (1., 0., 0.5);
-    AddPlane (&pcenter1, &pnormal1, &red, &white, 2.);
-
-
-    Vector scenter (0., -3., 1.);
-    AddSphere (&scenter, 1., &white);
-
-    Vector scenter1 (4., -3., 1.);
-    AddSphere (&scenter1, 1., &white);
-
-    Vector scenter2 (8., -3., 1.);
-    AddSphere (&scenter2, 1., &white);
-
-
-    Vector scenter3 (0., 3., 1.);
-    AddSphere (&scenter3, 1., &white);
-
-    Vector scenter4 (4., 3., 1.);
-    AddSphere (&scenter4, 1., &white);
-
-    Vector scenter5 (8., 3., 1.);
-    AddSphere (&scenter5, 1., &white);
-    */
 }
 
 World::~World () {
@@ -108,10 +65,10 @@ World::~World () {
     if (buffer != NULL)
         delete buffer;
 
-    /* . Clear all planes. */
+    /* Clear all planes. */
     while (PopPlane ());
 
-    /* . Clear all spheres. */
+    /* Clear all spheres. */
     while (PopSphere ());
 }
 
@@ -129,8 +86,11 @@ unsigned int World::PopPlane () {
             prev->SetNext (NULL);
         delete last;
         nplanes--;
+        #ifdef DEBUG_WORLD
+        cout << "World: Removed plane." << endl;
+        #endif
     }
-    /* . Returns zero if there are no planes left. */ 
+    /* Returns zero if there are no planes left. */ 
     return nplanes;
 }
 
@@ -148,8 +108,11 @@ unsigned int World::PopSphere () {
             prev->SetNext (NULL);
         delete last;
         nspheres--;
+        #ifdef DEBUG_WORLD
+        cout << "World: Removed sphere." << endl;
+        #endif
     }
-    /* . Returns zero if there are no spheres left. */ 
+    /* Returns zero if there are no spheres left. */ 
     return nspheres;
 }
 
@@ -170,6 +133,9 @@ unsigned int World::AddPlane (Vector *center, Vector *normal,
         } while (next != NULL);
         last->SetNext (plane);
     }
+    #ifdef DEBUG_WORLD
+    cout << "World: Added plane." << endl;
+    #endif
     return (++nplanes);
 }
 
@@ -189,13 +155,103 @@ unsigned int World::AddSphere (Vector *center, double radius,
         } while (next != NULL);
         last->SetNext (sphere);
     }
+    #ifdef DEBUG_WORLD
+    cout << "World: Added sphere." << endl;
+    #endif
     return (++nspheres);
 }
 
+unsigned int World::AddCamera_FromEntry (Entry *entry) {
+    unsigned int i = 999;
+    double  value;
+    string  key;
+    double  x0, y0, z0, lx, ly, lz, rot;
+
+    if (camera == NULL) {
+        while (entry->GetPair (&key, &value, &i)) {
+            if      (key == LABEL_CAMERA_X   )  x0  = value;
+            else if (key == LABEL_CAMERA_Y   )  y0  = value;
+            else if (key == LABEL_CAMERA_Z   )  z0  = value;
+            else if (key == LABEL_CAMERA_LX  )  lx  = value;
+            else if (key == LABEL_CAMERA_LY  )  ly  = value;
+            else if (key == LABEL_CAMERA_LZ  )  lz  = value;
+            else if (key == LABEL_CAMERA_ROT )  rot = value;
+        }
+        Vector position (x0, y0, z0),
+            lookat (lx, ly, lz);
+        /* FIXME */
+        camera = new Camera (&position, &lookat, 
+            800, 600, 70., rot);
+    }
+    return 1;
+}
+
+unsigned int World::AddLight_FromEntry (Entry *entry) {
+    unsigned int i = 999;
+    double  value;
+    string  key;
+    double  x0, y0, z0;
+
+    if (light == NULL) {
+        while (entry->GetPair (&key, &value, &i)) {
+            if      (key == LABEL_LIGHT_X  )  x0 = value;
+            else if (key == LABEL_LIGHT_Y  )  y0 = value;
+            else if (key == LABEL_LIGHT_Z  )  z0 = value;
+        }
+        Vector position (x0, y0, z0);
+        light = new Light (&position);
+    }
+    return 1;
+}
+
 unsigned int World::AddPlane_FromEntry (Entry *entry) {
+    unsigned int i = 999;
+    double  value;
+    string  key;
+    double  x0, y0, z0, A, B, C, scale;
+    float   cola_r, cola_g, cola_b, colb_r, 
+                colb_g, colb_b;
+    while (entry->GetPair (&key, &value, &i)) {
+        if      (key == LABEL_PLANE_X0  )  x0 = value;
+        else if (key == LABEL_PLANE_Y0  )  y0 = value;
+        else if (key == LABEL_PLANE_Z0  )  z0 = value;
+        else if (key == LABEL_PLANE_A   )  A  = value;
+        else if (key == LABEL_PLANE_B   )  B  = value;
+        else if (key == LABEL_PLANE_C   )  C  = value;
+        else if (key == LABEL_PLANE_SCALE   )  scale  = value; 
+        else if (key == LABEL_PLANE_COLA_R  )  cola_r = (float) value;
+        else if (key == LABEL_PLANE_COLA_G  )  cola_g = (float) value;
+        else if (key == LABEL_PLANE_COLA_B  )  cola_b = (float) value;
+        else if (key == LABEL_PLANE_COLB_R  )  colb_r = (float) value;
+        else if (key == LABEL_PLANE_COLB_G  )  colb_g = (float) value;
+        else if (key == LABEL_PLANE_COLB_B  )  colb_b = (float) value;
+    }
+    Vector center (x0, y0, z0);
+    Vector normal (A, B, C);
+    Color cola (cola_r, cola_g, cola_b), 
+        colb (colb_r, colb_g, colb_b);
+    return AddPlane (&center, &normal, &cola, &colb, scale);
 }
 
 unsigned int World::AddSphere_FromEntry (Entry *entry) {
+    unsigned int i = 999;
+    double  value;
+    string  key;
+    double  x0, y0, z0, R;
+    float   col_r, col_g, col_b;
+
+    while (entry->GetPair (&key, &value, &i)) {
+        if      (key == LABEL_SPHERE_X0  )  x0 = value;
+        else if (key == LABEL_SPHERE_Y0  )  y0 = value;
+        else if (key == LABEL_SPHERE_Z0  )  z0 = value;
+        else if (key == LABEL_SPHERE_R   )  R  = value;
+        else if (key == LABEL_SPHERE_COL_R  )  col_r = (float) value;
+        else if (key == LABEL_SPHERE_COL_G  )  col_g = (float) value;
+        else if (key == LABEL_SPHERE_COL_B  )  col_b = (float) value;
+    }
+    Vector center (x0, y0, z0);
+    Color col (col_r, col_g, col_b);
+    return AddSphere (&center, R, &col);
 }
 
 void World::TraceRay (Vector *origin, Vector *direction,
@@ -208,12 +264,15 @@ void World::TraceRay (Vector *origin, Vector *direction,
     Color   objcol;
     bool    isshadow;
 
-    /* . Initialize. */
+    /*
+     * Initialize.
+     */
     color->Set (0., 0., 0.);
     currd  = MAX_DISTANCE;
     hit    = HIT_NULL;
-
-    /* . Search for planes. */
+    /*
+     * Search for planes.
+     */
     plane    = planes;
     hitplane = NULL;
     while (plane != NULL) {
@@ -226,7 +285,9 @@ void World::TraceRay (Vector *origin, Vector *direction,
         plane = plane->GetNext ();
     }
 
-    /* . Search for spheres. */
+    /*
+     * Search for spheres.
+     */
     sphere    = spheres;
     hitsphere = NULL;
     while (sphere != NULL) {

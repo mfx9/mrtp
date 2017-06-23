@@ -23,7 +23,7 @@
 #include <cstdio>
 #include "vector.hpp"
 
-#define DEBUG_CAMERA  1
+// #define DEBUG_CAMERA  1
 
 
 class Camera {

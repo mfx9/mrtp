@@ -30,7 +30,7 @@ camera.o: camera.cpp camera.hpp
 color.o: color.cpp color.hpp
 	$(CC) $(CFLAGS) -c color.cpp -o color.o
 
-buffer.o: buffer.cpp buffer.hpp png++/png++-${pngver}
+buffer.o: buffer.cpp buffer.hpp
 	$(CC) $(CFLAGS) -c buffer.cpp -o buffer.o
 
 parser.o: parser.cpp parser.hpp

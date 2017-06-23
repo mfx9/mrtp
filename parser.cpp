@@ -205,127 +205,131 @@ void Parser::Parse () {
     status = STATUS_FAIL;
 
 
-    if (config.is_open ()) {
-        mode   = MODE_SEARCH;
-        accu   = "";
-        nlines = 0;
-        while (getline (config, line)) {
-            nlines++;
-            i = 0;
-            while (i < line.length ()) {
-                c = line.at (i++);
-                if ((c == ' ') || (c == '\n') || (c == '\t'))
-                    continue;
-                if (c == '#')
-                    break;
-                accu += c;
-
-                switch (mode) {
-                    case MODE_SEARCH:
-                        if ((accu == "camera") || (accu == "light") || (accu == "plane") || 
-                                (accu == "sphere") || (accu == "cylinder")) {
-                            #ifdef DEBUG_PARSER
-                            cout << "Reading " << accu << "..." << endl;
-                            #endif
-                            mode   = MODE_OPEN;
-                            item   = accu;
-                            nlabel = 0;
-                            nvalue = 0;
-                            accu   = "";
-                        }
-                        break;
-                    case MODE_OPEN:
-                        if (c == '(') {
-                            mode = MODE_READ;
-                            accu = "";
-                        }
-                        else {
-                            cout << "Line " << nlines << ": Undefined characters." << endl;
-                            config.close ();
-                            return;
-                        }
-                        break;
-                    case MODE_READ:
-                        if (c == ')') {
-                            values[nvalue++] = prev;
-                            mode = MODE_SEARCH;
-                            accu = "";
-                            if (nlabel != nvalue) {
-                                cout << "Line " << nlines << ": Numbers of labels and values do not match." << endl;
-                                config.close ();
-                                return;
-                            }
-                            j = 0;
-                            while (j < nvalue) {
-                                convert.str (values[j]);
-                                convert >> test;
-                                if (!convert) {
-                                    cout << "Line " << nlines << ": Unable to convert " << values[j] << " to double." << endl;
-                                    config.close ();
-                                    return;
-                                }
-                                convert.clear ();
-                                params[j++] = test;
-                            }
-                            #ifdef DEBUG_PARSER
-                            for (j = 0; j < nlabel; j++) {
-                                cout << labels[j] << "=" << values[j] << "(" << params[j] << ")" << endl;
-                            }
-                            cout << "Item is: " << item << endl;
-                            #endif
-
-                            if (item == "camera") {
-                                if (!CheckCamera (labels, params, nlabel)) {
-                                    config.close ();
-                                    return;
-                                }
-                                AddEntry (item, labels, params, nlabel);
-                            }
-                            else if (item == "light") {
-                                if (!CheckLight (labels, params, nlabel)) {
-                                    config.close ();
-                                    return;
-                                }
-                                AddEntry (item, labels, params, nlabel);
-                            }
-                            else if (item == "plane") {
-                                if (!CheckPlane (labels, params, nlabel)) {
-                                    config.close ();
-                                    return;
-                                }
-                                AddEntry (item, labels, params, nlabel);
-                            }
-                            else if (item == "sphere") {
-                                if (!CheckSphere (labels, params, nlabel)) {
-                                    config.close ();
-                                    return;
-                                }
-                                AddEntry (item, labels, params, nlabel);
-                            }
-                            else if (item == "cylinder") {
-                                /* Skip cylinders for now. */
-                            }
-                        }
-                        else if (c == '=') {
-                            labels[nlabel++] = prev;
-                            accu = "";
-                        }
-                        else if (c == ';') {
-                            values[nvalue++] = prev;
-                            accu = "";
-                        }
-                        break;
-                }
-                prev = accu;
-            }
-        }
-        config.close ();
-    }
-    else {
+    if (!config.is_open ()) {
         cout << "File " << filename << " cannot be opened." << endl;
         return;
     }
+    mode   = MODE_SEARCH;
+    accu   = "";
+    nlines = 0;
+
+    while (getline (config, line)) {
+        nlines++;
+        i = 0;
+        while (i < line.length ()) {
+            c = line.at (i++);
+            if ((c == ' ') || (c == '\n') || (c == '\t'))
+                continue;
+            if (c == '#')
+                break;
+            accu += c;
+
+            switch (mode) {
+                case MODE_SEARCH:
+                    if ((accu == "camera") || (accu == "light") || (accu == "plane") || 
+                            (accu == "sphere") || (accu == "cylinder")) {
+                        #ifdef DEBUG_PARSER
+                        cout << "Reading " << accu << "..." << endl;
+                        #endif
+                        mode   = MODE_OPEN;
+                        item   = accu;
+                        nlabel = 0;
+                        nvalue = 0;
+                        accu   = "";
+                    }
+                    break;
+                case MODE_OPEN:
+                    if (c == '(') {
+                        mode = MODE_READ;
+                        accu = "";
+                    }
+                    else {
+                        cout << "Line " << nlines << ": Undefined characters." << endl;
+                        config.close ();
+                        return;
+                    }
+                    break;
+                case MODE_READ:
+                    if (c == ')') {
+                        values[nvalue++] = prev;
+                        mode = MODE_SEARCH;
+                        accu = "";
+                        if (nlabel != nvalue) {
+                            cout << "Line " << nlines << ": Numbers of labels and values do not match." << endl;
+                            config.close ();
+                            return;
+                        }
+                        j = 0;
+                        while (j < nvalue) {
+                            convert.str (values[j]);
+                            convert >> test;
+                            if (!convert) {
+                                cout << "Line " << nlines << ": Unable to convert " << values[j] << " to double." << endl;
+                                config.close ();
+                                return;
+                            }
+                            convert.clear ();
+                            params[j++] = test;
+                        }
+                        #ifdef DEBUG_PARSER
+                        for (j = 0; j < nlabel; j++) {
+                            cout << labels[j] << "=" << values[j] << "(" << params[j] << ")" << endl;
+                        }
+                        cout << "Item is: " << item << endl;
+                        #endif
+
+                        if (item == "camera") {
+                            if (!CheckCamera (labels, params, nlabel)) {
+                                config.close ();
+                                return;
+                            }
+                            AddEntry (item, labels, params, nlabel);
+                        }
+                        else if (item == "light") {
+                            if (!CheckLight (labels, params, nlabel)) {
+                                config.close ();
+                                return;
+                            }
+                            AddEntry (item, labels, params, nlabel);
+                        }
+                        else if (item == "plane") {
+                            if (!CheckPlane (labels, params, nlabel)) {
+                                config.close ();
+                                return;
+                            }
+                            AddEntry (item, labels, params, nlabel);
+                        }
+                        else if (item == "sphere") {
+                            if (!CheckSphere (labels, params, nlabel)) {
+                                config.close ();
+                                return;
+                            }
+                            AddEntry (item, labels, params, nlabel);
+                        }
+                        else if (item == "cylinder") {
+                            /* Skip cylinders for now. */
+                        }
+                    }
+                    else if (c == '=') {
+                        labels[nlabel++] = prev;
+                        accu = "";
+                    }
+                    else if (c == ';') {
+                        values[nvalue++] = prev;
+                        accu = "";
+                    }
+                    break;
+            }
+            prev = accu;
+        }
+    }
+    config.close ();
     status = STATUS_OK;
+
+    #ifdef DEBUG_PARSER
+    cout << "Parsing complete, found entries: " << nentries 
+        << endl;
+    #endif
 }
 
 Entry::Entry (string title, string *labels, double *params,
@@ -390,13 +394,32 @@ void Entry::CopyTo (Entry *other) {
     }
 }
 
-unsigned int Entry::GetData (string *labels, 
-        double *params) {
-    labels = keys;
-    params = values;
-    return nitems;
+bool Entry::GetPair (string *key, double *value,
+        unsigned int *i) {
+    /*
+     * Before this method is called for the first time,
+     *   i must be set to a high number (exceeding
+     *   the actual number of pairs, for example 999).
+     *
+     * The method is supposed to be called iteratively
+     *   in a while type of loop.
+     *
+     */
+    unsigned int j;
+
+    if (*i < 1)
+        return false;
+    if (*i > nitems) (*i) = nitems;
+    j = (*i) - 1;
+    (*key)   =   keys[j];
+    (*value) = values[j];
+    (*i)--;
+    return true;
 }
 
 void Entry::GetLabel (string *title) {
-    title = &label;
+    #ifdef DEBUG_PARSER
+    cout << "Parser: Getting label \"" << label << "\"" << endl;
+    #endif
+    (*title) = label;
 }
