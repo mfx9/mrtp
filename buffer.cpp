@@ -46,7 +46,7 @@ void Buffer::Clear () {
     }
 }
 
-void Buffer::WriteToPNG (char *filename) {
+void Buffer::WriteToPNG (string filename) {
     png::image< png::rgb_pixel > image (width, heigth);
     rgb_pixel *pixel;
     unsigned char r, g, b;
@@ -65,11 +65,12 @@ void Buffer::WriteToPNG (char *filename) {
             pixel++;
         }
     }
-    image.write (filename);
+    image.write (filename.c_str ());
 }
 
-void Buffer::Text (char *text, unsigned int x,
+void Buffer::Text (string text, unsigned int x,
         unsigned int y, Color *color) {
+    /*
     unsigned char *fp, letter, idx, byte;
     char *tp;
     Color *bp, *sav;
@@ -95,4 +96,5 @@ void Buffer::Text (char *text, unsigned int x,
         }
         bp = sav + 8;
     }
+    */
 }

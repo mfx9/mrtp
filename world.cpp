@@ -19,7 +19,8 @@
 #include "world.hpp"
 
 
-World::World (Parser *parser) {
+World::World (Parser *parser, unsigned int width,
+        unsigned int heigth, double fov) {
     /* 
      * Initialize. 
      */
@@ -36,7 +37,7 @@ World::World (Parser *parser) {
     light  = NULL;
 
 
-    buffer = new Buffer (800, 600);
+    buffer = new Buffer (width, heigth);
 
     Entry entry;
     string label;
@@ -47,7 +48,7 @@ World::World (Parser *parser) {
         cout << "World: Reading entry \"" << label << "\"" << endl;
         #endif
         if (label == "camera")
-            AddCamera_FromEntry (&entry);
+            AddCamera_FromEntry (&entry, width, heigth, fov);
         else if (label == "light")
             AddLight_FromEntry (&entry);
         else if (label == "plane")
@@ -70,6 +71,8 @@ World::~World () {
 
     /* Clear all spheres. */
     while (PopSphere ());
+
+    /* Clear all cylinders. */
 }
 
 unsigned int World::PopPlane () {
@@ -161,7 +164,8 @@ unsigned int World::AddSphere (Vector *center, double radius,
     return (++nspheres);
 }
 
-unsigned int World::AddCamera_FromEntry (Entry *entry) {
+unsigned int World::AddCamera_FromEntry (Entry *entry,
+        unsigned int width, unsigned int heigth, double fov) {
     unsigned int i = 999;
     double  value;
     string  key;
@@ -179,9 +183,8 @@ unsigned int World::AddCamera_FromEntry (Entry *entry) {
         }
         Vector position (x0, y0, z0),
             lookat (lx, ly, lz);
-        /* FIXME */
         camera = new Camera (&position, &lookat, 
-            800, 600, 70., rot);
+            width, heigth, fov, rot);
     }
     return 1;
 }
@@ -392,9 +395,9 @@ void World::Render () {
     }
 }
 
-void World::WritePNG (char *filename) {
+void World::WritePNG (string filename) {
     Color blue (0., 0., 1.);
 
-    buffer->Text ("BUFFER TEST.", 0, 0, &blue);
+    /* buffer->Text ("BUFFER TEST.", 0, 0, &blue); */
     buffer->WriteToPNG (filename);
 }

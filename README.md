@@ -24,8 +24,12 @@ Just type in:
 make
 ```
 
-An executable file "mrtp" will be generated that is ready to run:
+An executable file "mrtp" will be generated that is ready to run.
+Type in:
 
 ```
-./mrtp [config.txt]
+./mrtp -h
 ```
+
+to get a list of available arguments and options and 
+an example of use.

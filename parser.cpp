@@ -193,7 +193,7 @@ void Parser::Parse () {
     ifstream config (fn);
 
     string line, accu, prev, item;
-    unsigned int i, j, nlines;
+    unsigned int i, j, nlines, len;
     char mode, c;
 
     string labels[MAX_PARM], values[MAX_PARM];
@@ -216,7 +216,8 @@ void Parser::Parse () {
     while (getline (config, line)) {
         nlines++;
         i = 0;
-        while (i < line.length ()) {
+        len = line.length ();
+        while (i < len) {
             c = line.at (i++);
             if ((c == ' ') || (c == '\n') || (c == '\t'))
                 continue;
@@ -264,7 +265,7 @@ void Parser::Parse () {
                             convert.str (values[j]);
                             convert >> test;
                             if (!convert) {
-                                cout << "Line " << nlines << ": Unable to convert " << values[j] << " to double." << endl;
+                                cout << "Line " << nlines << ": Unable to convert \"" << values[j] << "\" to double." << endl;
                                 config.close ();
                                 return;
                             }

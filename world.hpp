@@ -30,7 +30,7 @@
 #include "parser.hpp"
 
 
-#define DEBUG_WORLD     1
+// #define DEBUG_WORLD     1
 #define sqr(x) (x * x)
 
 #define HIT_NULL        0
@@ -54,7 +54,8 @@ class World {
         ncylinders;
     Buffer    *buffer;
 public:
-    World (Parser *parser);
+    World (Parser *parser, unsigned int width,
+        unsigned int heigth, double fov);
     ~World ();
     unsigned int AddPlane (Vector *center, Vector *normal,
         Color *colora, Color *colorb, double texscale);
@@ -63,13 +64,14 @@ public:
     unsigned int AddPlane_FromEntry (Entry *entry);
     unsigned int AddSphere_FromEntry (Entry *entry);
     unsigned int AddLight_FromEntry (Entry *entry);
-    unsigned int AddCamera_FromEntry (Entry *entry);
+    unsigned int AddCamera_FromEntry (Entry *entry,
+        unsigned int width, unsigned int heigth, double fov);
     unsigned int PopPlane ();
     unsigned int PopSphere ();
     void TraceRay (Vector *origin, Vector *direction,
         Color *color);
     void Render ();
-    void WritePNG (char *filename);
+    void WritePNG (string filename);
 };
 
 #endif /* _WORLD_H */

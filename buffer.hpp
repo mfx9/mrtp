@@ -19,11 +19,14 @@
 #ifndef _BUFFER_H
 #define _BUFFER_H
 
+#include <string>
+using namespace std;
+
 #include "png.hpp"
+using namespace png;
+
 #include "color.hpp"
 #include "fontdata.hpp"
-
-using namespace png;
 
 
 class Buffer {
@@ -34,8 +37,8 @@ public:
         unsigned int h);
     ~Buffer ();
     void Clear ();
-    void WriteToPNG (char *filename);
-    void Text (char *text, unsigned int x,
+    void WriteToPNG (string filename);
+    void Text (string text, unsigned int x,
         unsigned int y, Color *color);
     Color *GetPointer ();
 };
