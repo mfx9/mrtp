@@ -3,7 +3,7 @@
 pngver = 0.2.9
 
 # CFLAGS  = -O2 -fPIC -c -W -Wall -pedantic -I$(PDYNAMO_PCORE)/extensions/cinclude -I../cinclude
-CFLAGS = -Ipng++/png++-${pngver} -g
+CFLAGS = -Ipng++/png++-${pngver}
 CC  = g++
 
 

@@ -36,17 +36,19 @@ World::World (Parser *parser, unsigned int width,
     camera = NULL;
     light  = NULL;
 
-
+    /*
+     * Allocate buffer.
+     */
     buffer = new Buffer (width, heigth);
 
-    Entry entry;
+    Entry  entry;
     string label;
+    unsigned int nentries;
 
-    while (parser->PopEntry (&entry)) {
+    do {
+        nentries = parser->PopEntry (&entry);
         entry.GetLabel (&label);
-        #ifdef DEBUG_WORLD
-        cout << "World: Reading entry \"" << label << "\"" << endl;
-        #endif
+
         if (label == "camera")
             AddCamera_FromEntry (&entry, width, heigth, fov);
         else if (label == "light")
@@ -55,7 +57,7 @@ World::World (Parser *parser, unsigned int width,
             AddPlane_FromEntry (&entry);
         else if (label == "sphere")
             AddSphere_FromEntry (&entry);
-    }
+    } while (nentries > 0);
 }
 
 World::~World () {
@@ -67,10 +69,14 @@ World::~World () {
         delete buffer;
 
     /* Clear all planes. */
-    while (PopPlane ());
+    do {
+        PopPlane ();
+    } while (nplanes > 0);
 
     /* Clear all spheres. */
-    while (PopSphere ());
+    do {
+        PopSphere ();
+    } while (nspheres > 0);
 
     /* Clear all cylinders. */
 }
@@ -89,9 +95,6 @@ unsigned int World::PopPlane () {
             prev->SetNext (NULL);
         delete last;
         nplanes--;
-        #ifdef DEBUG_WORLD
-        cout << "World: Removed plane." << endl;
-        #endif
     }
     /* Returns zero if there are no planes left. */ 
     return nplanes;
@@ -111,9 +114,6 @@ unsigned int World::PopSphere () {
             prev->SetNext (NULL);
         delete last;
         nspheres--;
-        #ifdef DEBUG_WORLD
-        cout << "World: Removed sphere." << endl;
-        #endif
     }
     /* Returns zero if there are no spheres left. */ 
     return nspheres;
@@ -136,9 +136,6 @@ unsigned int World::AddPlane (Vector *center, Vector *normal,
         } while (next != NULL);
         last->SetNext (plane);
     }
-    #ifdef DEBUG_WORLD
-    cout << "World: Added plane." << endl;
-    #endif
     return (++nplanes);
 }
 
@@ -158,9 +155,6 @@ unsigned int World::AddSphere (Vector *center, double radius,
         } while (next != NULL);
         last->SetNext (sphere);
     }
-    #ifdef DEBUG_WORLD
-    cout << "World: Added sphere." << endl;
-    #endif
     return (++nspheres);
 }
 
@@ -270,7 +264,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
     /*
      * Initialize.
      */
-    color->Set (0., 0., 0.);
+    color->Zero ();
     currd  = MAX_DISTANCE;
     hit    = HIT_NULL;
     /*
@@ -383,10 +377,9 @@ void World::Render () {
      */
     for (j = 0; j < heigth; j++) {
         for (i = 0; i < width; i++) {
-            horiz  = vw * (double) i;
-            verti  = vh * (double) j;
-            origin = vo + horiz + verti;
-
+            horiz     = vw * (double) i;
+            verti     = vh * (double) j;
+            origin    = vo + horiz + verti;
             direction = origin - eye;
             direction.Normalize_InPlace ();
 
@@ -396,8 +389,9 @@ void World::Render () {
 }
 
 void World::WritePNG (string filename) {
+    /*
     Color blue (0., 0., 1.);
-
-    /* buffer->Text ("BUFFER TEST.", 0, 0, &blue); */
+    buffer->Text ("BUFFER TEST.", 0, 0, &blue);
+    */
     buffer->WriteToPNG (filename);
 }

@@ -39,15 +39,14 @@ void Buffer::Clear () {
     unsigned int i;
     Color *bp;
 
-    bp = &data[0];
-    for (i = 0; i < width * heigth; i++) {
-        bp->Set (0., 0., 0.);
-        bp++;
+    for (bp = &data[0], i = 0; 
+        i < width * heigth; i++, bp++) {
+            bp->Zero ();
     }
 }
 
 void Buffer::WriteToPNG (string filename) {
-    png::image< png::rgb_pixel > image (width, heigth);
+    image< rgb_pixel > image (width, heigth);
     rgb_pixel *pixel;
     unsigned char r, g, b;
     unsigned int i, j;
@@ -70,7 +69,6 @@ void Buffer::WriteToPNG (string filename) {
 
 void Buffer::Text (string text, unsigned int x,
         unsigned int y, Color *color) {
-    /*
     unsigned char *fp, letter, idx, byte;
     char *tp;
     Color *bp, *sav;
@@ -96,5 +94,4 @@ void Buffer::Text (string text, unsigned int x,
         }
         bp = sav + 8;
     }
-    */
 }

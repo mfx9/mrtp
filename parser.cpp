@@ -40,9 +40,6 @@ bool Parser::CheckCamera (string *labels, double *params,
         cout << "Incomplete camera definition." << endl;
         return false;
     }
-    #ifdef DEBUG_PARSER
-    cout << "Completed camera." << endl;
-    #endif
     return true;
 }
 
@@ -63,9 +60,6 @@ bool Parser::CheckLight (string *labels, double *params,
         cout << "Incomplete light definition." << endl;
         return false;
     }
-    #ifdef DEBUG_PARSER
-    cout << "Completed light." << endl;
-    #endif
     return true;
 }
 
@@ -96,9 +90,6 @@ bool Parser::CheckPlane (string *labels, double *params,
         cout << "Incomplete plane definition." << endl;
         return false;
     }
-    #ifdef DEBUG_PARSER
-    cout << "Completed plane." << endl;
-    #endif
     return true;
 }
 
@@ -123,9 +114,6 @@ bool Parser::CheckSphere (string *labels, double *params,
         cout << "Incomplete sphere definition." << endl;
         return false;
     }
-    #ifdef DEBUG_PARSER
-    cout << "Completed sphere." << endl;
-    #endif
     return true;
 }
 
@@ -141,8 +129,9 @@ Parser::~Parser () {
          * Remove all entries.
          *
          */
-        Entry tmp;
-        while (PopEntry (&tmp));
+        do {
+            PopEntry (NULL);
+        } while (nentries > 0);
     }
 }
 
@@ -181,7 +170,8 @@ unsigned int Parser::PopEntry (Entry *entry) {
         }
         if (prev != NULL)
             prev->SetNext (NULL);
-        last->CopyTo (entry);
+        if (entry != NULL)
+            last->CopyTo (entry);
         delete last;
         nentries--;
     }
@@ -202,6 +192,7 @@ void Parser::Parse () {
     double test, params[MAX_PARM];
     stringstream convert ("test");
 
+    unsigned int ncam, nlig;
     status = STATUS_FAIL;
 
 
@@ -209,9 +200,11 @@ void Parser::Parse () {
         cout << "File " << filename << " cannot be opened." << endl;
         return;
     }
-    mode   = MODE_SEARCH;
+    mode   = MODE_OPEN;
     accu   = "";
     nlines = 0;
+    ncam   = 0;
+    nlig   = 0;
 
     while (getline (config, line)) {
         nlines++;
@@ -225,112 +218,115 @@ void Parser::Parse () {
                 break;
             accu += c;
 
-            switch (mode) {
-                case MODE_SEARCH:
-                    if ((accu == "camera") || (accu == "light") || (accu == "plane") || 
-                            (accu == "sphere") || (accu == "cylinder")) {
-                        #ifdef DEBUG_PARSER
-                        cout << "Reading " << accu << "..." << endl;
-                        #endif
-                        mode   = MODE_OPEN;
-                        item   = accu;
+            if (mode == MODE_OPEN) {
+                if (c == '{') {
+                    if ((prev == "camera") || (prev == "light") || (prev == "plane") || 
+                            (prev == "sphere")) {
+                        mode   = MODE_READ;
+                        item   = prev;
                         nlabel = 0;
                         nvalue = 0;
                         accu   = "";
                     }
-                    break;
-                case MODE_OPEN:
-                    if (c == '(') {
-                        mode = MODE_READ;
-                        accu = "";
-                    }
                     else {
-                        cout << "Line " << nlines << ": Undefined characters." << endl;
+                        cout << "Line " << nlines << ": Undefined item: \"" << prev << "\"" << endl;
                         config.close ();
                         return;
                     }
-                    break;
-                case MODE_READ:
-                    if (c == ')') {
-                        values[nvalue++] = prev;
-                        mode = MODE_SEARCH;
-                        accu = "";
-                        if (nlabel != nvalue) {
-                            cout << "Line " << nlines << ": Numbers of labels and values do not match." << endl;
+                }
+            }
+            else {  /* mode == MODE_READ */
+                if (c == '}') {
+                    values[nvalue++] = prev;
+                    mode = MODE_OPEN;
+                    accu = "";
+                    if (nlabel != nvalue) {
+                        cout << "Line " << nlines << ": Numbers of labels and values do not match." << endl;
+                        config.close ();
+                        return;
+                    }
+                    j = 0;
+                    while (j < nvalue) {
+                        convert.str (values[j]);
+                        convert >> test;
+                        if (!convert) {
+                            cout << "Line " << nlines << ": Unable to convert \"" << values[j] << "\" to double." << endl;
                             config.close ();
                             return;
                         }
-                        j = 0;
-                        while (j < nvalue) {
-                            convert.str (values[j]);
-                            convert >> test;
-                            if (!convert) {
-                                cout << "Line " << nlines << ": Unable to convert \"" << values[j] << "\" to double." << endl;
-                                config.close ();
-                                return;
-                            }
-                            convert.clear ();
-                            params[j++] = test;
+                        convert.clear ();
+                        params[j++] = test;
+                        if (j == MAX_PARM) {
+                            cout << "Line " << nlines << ": Number of parameters exceeded." << endl;
+                            config.close ();
+                            return;
                         }
-                        #ifdef DEBUG_PARSER
-                        for (j = 0; j < nlabel; j++) {
-                            cout << labels[j] << "=" << values[j] << "(" << params[j] << ")" << endl;
-                        }
-                        cout << "Item is: " << item << endl;
-                        #endif
+                    }
 
-                        if (item == "camera") {
-                            if (!CheckCamera (labels, params, nlabel)) {
-                                config.close ();
-                                return;
-                            }
-                            AddEntry (item, labels, params, nlabel);
+                    if (item == "camera") {
+                        if ((ncam++) > 1) {
+                            cout << "Line " << nlines << ": Multiple camera entries." << endl;
+                            config.close ();
+                            return;
                         }
-                        else if (item == "light") {
-                            if (!CheckLight (labels, params, nlabel)) {
-                                config.close ();
-                                return;
-                            }
-                            AddEntry (item, labels, params, nlabel);
-                        }
-                        else if (item == "plane") {
-                            if (!CheckPlane (labels, params, nlabel)) {
-                                config.close ();
-                                return;
-                            }
-                            AddEntry (item, labels, params, nlabel);
-                        }
-                        else if (item == "sphere") {
-                            if (!CheckSphere (labels, params, nlabel)) {
-                                config.close ();
-                                return;
-                            }
-                            AddEntry (item, labels, params, nlabel);
-                        }
-                        else if (item == "cylinder") {
-                            /* Skip cylinders for now. */
+                        if (!CheckCamera (labels, params, nlabel)) {
+                            config.close ();
+                            return;
                         }
                     }
-                    else if (c == '=') {
-                        labels[nlabel++] = prev;
-                        accu = "";
+                    else if (item == "light") {
+                        if ((nlig++) > 1) {
+                            cout << "Line " << nlines << ": Multiple light entries." << endl;
+                            config.close ();
+                            return;
+                        }
+                        if (!CheckLight (labels, params, nlabel)) {
+                            config.close ();
+                            return;
+                        }
                     }
-                    else if (c == ';') {
-                        values[nvalue++] = prev;
-                        accu = "";
+                    else if (item == "plane") {
+                        if (!CheckPlane (labels, params, nlabel)) {
+                            config.close ();
+                            return;
+                        }
                     }
-                    break;
+                    else if (item == "sphere") {
+                        if (!CheckSphere (labels, params, nlabel)) {
+                            config.close ();
+                            return;
+                        }
+                    }
+                    else if (item == "cylinder") {
+                        /* Skip cylinders for now. */
+                    }
+                    AddEntry (item, labels, params, nlabel);
+                }
+                else if (c == '=') {
+                    labels[nlabel++] = prev;
+                    accu = "";
+                }
+                else if (c == ';') {
+                    values[nvalue++] = prev;
+                    accu = "";
+                }
             }
             prev = accu;
         }
     }
     config.close ();
-    status = STATUS_OK;
 
-    #ifdef DEBUG_PARSER
-    cout << "Parsing complete, found entries: " << nentries 
-        << endl;
-    #endif
+    if (ncam < 1) {
+        cout << "Camera not found." << endl;
+        return;
+    }
+    if (nlig < 1) {
+        cout << "Light not found." << endl;
+        return;
+    }
+    status = STATUS_OK;
+    cout << "Parsing complete, found " << nentries 
+        << " entries." << endl;
 }
 
 Entry::Entry (string title, string *labels, double *params,
@@ -345,16 +341,10 @@ Entry::Entry (string title, string *labels, double *params,
         keys[i] = labels[i];
         values[i] = params[i];
     }
-    #ifdef DEBUG_PARSER
-    cout << "Created entry: " << label << endl;
-    #endif
 }
 
 Entry::Entry () {
     nitems = 0;
-    #ifdef DEBUG_PARSER
-    cout << "Created uninitialized entry." << endl;
-    #endif
 }
 
 Entry::~Entry () {
@@ -362,9 +352,6 @@ Entry::~Entry () {
         delete[] keys;
         delete[] values;
     }
-    #ifdef DEBUG_PARSER
-    cout << "Removed entry: " << label << endl;
-    #endif
 }
 
 Entry *Entry::GetNext () {
@@ -419,8 +406,5 @@ bool Entry::GetPair (string *key, double *value,
 }
 
 void Entry::GetLabel (string *title) {
-    #ifdef DEBUG_PARSER
-    cout << "Parser: Getting label \"" << label << "\"" << endl;
-    #endif
     (*title) = label;
 }

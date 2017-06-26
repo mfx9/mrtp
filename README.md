@@ -12,7 +12,7 @@ Essentially, the purpose of writing Mrtp was to refresh my knowledge
 of C++, raytracing and computer graphics. Also to experiment with 
 linking of a project to third-party libraries, for example png++.
 
-As of now, the program is not fully functional and is under
+As of now, the program has only basic functionality and is under
 development.
 
 
@@ -31,5 +31,4 @@ Type in:
 ./mrtp -h
 ```
 
-to get a list of available arguments and options and 
-an example of use.
+to get a list of available options and an example of use.

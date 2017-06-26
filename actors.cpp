@@ -34,11 +34,6 @@ Plane::Plane (Vector *c, Vector *n, Color *cola,
     c->CopyTo (&center);
     n->CopyTo (&normal);
     normal.Normalize_InPlace ();
-#ifdef DEBUG_ACTORS
-    printf ("%s: Plane center and normal\n", __FILE__);
-    center.Print ();
-    normal.Print ();
-#endif
     /*
      * . Texturing.
      */
@@ -57,11 +52,6 @@ Plane::Plane (Vector *c, Vector *n, Color *cola,
     i = j ^ k;
     i.Normalize_InPlace ();
     i.CopyTo (&texx);
-#ifdef DEBUG_ACTORS
-    printf ("%s: Plane texturing (texx, texy)\n", __FILE__);
-    texx.Print ();
-    texy.Print ();
-#endif
 }
 
 Plane *Plane::GetNext () {

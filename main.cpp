@@ -17,12 +17,15 @@
  *
  */
 #include <iostream>
+using namespace std;
+
+#include <iomanip>
 #include <sstream>
 #include <string>
+#include <ctime>
+
 #include "world.hpp"
 #include "parser.hpp"
-
-using namespace std;
 
 
 #define HELP_SPACING { cout << endl; }
@@ -51,10 +54,12 @@ void HelpScreen (string program) {
     cout << "Options:\n"
             "    -h, --help\n"
             "      Print this help screen.\n\n"
+            /*
             "    -q, --quiet\n"
-            "      Supress all output.\n\n"
+            "      Supress all output, except errors.\n\n"
             "    -v, --version\n"
             "      Version of the program.\n\n"
+            */
             "    -r, --resolution\n"
             "      Resolution of the rendered image, for\n"
             "      example 640x480 (default), 1024x768, etc.\n\n"
@@ -65,36 +70,10 @@ void HelpScreen (string program) {
             "      format (default is \"output.png\").\n\n"
             "Example:\n";
     cout << "    " << program << " -r 1024x768 -o test.png test.txt" << endl;
-
-    /*
-    cout << "Options:" << endl;
-    cout << "    -h, --help" << endl;
-    cout << "      Print this help screen." << endl;
-    HELP_SPACING;
-    cout << "    -q, --quiet" << endl;
-    cout << "      Supress all output." << endl;
-    HELP_SPACING;
-    cout << "    -v, --version" << endl;
-    cout << "      Version of the program." << endl;
-    HELP_SPACING;
-    cout << "    -r, --resolution" << endl;
-    cout << "      Resolution of the rendered image, for" << endl;
-    cout << "      example " << DEFAULT_DISPLAY << " (default), 1024x768, etc." << endl;
-    HELP_SPACING;
-    cout << "    -f, --fov" << endl;
-    cout << "      Field of vision, in degrees (default is " << DEFAULT_FOV << ")." << endl;
-    HELP_SPACING;
-    cout << "    -o, --output" << endl;
-    cout << "      Filename for the rendered image, in PNG" << endl;
-    cout << "      format (default is \"" << DEFAULT_OUTPUT << "\")." << endl;
-    HELP_SPACING;
-    cout << "Example:" << endl;
-    cout << "    " << program << " -r 1024x768 -o test.png test.txt" << endl;
-    */
 }
 
 int main (int argc, char **argv) {
-    unsigned int i, len;
+    unsigned int i, len, timeStart, timeStop;
     string  text, next, foo, bar;
     stringstream convert ("test");
     size_t pos;
@@ -192,7 +171,7 @@ int main (int argc, char **argv) {
         }
         else if ((text == "-o") || (text == "--output")) {
             if (i == (argc - 1)) {
-                cout << "Output not given." << endl;
+                cout << "Output file not given." << endl;
                 return EXIT_FAIL;
             }
             output = argv[++i];
@@ -221,8 +200,19 @@ int main (int argc, char **argv) {
         return EXIT_FAIL;
     }
 
+    cout << fixed << setprecision (1);
+    cout << "Parameters: width=" << width << ", heigth=" << heigth << 
+        ", fov=" << fov << endl;
+
     World world (&parser, width, heigth, fov);
+    cout << "Rendering..." << endl;
+    timeStart = clock ();
     world.Render ();
+    timeStop = clock ();
+
+    cout << "Elapsed time: " << 
+        ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
+        " sec" << endl;
     world.WritePNG (output);
 
     return EXIT_OK;

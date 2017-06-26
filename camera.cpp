@@ -57,17 +57,6 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
     Vector i;
     i = lookat - eye;
     i.Normalize_InPlace ();
-#ifdef DEBUG_CAMERA
-    printf ("%s: Basis vectors\n", __FILE__);
-    Vector bi (1., 0., 0.), bj (0., 1., 0.), 
-        bk (0., 0., 1.);
-    bi.Print ();
-    bj.Print ();
-    bk.Print ();
-    printf ("%s: Camera position and target\n", __FILE__);
-    eye.Print ();
-    lookat.Print ();
-#endif
     /*
      * if (i.x == 0. && i.y == 0.)
      *     return false;
@@ -82,17 +71,6 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
     j.Scale_InPlace (-1.);
     k = i ^ j;
     k.Normalize_InPlace ();
-#ifdef DEBUG_CAMERA
-    Vector temp;
-    printf ("%s: Camera coordinate system (i, j, k)\n", __FILE__);
-    temp = eye + i;
-    temp.Print ();
-    temp = eye + j;
-    temp.Print ();
-    temp = eye + k;
-    temp.Print ();
-#endif
-
     /*
      * . Apply camera rotation around
      *  the axis of i.
@@ -104,13 +82,6 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
      */
     Vector center;
     center = (i * perspective) + eye;
-#ifdef DEBUG_CAMERA
-    /*
-    printf ("** Center of screen **\n");
-    center.Print ();
-    */
-#endif
-
     /*
      * . Modify vectors.
      */
@@ -124,14 +95,6 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
     wo = center + j + k;
     ww = center - j + k;
     wh = center + j - k;
-#ifdef DEBUG_CAMERA
-    /*
-    printf ("** Corners of window **\n");
-    wo.Print ();
-    ww.Print ();
-    wh.Print ();
-    */
-#endif
 
     /*
      * . Find vectors spanning the window.

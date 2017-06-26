@@ -19,24 +19,47 @@
 #include "color.hpp"
 
 
+Color::~Color () {
+}
+
 Color::Color () {
-    red = 0.; green = 0; blue = 0;
+    COLOR_ZERO ();
 }
 
+#ifdef FLOAT_COLOR
 Color::Color (float r, float g, float b) {
-    red = r; green = g; blue = b;
+    COLOR_TRIM (r, g, b);
+    red   = r;
+    green = g;
+    blue  = b;
 }
-
-/*
+#else
 Color::Color (unsigned char r, 
         unsigned char g, unsigned char b) {
-    red   = float (r) / 255.;
-    green = float (g) / 255.;
-    blue  = float (b) / 255.;
+    red   = r;
+    green = g;
+    blue  = b;
 }
-*/
+#endif
 
-Color::~Color () {
+#ifdef FLOAT_COLOR
+void Color::Set (float r, float g, float b) {
+    COLOR_TRIM (r, g, b);
+    red   = r;
+    green = g;
+    blue  = b;
+}
+#else
+void Color::Set (unsigned char r, 
+        unsigned char g, unsigned char b) {
+    red   = r;
+    green = g;
+    blue  = b;
+}
+#endif
+
+void Color::Zero () {
+    COLOR_ZERO ();
 }
 
 void Color::CopyTo (Color *other) {
@@ -45,28 +68,37 @@ void Color::CopyTo (Color *other) {
     other->blue  = blue;
 }
 
-void Color::Convert (unsigned char *cr, unsigned char *cg,
-        unsigned char *cb) {
-    *cr = (unsigned char) (red   * 255.);
-    *cg = (unsigned char) (green * 255.);
-    *cb = (unsigned char) (blue  * 255.);
-}
-
-void Color::Set (float r, float g, float b) {
-    red = r; green = g; blue = b;
+void Color::Convert (unsigned char *cr, 
+        unsigned char *cg, unsigned char *cb) {
+    #ifdef FLOAT_COLOR
+    *cr = FLOAT_TO_BYTE (red);
+    *cg = FLOAT_TO_BYTE (green);
+    *cb = FLOAT_TO_BYTE (blue);
+    #else
+    *cr = red;
+    *cg = green;
+    *cb = blue;
+    #endif
 }
 
 void Color::Scale_InPlace (double scale) {
     /*
-     * . Scale can only be between <0; 1>
+     * Scale is between <0, 1>
      */
-    if ((scale >= 0.) && (scale <= 1.)) {
-        red   *= (float) scale;
-        green *= (float) scale;
-        blue  *= (float) scale;
-    } else {
-        red   = 0.;
-        green = 0.;
-        blue  = 0.;
-    }
+    if (scale < 0.)
+        scale = 0.;
+    else if (scale > 1.)
+        scale = 1.;
+    #ifdef FLOAT_COLOR
+    red   = red   * (float) scale;
+    green = green * (float) scale;
+    blue  = blue  * (float) scale;
+    #else
+    red = FLOAT_TO_BYTE (BYTE_TO_FLOAT 
+        (red) * (float) scale);
+    green = FLOAT_TO_BYTE (BYTE_TO_FLOAT 
+        (green) * (float) scale);
+    blue = FLOAT_TO_BYTE (BYTE_TO_FLOAT 
+        (blue) * (float) scale);
+    #endif
 }

@@ -27,12 +27,9 @@
 using namespace std;
 
 
-#define MODE_SEARCH   1
-#define MODE_OPEN     2
-#define MODE_READ     3
-
-#define MAX_PARM      16
-// #define DEBUG_PARSER  1
+#define MODE_OPEN   1
+#define MODE_READ   2
+#define MAX_PARM    32
 
 #define STATUS_FAIL   0
 #define STATUS_NEW    1
