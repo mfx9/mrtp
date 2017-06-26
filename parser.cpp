@@ -256,11 +256,6 @@ void Parser::Parse () {
                         }
                         convert.clear ();
                         params[j++] = test;
-                        if (j == MAX_PARM) {
-                            cout << "Line " << nlines << ": Number of parameters exceeded." << endl;
-                            config.close ();
-                            return;
-                        }
                     }
 
                     if (item == "camera") {
@@ -302,13 +297,20 @@ void Parser::Parse () {
                     }
                     AddEntry (item, labels, params, nlabel);
                 }
-                else if (c == '=') {
-                    labels[nlabel++] = prev;
-                    accu = "";
-                }
-                else if (c == ';') {
-                    values[nvalue++] = prev;
-                    accu = "";
+                else {
+                    if (c == '=') {
+                        labels[nlabel++] = prev;
+                        accu = "";
+                    }
+                    else if (c == ';') {
+                        values[nvalue++] = prev;
+                        accu = "";
+                    }
+                    if ((nlabel == (MAX_PARM - 1)) || (nvalue == (MAX_PARM - 1))) {
+                        cout << "Line " << nlines << ": Number of parameters exceeded." << endl;
+                        config.close ();
+                        return;
+                    }
                 }
             }
             prev = accu;
