@@ -19,7 +19,6 @@
 #ifndef _VECTOR_H
 #define _VECTOR_H
 
-#include <cstdio>
 #include <cmath>
 
 
@@ -32,7 +31,6 @@ public:
         double newz);
     void Set (double newx, double newy,
         double newz);
-    void Print ();
     double Len ();
     double DotSelf ();
     void Scale_InPlace (double scale);

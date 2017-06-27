@@ -1,7 +1,6 @@
 /png++/png++*
-/tinyxml2/tinyxml2*
 /mrtp
 /*.png
-*.a
 *.o
+*.a
 *.so

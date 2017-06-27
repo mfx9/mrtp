@@ -39,10 +39,6 @@ void Vector::Set (double newx,
     z = newz;
 }
 
-void Vector::Print () {
-    printf ("x=%7.3f    y=%7.3f    z=%7.3f\n", x, y, z);
-}
-
 double Vector::Len () {
     return sqrt (x * x + y * y + z * z);
 }
