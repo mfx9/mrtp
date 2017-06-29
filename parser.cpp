@@ -193,11 +193,14 @@ void Parser::Parse () {
     stringstream convert ("test");
 
     unsigned int ncam, nlig;
+    bool check;
+
     status = STATUS_FAIL;
 
 
     if (!config.is_open ()) {
-        cout << "File " << filename << " cannot be opened." << endl;
+        cout << "File " << filename 
+            << " cannot be opened." << endl;
         return;
     }
     mode   = MODE_OPEN;
@@ -220,8 +223,8 @@ void Parser::Parse () {
 
             if (mode == MODE_OPEN) {
                 if (c == '{') {
-                    if ((prev == "camera") || (prev == "light") || (prev == "plane") || 
-                            (prev == "sphere")) {
+                    if ((prev == "camera") || (prev == "light") 
+                            || (prev == "plane") || (prev == "sphere")) {
                         mode   = MODE_READ;
                         item   = prev;
                         nlabel = 0;
@@ -229,7 +232,8 @@ void Parser::Parse () {
                         accu   = "";
                     }
                     else {
-                        cout << "Line " << nlines << ": Undefined item: \"" << prev << "\"" << endl;
+                        cout << "Line " << nlines << ": Undefined item: \"" 
+                            << prev << "\"" << endl;
                         config.close ();
                         return;
                     }
@@ -241,7 +245,8 @@ void Parser::Parse () {
                     mode = MODE_OPEN;
                     accu = "";
                     if (nlabel != nvalue) {
-                        cout << "Line " << nlines << ": Numbers of labels and values do not match." << endl;
+                        cout << "Line " << nlines 
+                            << ": Numbers of labels and values do not match." << endl;
                         config.close ();
                         return;
                     }
@@ -250,7 +255,8 @@ void Parser::Parse () {
                         convert.str (values[j]);
                         convert >> test;
                         if (!convert) {
-                            cout << "Line " << nlines << ": Unable to convert \"" << values[j] << "\" to double." << endl;
+                            cout << "Line " << nlines << ": Unable to convert \"" 
+                                << values[j] << "\" to double." << endl;
                             config.close ();
                             return;
                         }
@@ -259,46 +265,51 @@ void Parser::Parse () {
                     }
 
                     if (item == "camera") {
-                        if ((ncam++) > 1) {
-                            cout << "Line " << nlines << ": Multiple camera entries." << endl;
-                            config.close ();
-                            return;
+                        if ((++ncam) < 2) {
+                            check = CheckCamera (labels, params, nlabel);
                         }
-                        if (!CheckCamera (labels, params, nlabel)) {
-                            config.close ();
-                            return;
+                        else {
+                            cout << "Line " << nlines 
+                                << ": Multiple camera entries." << endl;
+                            check = false;
                         }
                     }
                     else if (item == "light") {
-                        if ((nlig++) > 1) {
-                            cout << "Line " << nlines << ": Multiple light entries." << endl;
-                            config.close ();
-                            return;
+                        if ((++nlig) < 2) {
+                            check = CheckLight (labels, params, nlabel);
                         }
-                        if (!CheckLight (labels, params, nlabel)) {
-                            config.close ();
-                            return;
+                        else {
+                            cout << "Line " << nlines 
+                                << ": Multiple light entries." << endl;
+                            check = false;
                         }
                     }
                     else if (item == "plane") {
-                        if (!CheckPlane (labels, params, nlabel)) {
-                            config.close ();
-                            return;
-                        }
+                        check = CheckPlane (labels, params, nlabel);
                     }
                     else if (item == "sphere") {
-                        if (!CheckSphere (labels, params, nlabel)) {
-                            config.close ();
-                            return;
-                        }
+                        check = CheckSphere (labels, params, nlabel);
                     }
                     else if (item == "cylinder") {
                         /* Skip cylinders for now. */
+                    }
+
+                    if (!check) {
+                        config.close ();
+                        return;
                     }
                     AddEntry (item, labels, params, nlabel);
                 }
                 else {
                     if (c == '=') {
+                        for (j = 0; j < nlabel; j++) {
+                            if (labels[j] == prev) {
+                                cout << "Line " << nlines << ": Repeated \"" 
+                                    << prev << "\" parameter." << endl;
+                                config.close ();
+                                return;
+                            }
+                        }
                         labels[nlabel++] = prev;
                         accu = "";
                     }
@@ -307,7 +318,8 @@ void Parser::Parse () {
                         accu = "";
                     }
                     if ((nlabel == (MAX_PARM - 1)) || (nvalue == (MAX_PARM - 1))) {
-                        cout << "Line " << nlines << ": Number of parameters exceeded." << endl;
+                        cout << "Line " << nlines 
+                            << ": Number of parameters exceeded." << endl;
                         config.close ();
                         return;
                     }
