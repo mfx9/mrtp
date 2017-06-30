@@ -19,15 +19,15 @@
 #include "actors.hpp"
 
 
-Actor::Actor () {
-}
-
-Actor::~Actor () {
-}
-
 /*
- * . Planes.
+ * Planes.
  */
+Plane::Plane () {
+}
+
+Plane::~Plane () {
+}
+
 Plane::Plane (Vector *c, Vector *n, Color *cola, 
         Color *colb, double texscale) {
     next = NULL;
@@ -35,7 +35,7 @@ Plane::Plane (Vector *c, Vector *n, Color *cola,
     n->CopyTo (&normal);
     normal.Normalize_InPlace ();
     /*
-     * . Texturing.
+     * Texturing.
      */
     cola->CopyTo (&colora);
     colb->CopyTo (&colorb);
@@ -115,8 +115,14 @@ void Plane::GetNormal (Vector *n) {
 }
 
 /*
- * . Spheres.
+ * Spheres.
  */
+Sphere::Sphere () {
+}
+
+Sphere::~Sphere () {
+}
+
 Sphere::Sphere (Vector *c, double radius,
         Color *col) {
     c->CopyTo (&center);
@@ -177,7 +183,16 @@ void Sphere::GetNormal (Vector *hit, Vector *n) {
 }
 
 /*
- * . Light.
+ * Cylinders.
+ */
+Cylinder::Cylinder () {
+}
+
+Cylinder::~Cylinder () {
+}
+
+/*
+ * Light.
  */
 Light::Light (Vector *origin) {
     origin->CopyTo (&position);

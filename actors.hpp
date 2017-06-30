@@ -23,6 +23,7 @@
 #include <cmath>
 #include "vector.hpp"
 #include "color.hpp"
+#include "texture.hpp"
 
 
 // #define DEBUG_ACTORS   1
@@ -32,50 +33,63 @@
 #define IS_NOT_ZERO(x) ((x <= -TOLERANCE) || (x >= TOLERANCE))
 
 
-class Actor {
-public:
-    Actor ();
-    ~Actor ();
-};
-
-class Sphere : public Actor {
-    Vector center;
-    double R;
-    Color color;
+class Sphere {
+    Vector  center;
+    double  R;
+    Color   color;
     Sphere *next;
 public:
+    ~Sphere ();
+    Sphere ();
     Sphere (Vector *c, double radius,
         Color *col);
+
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
-    Sphere *GetNext ();
     void GetNormal (Vector *hit, Vector *n);
-    void SetNext (Sphere *sphere);
     void DetermineColor (Color *col);
+
+    Sphere *GetNext ();
+    void SetNext (Sphere *sphere);
 };
 
-class Plane : public Actor {
-    Vector center, normal;
-    Vector texx, texy;
-    Color colora, colorb;
-    double tscale;
-    Plane *next;
+class Plane {
+    Vector  center, normal;
+    Vector  texx, texy;
+    Color   colora, colorb;
+    double  tscale;
+    Texture *texture;
+    bool    istexture;
+    Plane   *next;
 public:
+    ~Plane ();
+    Plane ();
     Plane (Vector *c, Vector *n, Color *cola, 
         Color *colb, double texscale);
+
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
-    Plane *GetNext ();
     void GetNormal (Vector *n);
-    void SetNext (Plane *plane);
     void DetermineColor (Vector *inter, Color *col);
+
+    Plane *GetNext ();
+    void SetNext (Plane *plane);
 };
 
-class Cylinder : public Actor {
-    double m, n, R;
-    Color color;
-    char type;
+class Cylinder {
+    Vector   O, D;
+    double   R;
+    Color    color;
+    Cylinder *next;
 public:
+    ~Cylinder ();
+    Cylinder ();
+
+    double Solve (Vector *origin, Vector *direction, 
+        double mind, double maxd);
+
+    Cylinder *GetNext ();
+    void SetNext (Cylinder *cylinder);
 };
 
 class Light {

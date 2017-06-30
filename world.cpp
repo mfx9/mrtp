@@ -349,8 +349,14 @@ void World::TraceRay (Vector *origin, Vector *direction,
         }
         if (isshadow)
             dot *= SHADOW_FACTOR;
-        fade = (1. / sqr (MAX_DISTANCE)) * sqr (currd);
-
+        /*
+         * Decrease light intensity for objects further
+         *   away from the camera.
+         *
+         */
+        /* fade = 1. - (currd / MAX_DISTANCE); */
+        fade = 1. - sqr (currd / MAX_DISTANCE);
+        dot *= fade;
         objcol.Scale_InPlace (dot);
         /*
          * Put a pixel in the frame buffer.
@@ -393,5 +399,5 @@ void World::WritePNG (string filename) {
     Color blue (0., 0., 1.);
     buffer->Text ("BUFFER TEST.", 0, 0, &blue);
     */
-    buffer->WriteToPNG (filename);
+    buffer->Write_ToPNG (filename);
 }

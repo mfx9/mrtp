@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef _BUFFER_H
-#define _BUFFER_H
+#ifndef _TEXTURE_H
+#define _TEXTURE_H
 
 #include <string>
 using namespace std;
@@ -25,22 +25,14 @@ using namespace std;
 #include "png.hpp"
 using namespace png;
 
+#include "buffer.hpp"
 #include "color.hpp"
-#include "fontdata.hpp"
 
 
-class Buffer {
-    Color *data;
-    unsigned int width, heigth;
+class Texture : public Buffer {
 public:
-    Buffer (unsigned int w,
-        unsigned int h);
-    ~Buffer ();
-    void Clear ();
-    void Text (string text, unsigned int x,
-        unsigned int y, Color *color);
-    Color *GetPointer ();
-    void Write_ToPNG (string filename);
+    bool Load_FromPNG (string filename);
+    void Generate (Color *cola, Color *colb);
 };
 
-#endif /* _BUFFER_H */
+#endif /* _TEXTURE_H */

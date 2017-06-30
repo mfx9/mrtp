@@ -33,34 +33,34 @@
     else if (b < 0.) b = 0.; }
 
 #ifdef FLOAT_COLOR
-#define COLOR_ZERO() { red = 0.; \
-    green = 0.; blue = 0.; }
+#define COLOR_ZERO() { red = 0.; green = 0.; \
+    blue = 0.; }
 #else
-#define COLOR_ZERO() { red = 0; \
-    green = 0; blue = 0; }
+#define COLOR_ZERO() { red = 0; green = 0; \
+    blue = 0; }
 #endif
 
 
 class Color {
     #ifdef FLOAT_COLOR
-    float red, green, blue;
+        float red, green, blue;
     #else
-    unsigned char red, green,
-        blue;
+        unsigned char red, green,
+            blue;
     #endif
 public:
     Color ();
     ~Color ();
     #ifdef FLOAT_COLOR
-    Color (float r, float g, 
-        float b);
-    void Set (float r, float g, 
-        float b);
+        Color (float r, float g, 
+            float b);
+        void Set (float r, float g, 
+            float b);
     #else
-    Color (unsigned char r, unsigned char g, 
-        unsigned char b);
-    void Set (unsigned char r, unsigned char g, 
-        unsigned char b);
+        Color (unsigned char r, unsigned char g, 
+            unsigned char b);
+        void Set (unsigned char r, unsigned char g, 
+            unsigned char b);
     #endif
     void Zero ();
     void CopyTo (Color *other);

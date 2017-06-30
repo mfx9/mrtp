@@ -58,17 +58,28 @@ public:
     World (Parser *parser, unsigned int width,
         unsigned int heigth, double fov);
     ~World ();
+    /*
+     * Manipulation of objects, adding, 
+     * removing, etc.
+     *
+     */
     unsigned int AddPlane (Vector *center, Vector *normal,
         Color *colora, Color *colorb, double texscale);
     unsigned int AddSphere (Vector *center, double radius,
         Color *color);
+
     unsigned int AddPlane_FromEntry (Entry *entry);
     unsigned int AddSphere_FromEntry (Entry *entry);
     unsigned int AddLight_FromEntry (Entry *entry);
     unsigned int AddCamera_FromEntry (Entry *entry,
         unsigned int width, unsigned int heigth, double fov);
+
     unsigned int PopPlane ();
     unsigned int PopSphere ();
+    /*
+     * Rendering, writing output, etc.
+     *
+     */
     void TraceRay (Vector *origin, Vector *direction,
         Color *color);
     void Render ();
