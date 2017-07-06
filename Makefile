@@ -1,57 +1,67 @@
-# . Makefile
+# . Makefile for mrtp
 
-pngver = 0.2.9
-CFLAGS = -Ipng++/png++-${pngver} -O2 -W -Wall -pedantic
-CC = g++
+PNGVER  = 0.2.9
+INCLUDE = ./include
+SRC     = ./src
+CFLAGS  = -I${INCLUDE} -Ipng++/png++-${PNGVER} -O2 -W -Wall -pedantic
+CC      = g++
 
-objects = main.o actors.o vector.o world.o camera.o color.o  \
-    buffer.o parser.o fontdata.o texture.o
+OBJ = ${SRC}/main.o     \
+      ${SRC}/actors.o   \
+      ${SRC}/vector.o   \
+      ${SRC}/world.o    \
+      ${SRC}/camera.o   \
+      ${SRC}/color.o    \
+      ${SRC}/buffer.o   \
+      ${SRC}/parser.o   \
+      ${SRC}/fontdata.o \
+      ${SRC}/texture.o
 
 
 default: mrtp
 
-mrtp:  ${objects}
-	$(CC) $(CFLAGS) ${objects} -lpng -lm -o mrtp
+mrtp: ${OBJ}
+	$(CC) $(CFLAGS) ${OBJ} -lpng -lm -o mrtp
 
-main.o: main.cpp
-	$(CC) $(CFLAGS) -c main.cpp -o main.o
+${SRC}/main.o: ${SRC}/main.cpp
+	$(CC) $(CFLAGS) -c ${SRC}/main.cpp -o ${SRC}/main.o
 
-actors.o: actors.cpp actors.hpp
-	$(CC) $(CFLAGS) -c actors.cpp -o actors.o
+${SRC}/actors.o: ${SRC}/actors.cpp ${INCLUDE}/actors.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/actors.cpp -o ${SRC}/actors.o
 
-vector.o: vector.cpp vector.hpp
-	$(CC) $(CFLAGS) -c vector.cpp -o vector.o
+${SRC}/vector.o: ${SRC}/vector.cpp ${INCLUDE}/vector.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/vector.cpp -o ${SRC}/vector.o
 
-world.o: world.cpp world.hpp
-	$(CC) $(CFLAGS) -c world.cpp -o world.o
+${SRC}/world.o: ${SRC}/world.cpp ${INCLUDE}/world.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/world.cpp -o ${SRC}/world.o
 
-camera.o: camera.cpp camera.hpp
-	$(CC) $(CFLAGS) -c camera.cpp -o camera.o
+${SRC}/camera.o: ${SRC}/camera.cpp ${INCLUDE}/camera.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/camera.cpp -o ${SRC}/camera.o
 
-color.o: color.cpp color.hpp
-	$(CC) $(CFLAGS) -c color.cpp -o color.o
+${SRC}/color.o: ${SRC}/color.cpp ${INCLUDE}/color.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/color.cpp -o ${SRC}/color.o
 
-buffer.o: buffer.cpp buffer.hpp
-	$(CC) $(CFLAGS) -c buffer.cpp -o buffer.o
+${SRC}/buffer.o: ${SRC}/buffer.cpp ${INCLUDE}/buffer.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/buffer.cpp -o ${SRC}/buffer.o
 
-parser.o: parser.cpp parser.hpp
-	$(CC) $(CFLAGS) -c parser.cpp -o parser.o
+${SRC}/parser.o: ${SRC}/parser.cpp ${INCLUDE}/parser.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/parser.cpp -o ${SRC}/parser.o
 
-fontdata.o: fontdata.cpp fontdata.hpp
-	$(CC) $(CFLAGS) -c fontdata.cpp -o fontdata.o
+${SRC}/fontdata.o: ${SRC}/fontdata.cpp ${INCLUDE}/fontdata.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/fontdata.cpp -o ${SRC}/fontdata.o
 
-texture.o: texture.cpp texture.hpp
-	$(CC) $(CFLAGS) -c texture.cpp -o texture.o
+${SRC}/texture.o: ${SRC}/texture.cpp ${INCLUDE}/texture.hpp
+	$(CC) $(CFLAGS) -c ${SRC}/texture.cpp -o ${SRC}/texture.o
 
 clean:
-	if [ -e mrtp        ] ; then rm mrtp        ; fi
-	if [ -e main.o      ] ; then rm main.o      ; fi
-	if [ -e actors.o    ] ; then rm actors.o    ; fi
-	if [ -e vector.o    ] ; then rm vector.o    ; fi
-	if [ -e world.o     ] ; then rm world.o     ; fi
-	if [ -e camera.o    ] ; then rm camera.o    ; fi
-	if [ -e color.o     ] ; then rm color.o     ; fi
-	if [ -e buffer.o    ] ; then rm buffer.o    ; fi
-	if [ -e parser.o    ] ; then rm parser.o    ; fi
-	if [ -e fontdata.o  ] ; then rm fontdata.o  ; fi
-	if [ -e texture.o   ] ; then rm texture.o   ; fi
+	if [ -e mrtp ] ; then rm -v mrtp ; fi
+	if [ -e  ${SRC}/main.o     ]  ;  then  rm -v  ${SRC}/main.o      ;  fi
+	if [ -e  ${SRC}/actors.o   ]  ;  then  rm -v  ${SRC}/actors.o    ;  fi
+	if [ -e  ${SRC}/vector.o   ]  ;  then  rm -v  ${SRC}/vector.o    ;  fi
+	if [ -e  ${SRC}/world.o    ]  ;  then  rm -v  ${SRC}/world.o     ;  fi
+	if [ -e  ${SRC}/camera.o   ]  ;  then  rm -v  ${SRC}/camera.o    ;  fi
+	if [ -e  ${SRC}/color.o    ]  ;  then  rm -v  ${SRC}/color.o     ;  fi
+	if [ -e  ${SRC}/buffer.o   ]  ;  then  rm -v  ${SRC}/buffer.o    ;  fi
+	if [ -e  ${SRC}/parser.o   ]  ;  then  rm -v  ${SRC}/parser.o    ;  fi
+	if [ -e  ${SRC}/fontdata.o ]  ;  then  rm -v  ${SRC}/fontdata.o  ;  fi
+	if [ -e  ${SRC}/texture.o  ]  ;  then  rm -v  ${SRC}/texture.o   ;  fi
