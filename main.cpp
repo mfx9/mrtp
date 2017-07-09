@@ -19,7 +19,6 @@
 #include <iostream>
 using namespace std;
 
-#include <iomanip>
 #include <sstream>
 #include <string>
 #include <ctime>
@@ -28,19 +27,22 @@ using namespace std;
 #include "parser.hpp"
 
 
-/* Defaults. */
-#define DEFAULT_OUTPUT  "output.png"
-#define DEFAULT_WIDTH    640
-#define DEFAULT_HEIGTH   480
-#define DEFAULT_FOV       70.
+/* Default settings. */
+#define DEFAULT_OUTPUT   "output.png"
+#define DEFAULT_WIDTH     640
+#define DEFAULT_HEIGHT    480
+#define DEFAULT_FOV        70.0f
+#define DEFAULT_DISTANCE   60.0f
+#define DEFAULT_SHADOW      0.25f
+#define DEFAULT_MODEL     LIGHT_MODEL_QUADRATIC
 
 /* Program limits. */
-#define MIN_FOV        50.
-#define MAX_FOV       170.
+#define MIN_FOV        50.0f
+#define MAX_FOV       170.0f
 #define MIN_WIDTH     320
 #define MAX_WIDTH    4096
-#define MIN_HEIGTH    240
-#define MAX_HEIGTH   3072
+#define MIN_HEIGHT    240
+#define MAX_HEIGHT   3072
 
 /* Exit codes. */
 #define EXIT_OK    0
@@ -61,11 +63,18 @@ void HelpScreen (string program) {
             "    -r, --resolution\n"
             "      Resolution of the rendered image, for\n"
             "      example 640x480 (default), 1024x768, etc.\n\n"
-            "    -f, --fov\n"
-            "      Field of vision, in degrees (default is 70).\n\n"
             "    -o, --output\n"
             "      Filename for the rendered image, in PNG\n"
             "      format (default is \"output.png\").\n\n"
+            "    -f, --fov\n"
+            "      Field of vision, in degrees (default is 70).\n\n"
+            "    -d, --distance\n"
+            "      Distance to quench light (default is 60).\n\n"
+            "    -m, --model\n"
+            "      Light quenching model (none, linear, quadratic,\n"
+            "      default is quadratic).\n\n"
+            "    -s, --shadow\n"
+            "      Shadow factor (default is 0.25).\n\n"
             "Example:\n";
     cout << "    " << program << " -r 1024x768 -o test.png test.txt" << endl;
 }
@@ -80,12 +89,15 @@ int main (int argc, char **argv) {
     /* 
      * Modifiable parameters.
      */
-    bool    quiet  = false;
-    string  input  = "";
-    string  output = DEFAULT_OUTPUT;
-    double  fov    = DEFAULT_FOV;
-    unsigned int width = DEFAULT_WIDTH,
-        height = DEFAULT_HEIGTH;
+    bool    quiet       = false;
+    string  input       = "";
+    string  output      = DEFAULT_OUTPUT;
+    double  fov         = DEFAULT_FOV;
+    double  distance    = DEFAULT_DISTANCE;
+    double  shadow      = DEFAULT_SHADOW;
+    char    model       = DEFAULT_MODEL;
+    unsigned int width  = DEFAULT_WIDTH;
+    unsigned int height = DEFAULT_HEIGHT;
 
 
     if (argc < 2) {
@@ -140,7 +152,7 @@ int main (int argc, char **argv) {
                     convert.clear ();
                 }
                 if ((width < MIN_WIDTH) || (width > MAX_WIDTH) ||
-                    (height < MIN_HEIGTH) || (height > MAX_HEIGTH)) {
+                    (height < MIN_HEIGHT) || (height > MAX_HEIGHT)) {
                     resok = false;
                 }
             }
@@ -175,6 +187,52 @@ int main (int argc, char **argv) {
             output = argv[++i];
             /* Check for a valid filename. */
         }
+        else if ((text == "-m") || (text == "--model")) {
+            if (i == (argc - 1)) {
+                cout << "Light quenching model not given." << endl;
+                return EXIT_FAIL;
+            }
+            next = argv[++i];
+            if (next == "none") {
+                model = LIGHT_MODEL_NONE;
+            }
+            else if (next == "linear") {
+                model = LIGHT_MODEL_LINEAR;
+            }
+            else if (next == "quadratic") {
+                model = LIGHT_MODEL_QUADRATIC;
+            }
+            else {
+                cout << "Unsupported light model." << endl;
+                return EXIT_FAIL;
+            }
+        }
+        else if ((text == "-d") || (text == "--distance")) {
+            if (i == (argc - 1)) {
+                cout << "Distance to quench light not given." << endl;
+                return EXIT_FAIL;
+            }
+            next = argv[++i];
+            convert.str (next);
+            convert >> distance;
+            if (!convert) {
+                cout << "Unable to convert distance to double." << endl;
+                return EXIT_FAIL;
+            }
+        }
+        else if ((text == "-s") || (text == "--shadow")) {
+            if (i == (argc - 1)) {
+                cout << "Shadow factor not given." << endl;
+                return EXIT_FAIL;
+            }
+            next = argv[++i];
+            convert.str (next);
+            convert >> shadow;
+            if (!convert) {
+                cout << "Unable to convert shadow to double." << endl;
+                return EXIT_FAIL;
+            }
+        }
         else {
             if (text.at (0) == '-') {
                 cout << "Undefined option: \"" << text << "\"" << endl;
@@ -198,12 +256,10 @@ int main (int argc, char **argv) {
         return EXIT_FAIL;
     }
 
-    cout << fixed << setprecision (1);
-    cout << "Parameters: width=" << width << ", height=" << height << 
-        ", fov=" << fov << endl;
-
-    World world (&parser, width, height, fov);
+    World world (&parser, width, height, fov, 
+        distance, shadow, model);
     world.Initialize ();
+
     cout << "Rendering..." << endl;
     timeStart = clock ();
     world.Render ();

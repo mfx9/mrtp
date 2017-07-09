@@ -39,30 +39,55 @@
 #define HIT_SPHERE      2
 #define HIT_CYLINDER    3
 
-#define MAX_DISTANCE   60.
-#define SHADOW_FACTOR    .25
+#define LIGHT_MODEL_NONE       0
+#define LIGHT_MODEL_LINEAR     1
+#define LIGHT_MODEL_QUADRATIC  2
 
 
 class World {
-    Camera    *camera;
-    Light     *light;
-    /*
-     * One-way linked lists, not continuous 
-     * tables.
+    Buffer *buffer;
+    Camera *camera;
+    Light  *light;
+
+    /* Model to quench light with 
+     * increasing distance.
+     *
+     * At maxdist, the light is fully
+     * quenched, unless the model 
+     * is "none". 
      */
-    Plane     *planes;
-    Sphere    *spheres;
-    Cylinder  *cylinders;
-    unsigned int nplanes, nspheres, 
-        ncylinders;
-    Buffer    *buffer;
+    char    model;
+    double  maxdist;
+    /*
+     * Shadow factor between <0..1>,
+     * defines how "deep" shadows are.
+     */
+    double  shadow;
+    /*
+     * Maximum distance reached by rays.
+     */
+    double  cutoff;
+    /*
+     * Planes, spheres and cylinders
+     * are one-way linked lists.
+     */
+    Plane        *planes;
+    unsigned int  nplanes;
+
+    Sphere       *spheres;
+    unsigned int  nspheres;
+
+    Cylinder     *cylinders;
+    unsigned int  ncylinders;
 
     Parser    *parser_;
     double     fov_;
     unsigned int width_, height_;
 public:
     World (Parser *parser, unsigned int width,
-        unsigned int height, double fov);
+        unsigned int height, double fov,
+        double distance, double shadowfactor, 
+        char lightmodel);
     ~World ();
     bool Initialize ();
     /*

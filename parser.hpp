@@ -167,9 +167,11 @@ public:
         double *params, unsigned int npairs);
     Entry ();
     ~Entry ();
+
     Entry *GetNext ();
     void SetNext (Entry *n);
     void CopyTo (Entry *other);
+
     bool GetPair (string *key, double *value, 
         unsigned int *i);
     void GetLabel (string *title);

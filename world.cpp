@@ -20,7 +20,9 @@
 
 
 World::World (Parser *parser, unsigned int width,
-        unsigned int height, double fov) {
+        unsigned int height, double fov,
+        double distance, double shadowfactor, 
+        char lightmodel) {
     /* 
      * Initialize. 
      */
@@ -31,10 +33,13 @@ World::World (Parser *parser, unsigned int width,
     planes     = NULL;
     spheres    = NULL;
     cylinders  = NULL;
+    buffer     = NULL;
+    camera     = NULL;
+    light      = NULL;
 
-    buffer = NULL;
-    camera = NULL;
-    light  = NULL;
+    maxdist  = distance;
+    shadow   = shadowfactor;
+    model    = lightmodel;
 
     parser_  =  parser;
     width_   =  width;
@@ -342,7 +347,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
      * Initialize.
      */
     color->Zero ();
-    currd  = MAX_DISTANCE;
+    currd  = maxdist;
     hit    = HIT_NULL;
     /*
      * Search for planes.
@@ -350,7 +355,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
     plane    = planes;
     hitplane = NULL;
     while (plane != NULL) {
-        dist = plane->Solve (origin, direction, 0., MAX_DISTANCE);
+        dist = plane->Solve (origin, direction, 0., maxdist);
         if ((dist > 0.) && (dist < currd)) {
             currd    = dist;
             hitplane = plane;
@@ -365,7 +370,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
     sphere    = spheres;
     hitsphere = NULL;
     while (sphere != NULL) {
-        dist  = sphere->Solve (origin, direction, 0., MAX_DISTANCE);
+        dist  = sphere->Solve (origin, direction, 0., maxdist);
         if ((dist > 0.) && (dist < currd)) {
             currd     = dist;
             hitsphere = sphere;
@@ -380,7 +385,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
     cylinder    = cylinders;
     hitcylinder = NULL;
     while (cylinder != NULL) {
-        dist  = cylinder->Solve (origin, direction, 0., MAX_DISTANCE);
+        dist  = cylinder->Solve (origin, direction, 0., maxdist);
         if ((dist > 0.) && (dist < currd)) {
             currd       = dist;
             hitcylinder = cylinder;
@@ -451,15 +456,23 @@ void World::TraceRay (Vector *origin, Vector *direction,
             }
         }
 
-        if (isshadow)
-            dot *= SHADOW_FACTOR;
+        if (isshadow) {
+            dot *= shadow;
+        }
         /*
          * Decrease light intensity for objects further
-         *   away from the camera.
+         *   away from the light.
          *
          */
-        /* fade = 1. - (currd / MAX_DISTANCE); */
-        fade = 1. - sqr (raylen / MAX_DISTANCE);
+        if (model == LIGHT_MODEL_LINEAR) {
+            fade = 1.0f - (raylen / maxdist);
+        }
+        else if (model == LIGHT_MODEL_QUADRATIC) {
+            fade = 1.0f - sqr (raylen / maxdist);
+        }
+        else {  /* if (model == LIGHT_MODEL_NONE) */
+            fade = 1.0f;
+        }
         dot *= fade;
         objcol.Scale_InPlace (dot);
         /*
