@@ -226,8 +226,8 @@ void Parser::Parse () {
 
 
     if (!config.is_open ()) {
-        cout << "File " << filename 
-            << " cannot be opened." << endl;
+        cout << "File \"" << filename 
+            << "\" cannot be opened." << endl;
         return;
     }
     mode   = MODE_OPEN;

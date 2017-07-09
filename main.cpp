@@ -232,6 +232,10 @@ int main (int argc, char **argv) {
                 cout << "Unable to convert shadow to double." << endl;
                 return EXIT_FAIL;
             }
+            if ((shadow < 0.0f) || (shadow > 1.0f)) {
+                cout << "Invalid shadow factor." << endl;
+                return EXIT_FAIL;
+            }
         }
         else {
             if (text.at (0) == '-') {

@@ -45,7 +45,7 @@ bool Texture::LoadFromPNG (string filename) {
      */
     width  = image.get_width ();
     height = image.get_height ();
-    data   = new Color [(size_t) width * height];
+    data   = new Color [(size_t) (width * height)];
     /*
      * Copy data file->buffer.
      */

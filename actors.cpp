@@ -146,13 +146,13 @@ void Sphere::DetermineColor (Color *col) {
 
 double Sphere::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
-    Vector oc;
-    oc = (*origin) - center;
+    Vector T;
+    T = (*origin) - center;
 
     double a, b, c;
     a  = direction->DotSelf ();
-    b  = 2.0f * (*direction * oc);
-    c  = oc.DotSelf () - (R * R);
+    b  = 2.0f * (*direction * T);
+    c  = T.DotSelf () - (R * R);
 
     double delta, sqdelta, ta, tb, d;
     SOLVE_QUADRATIC (a, b, c, delta, sqdelta, 
@@ -248,13 +248,10 @@ double Cylinder::Solve (Vector *O, Vector *D,
     double delta, sqdelta, ta, tb, t;
     SOLVE_QUADRATIC (aa, bb, cc, delta, sqdelta, 
         ta, tb, t, mind, maxd);
-
-    double dist = -1.0f;
     if (t > 0.0f) {
-        dist  = t;
-        alpha = d * t * b;
+        alpha = d + t * b;
     }
-    return dist;
+    return t;
 }
 
 void Cylinder::GetNormal (Vector *hit, Vector *n) {
