@@ -205,6 +205,7 @@ int main (int argc, char **argv) {
         ", fov=" << fov << endl;
 
     World world (&parser, width, heigth, fov);
+    world.Initialize ();
     cout << "Rendering..." << endl;
     timeStart = clock ();
     world.Render ();

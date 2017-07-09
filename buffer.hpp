@@ -40,7 +40,7 @@ public:
     void Text (string text, unsigned int x,
         unsigned int y, Color *color);
     Color *GetPointer ();
-    void Write_ToPNG (string filename);
+    void WriteToPNG (string filename);
 };
 
 #endif /* _BUFFER_H */

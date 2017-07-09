@@ -21,6 +21,7 @@
 
 #include <cstdio>
 #include <cmath>
+
 #include "vector.hpp"
 #include "color.hpp"
 #include "texture.hpp"
@@ -28,10 +29,29 @@
 
 // #define DEBUG_ACTORS   1
 
-#define TOLERANCE  .000001
+#define TOLERANCE  0.000001f
 #define IS_ZERO(x) ((x > -TOLERANCE) && (x < TOLERANCE))
 #define IS_NOT_ZERO(x) ((x <= -TOLERANCE) || (x >= TOLERANCE))
 
+#define SOLVE_QUADRATIC(a, b, c, delta, sqdelta, ta, tb, t, mint, maxt) \
+    delta = b * b - 4.0f * a * c; \
+    if (delta < 0.0f) { \
+        t = -1.0f; \
+    } \
+    else { \
+        if IS_ZERO (delta) { \
+            t = -b / (2.0f * a); \
+        } \
+        else { \
+            sqdelta = sqrt (delta); \
+            t  = 0.5f / a; \
+            ta = (-b - sqdelta) * t; \
+            tb = (-b + sqdelta) * t; \
+            t  = (ta < tb) ? ta : tb; \
+        } \
+        if ((t < mint) || (t > maxt)) \
+            t = -1.0f; \
+    }
 
 class Sphere {
     Vector  center;
@@ -77,16 +97,23 @@ public:
 };
 
 class Cylinder {
-    Vector   O, D;
-    double   R;
-    Color    color;
+    Vector    A, B;
+    double    R, alpha;
+    Color     color;
     Cylinder *next;
 public:
     ~Cylinder ();
     Cylinder ();
+    /*
+     * Points a and b define cylinder's axis.
+     */
+    Cylinder (Vector *a, Vector *b, double radius, 
+        Color *col);
 
-    double Solve (Vector *origin, Vector *direction, 
+    double Solve (Vector *O, Vector *D,
         double mind, double maxd);
+    void GetNormal (Vector *hit, Vector *n);
+    void DetermineColor (Color *col);
 
     Cylinder *GetNext ();
     void SetNext (Cylinder *cylinder);

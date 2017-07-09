@@ -19,7 +19,7 @@
 #include "texture.hpp"
 
 
-bool Texture::Load_FromPNG (string filename) {
+bool Texture::LoadFromPNG (string filename) {
     return true;
 }
 

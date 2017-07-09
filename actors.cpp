@@ -99,13 +99,14 @@ void Plane::DetermineColor (Vector *inter,
 
 double Plane::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
-    double bar, d = -1.;
+    double bar, d = -1.0f;
 
     bar = (*direction) * normal;
     if IS_NOT_ZERO (bar) {
         d = -((*origin - center) * normal) / bar;
+
         if ((d < mind) || (d > maxd))
-            d = -1.;
+            d = -1.0f;
     }
     return d;
 }
@@ -150,36 +151,21 @@ double Sphere::Solve (Vector *origin, Vector *direction,
 
     double a, b, c;
     a  = direction->DotSelf ();
-    b  = 2. * (*direction * oc);
+    b  = 2.0f * (*direction * oc);
     c  = oc.DotSelf () - (R * R);
 
-    double delta, d;
-    delta = b * b - 4. * a * c;
-    if (delta < 0.) {
-        d = -1;
-    }
-    else {
-        if IS_ZERO (delta) {
-            d = -b / (2. * a);
-        }
-        else {
-            double sd, t, da, db;
-            sd = sqrt (delta);
-            t  = .5 / a;
-            da = (-b - sd) * t;
-            db = (-b + sd) * t;
-            d  = (da < db) ? da : db;
-        }
-        if ((d < mind) || (d > maxd))
-            d = -1;
-    }
+    double delta, sqdelta, ta, tb, d;
+    SOLVE_QUADRATIC (a, b, c, delta, sqdelta, 
+        ta, tb, d, mind, maxd);
     return d;
 }
 
 void Sphere::GetNormal (Vector *hit, Vector *n) {
-    Vector subtract = (*hit) - center;
-    subtract.Normalize_InPlace ();
-    subtract.CopyTo (n);
+    Vector T;
+
+    T = (*hit) - center;
+    T.Normalize_InPlace ();
+    T.CopyTo (n);
 }
 
 /*
@@ -189,6 +175,109 @@ Cylinder::Cylinder () {
 }
 
 Cylinder::~Cylinder () {
+}
+
+Cylinder::Cylinder (Vector *a, Vector *b, double radius, 
+        Color *col) {
+    /*
+     * Cylinder's direction.
+     */
+    Vector T;
+    T = (*b) - (*a);
+    T.Normalize_InPlace ();
+    T.CopyTo (&B);
+    /*
+     * Radius and origin.
+     */
+    a->CopyTo (&A);
+    R = radius;
+    /*
+     * Color, etc.
+     */
+    col->CopyTo (&color);
+    next = NULL;
+}
+
+double Cylinder::Solve (Vector *O, Vector *D,
+        double mind, double maxd) {
+    /*
+     * Capital letters are vectors.
+     *   A     :  Origin    of cylinder
+     *   B     :  Direction of cylinder
+     *   O     :  Origin    of ray
+     *   D     :  Direction of ray
+     *   P     :  Hit point on cylinder's surface
+     *   X     :  Point on cylinder's axis closest to the hit point
+     *   t     :  Distance between ray's      origin and P
+     *   alpha :  Distance between cylinder's origin and X
+     *
+     *  (P - X) . B = 0
+     *  |P - X| = R  => (P - X) . (P - X) = R^2
+     *
+     *  P = O + t * D
+     *  X = A + alpha * B
+     *  T = O - A
+     *  ...
+     *  2t * (T.D - alpha * D.B)  +  t^2 - 2 * alpha * T.B  +
+     *      +  alpha^2  =  R^2 - T.T
+     *  a = T.D
+     *  b = D.B
+     *  d = T.B
+     *  f = R^2 - T.T
+     *
+     *  t^2 * (1 - b^2)  +  2t * (a - b * d)  -
+     *      -  d^2 - f = 0    => t = ...
+     *  alpha = d + t * b
+     *
+     */
+    Vector T;
+    T = (*O) - A;
+
+    double a, b, d, f;
+    a  = T * (*D);
+    b  = B * (*D);
+    d  = T * B;
+    f  = (R * R) - (T * T);
+
+    /* Solving a quadratic equation for t. */
+    double aa, bb, cc;
+    aa = 1.0f - (b * b);
+    bb = 2.0f * (a - b * d);
+    cc = -(d * d) - f;
+
+    double delta, sqdelta, ta, tb, t;
+    SOLVE_QUADRATIC (aa, bb, cc, delta, sqdelta, 
+        ta, tb, t, mind, maxd);
+
+    double dist = -1.0f;
+    if (t > 0.0f) {
+        dist  = t;
+        alpha = d * t * b;
+    }
+    return dist;
+}
+
+void Cylinder::GetNormal (Vector *hit, Vector *n) {
+    Vector T, Q, N;
+
+    B.CopyTo (&T);
+    T.Scale_InPlace (alpha);
+    Q = A + T;
+    N = (*hit) - Q;
+    N.Normalize_InPlace ();
+    N.CopyTo (n);
+}
+
+void Cylinder::DetermineColor (Color *col) {
+    color.CopyTo (col);
+}
+
+Cylinder *Cylinder::GetNext () {
+    return next;
+}
+
+void Cylinder::SetNext (Cylinder *cylinder) {
+    next = cylinder;
 }
 
 /*

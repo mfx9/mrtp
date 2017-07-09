@@ -45,7 +45,7 @@ void Buffer::Clear () {
     }
 }
 
-void Buffer::Write_ToPNG (string filename) {
+void Buffer::WriteToPNG (string filename) {
     image< rgb_pixel > image (width, heigth);
     rgb_pixel *pixel;
     unsigned char r, g, b;

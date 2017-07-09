@@ -31,7 +31,7 @@ using namespace png;
 
 class Texture : public Buffer {
 public:
-    bool Load_FromPNG (string filename);
+    bool LoadFromPNG (string filename);
     void Generate (Color *cola, Color *colb);
 };
 

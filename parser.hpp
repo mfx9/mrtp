@@ -95,6 +95,20 @@ using namespace std;
 #define SPHERE_COMPLETE  (SPHERE_X0 | SPHERE_Y0 | SPHERE_Z0  \
     | SPHERE_R | SPHERE_COL_R | SPHERE_COL_G | SPHERE_COL_B)
 
+#define CYLINDER_AX      0x1
+#define CYLINDER_AY      0x2
+#define CYLINDER_AZ      0x4
+#define CYLINDER_BX      0x8
+#define CYLINDER_BY      0x10
+#define CYLINDER_BZ      0x20
+#define CYLINDER_R       0x40
+#define CYLINDER_COL_R   0x80
+#define CYLINDER_COL_G   0x100
+#define CYLINDER_COL_B   0x200
+#define CYLINDER_COMPLETE  (CYLINDER_AX | CYLINDER_AY | CYLINDER_AZ  \
+    | CYLINDER_BX | CYLINDER_BY | CYLINDER_BZ  \
+    | CYLINDER_R | CYLINDER_COL_R | CYLINDER_COL_G | CYLINDER_COL_B)
+
 
 #define LABEL_CAMERA_X    "x"
 #define LABEL_CAMERA_Y    "y"
@@ -130,6 +144,17 @@ using namespace std;
 #define LABEL_SPHERE_COL_G   "col_g"
 #define LABEL_SPHERE_COL_B   "col_b"
 
+#define LABEL_CYLINDER_AX      "ax"
+#define LABEL_CYLINDER_AY      "ay"
+#define LABEL_CYLINDER_AZ      "az"
+#define LABEL_CYLINDER_BX      "bx"
+#define LABEL_CYLINDER_BY      "by"
+#define LABEL_CYLINDER_BZ      "bz"
+#define LABEL_CYLINDER_R       "R"
+#define LABEL_CYLINDER_COL_R   "col_r"
+#define LABEL_CYLINDER_COL_G   "col_g"
+#define LABEL_CYLINDER_COL_B   "col_b"
+
 
 class Entry {
     string  label;
@@ -162,6 +187,8 @@ class Parser {
     bool CheckPlane (string *labels, double *params,
         unsigned int npairs);
     bool CheckSphere (string *labels, double *params,
+        unsigned int npairs);
+    bool CheckCylinder (string *labels, double *params,
         unsigned int npairs);
     bool CheckLight (string *labels, double *params,
         unsigned int npairs);

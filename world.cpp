@@ -36,28 +36,38 @@ World::World (Parser *parser, unsigned int width,
     camera = NULL;
     light  = NULL;
 
-    /*
-     * Allocate buffer.
-     */
-    buffer = new Buffer (width, heigth);
+    parser_  =  parser;
+    width_   =  width;
+    heigth_  =  heigth;
+    fov_     =  fov;
+}
 
+bool World::Initialize () {
     Entry  entry;
     string label;
     unsigned int nentries;
+    /*
+     * Allocate buffer.
+     */
+    buffer = new Buffer (width_, heigth_);
 
     do {
-        nentries = parser->PopEntry (&entry);
+        nentries = parser_->PopEntry (&entry);
         entry.GetLabel (&label);
 
         if (label == "camera")
-            AddCamera_FromEntry (&entry, width, heigth, fov);
+            AddCamera_FromEntry (&entry, width_, heigth_, fov_);
         else if (label == "light")
             AddLight_FromEntry (&entry);
         else if (label == "plane")
             AddPlane_FromEntry (&entry);
         else if (label == "sphere")
             AddSphere_FromEntry (&entry);
+        else if (label == "cylinder")
+            AddCylinder_FromEntry (&entry);
     } while (nentries > 0);
+
+    return true;
 }
 
 World::~World () {
@@ -79,6 +89,9 @@ World::~World () {
     } while (nspheres > 0);
 
     /* Clear all cylinders. */
+    do {
+        PopCylinder ();
+    } while (ncylinders > 0);
 }
 
 unsigned int World::PopPlane () {
@@ -119,6 +132,25 @@ unsigned int World::PopSphere () {
     return nspheres;
 }
 
+unsigned int World::PopCylinder () {
+    Cylinder *prev, *next, *last;
+
+    if (ncylinders > 0) {
+        last = cylinders;
+        prev = NULL;
+        while ((next = last->GetNext ()) != NULL) {
+            prev = last;
+            last = next;
+        }
+        if (prev != NULL)
+            prev->SetNext (NULL);
+        delete last;
+        ncylinders--;
+    }
+    /* Returns zero if there are no cylinders left. */ 
+    return ncylinders;
+}
+
 unsigned int World::AddPlane (Vector *center, Vector *normal,
         Color *colora, Color *colorb, double texscale) {
     Plane *next, *last, *plane;
@@ -156,6 +188,25 @@ unsigned int World::AddSphere (Vector *center, double radius,
         last->SetNext (sphere);
     }
     return (++nspheres);
+}
+
+unsigned int World::AddCylinder (Vector *A, Vector *B, 
+        double radius, Color *color) {
+    Cylinder *next, *last, *cylinder;
+
+    cylinder = new Cylinder (A, B, radius, color);
+    if (ncylinders < 1) {
+        cylinders = cylinder;
+    }
+    else {
+        next = cylinders;
+        do {
+            last = next;
+            next = last->GetNext ();
+        } while (next != NULL);
+        last->SetNext (cylinder);
+    }
+    return (++ncylinders);
 }
 
 unsigned int World::AddCamera_FromEntry (Entry *entry,
@@ -251,15 +302,40 @@ unsigned int World::AddSphere_FromEntry (Entry *entry) {
     return AddSphere (&center, R, &col);
 }
 
+unsigned int World::AddCylinder_FromEntry (Entry *entry) {
+    unsigned int i = 999;
+    double  value;
+    string  key;
+    double  R, ax, ay, az, bx, by, bz;
+    float   col_r, col_g, col_b;
+
+    while (entry->GetPair (&key, &value, &i)) {
+        if      (key == LABEL_CYLINDER_AX  )  ax = value;
+        else if (key == LABEL_CYLINDER_AY  )  ay = value;
+        else if (key == LABEL_CYLINDER_AZ  )  az = value;
+        else if (key == LABEL_CYLINDER_BX  )  bx = value;
+        else if (key == LABEL_CYLINDER_BY  )  by = value;
+        else if (key == LABEL_CYLINDER_BZ  )  bz = value;
+        else if (key == LABEL_CYLINDER_R   )  R  = value;
+        else if (key == LABEL_CYLINDER_COL_R  )  col_r = (float) value;
+        else if (key == LABEL_CYLINDER_COL_G  )  col_g = (float) value;
+        else if (key == LABEL_CYLINDER_COL_B  )  col_b = (float) value;
+    }
+    Vector A (ax, ay, az), B (bx, by, bz);
+    Color col (col_r, col_g, col_b);
+    return AddCylinder (&A, &B, R, &col);
+}
+
 void World::TraceRay (Vector *origin, Vector *direction,
         Color *color) {
-    Plane   *plane, *hitplane;
-    Sphere  *sphere, *hitsphere;
-    double  dist, currd, dot, raylen, fade;
-    char    hit;
-    Vector  inter, tl, normal;
-    Color   objcol;
-    bool    isshadow;
+    Plane    *plane, *hitplane;
+    Sphere   *sphere, *hitsphere;
+    Cylinder *cylinder, *hitcylinder;
+    double    dist, currd, dot, raylen, fade;
+    char      hit;
+    Vector    inter, tl, normal;
+    Color     objcol;
+    bool      isshadow;
 
     /*
      * Initialize.
@@ -297,9 +373,20 @@ void World::TraceRay (Vector *origin, Vector *direction,
         sphere = sphere->GetNext ();
     }
 
-    /* . Search for cylinders. 
-
-        Skip for now. */
+    /*
+     * Search for cylinders. 
+     */
+    cylinder    = cylinders;
+    hitcylinder = NULL;
+    while (cylinder != NULL) {
+        dist  = cylinder->Solve (origin, direction, 0., MAX_DISTANCE);
+        if ((dist > 0.) && (dist < currd)) {
+            currd       = dist;
+            hitcylinder = cylinder;
+            hit         = HIT_CYLINDER;
+        }
+        cylinder = cylinder->GetNext ();
+    }
 
     if (hit != HIT_NULL) {
         /*
@@ -318,6 +405,8 @@ void World::TraceRay (Vector *origin, Vector *direction,
                 hitsphere->DetermineColor (&objcol);
                 break;
             case HIT_CYLINDER:
+                hitcylinder->GetNormal (&inter, &normal);
+                hitcylinder->DetermineColor (&objcol);
                 break;
         }
         /*
@@ -326,13 +415,13 @@ void World::TraceRay (Vector *origin, Vector *direction,
          *
          */
         light->GetToLight (&inter, &tl);
+        raylen = tl.Len ();
         tl.Normalize_InPlace ();
         dot = normal * tl;
-        raylen = tl.Len ();
 
         /*
          * Planes cannot cast shadows so check
-         *   only for spheres.
+         *   only for spheres and cylinder.
          *
          */
         isshadow = false;
@@ -347,6 +436,20 @@ void World::TraceRay (Vector *origin, Vector *direction,
             }
             sphere = sphere->GetNext ();
         }
+        if (!isshadow) {
+            cylinder   = cylinders;
+            while (cylinder != NULL) {
+                if (cylinder != hitcylinder) {
+                    dist = cylinder->Solve (&inter, &tl, 0., raylen);
+                    if (dist > 0.) {
+                        isshadow = true;
+                        break;
+                    }
+                }
+                cylinder = cylinder->GetNext ();
+            }
+        }
+
         if (isshadow)
             dot *= SHADOW_FACTOR;
         /*
@@ -355,7 +458,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
          *
          */
         /* fade = 1. - (currd / MAX_DISTANCE); */
-        fade = 1. - sqr (currd / MAX_DISTANCE);
+        fade = 1. - sqr (raylen / MAX_DISTANCE);
         dot *= fade;
         objcol.Scale_InPlace (dot);
         /*
@@ -399,5 +502,5 @@ void World::WritePNG (string filename) {
     Color blue (0., 0., 1.);
     buffer->Text ("BUFFER TEST.", 0, 0, &blue);
     */
-    buffer->Write_ToPNG (filename);
+    buffer->WriteToPNG (filename);
 }

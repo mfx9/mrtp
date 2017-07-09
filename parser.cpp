@@ -117,6 +117,33 @@ bool Parser::CheckSphere (string *labels, double *params,
     return true;
 }
 
+bool Parser::CheckCylinder (string *labels, double *params, 
+        unsigned int npairs) {
+    unsigned int j, flags = 0x00;
+    for (j = 0; j < npairs; j++) {
+        if      (labels[j] == LABEL_CYLINDER_AX  )  flags |= CYLINDER_AX;
+        else if (labels[j] == LABEL_CYLINDER_AY  )  flags |= CYLINDER_AY;
+        else if (labels[j] == LABEL_CYLINDER_AZ  )  flags |= CYLINDER_AZ;
+        else if (labels[j] == LABEL_CYLINDER_BX  )  flags |= CYLINDER_BX;
+        else if (labels[j] == LABEL_CYLINDER_BY  )  flags |= CYLINDER_BY;
+        else if (labels[j] == LABEL_CYLINDER_BZ  )  flags |= CYLINDER_BZ;
+        else if (labels[j] == LABEL_CYLINDER_R   )  flags |= CYLINDER_R;
+        else if (labels[j] == LABEL_CYLINDER_COL_R )  flags |= CYLINDER_COL_R;
+        else if (labels[j] == LABEL_CYLINDER_COL_G )  flags |= CYLINDER_COL_G;
+        else if (labels[j] == LABEL_CYLINDER_COL_B )  flags |= CYLINDER_COL_B;
+        else {
+            cout << "Undefined parameter in cylinder: \"" << labels[j] 
+                << "\"" << endl;
+            return false;
+        }
+    }
+    if (flags != CYLINDER_COMPLETE) {
+        cout << "Incomplete cylinder definition." << endl;
+        return false;
+    }
+    return true;
+}
+
 Parser::Parser (string fn) {
     status   = STATUS_NEW;
     filename = fn;
@@ -224,7 +251,8 @@ void Parser::Parse () {
             if (mode == MODE_OPEN) {
                 if (c == '{') {
                     if ((prev == "camera") || (prev == "light") 
-                            || (prev == "plane") || (prev == "sphere")) {
+                            || (prev == "plane") || (prev == "sphere") 
+                            || (prev == "cylinder")) {
                         mode   = MODE_READ;
                         item   = prev;
                         nlabel = 0;
@@ -291,7 +319,7 @@ void Parser::Parse () {
                         check = CheckSphere (labels, params, nlabel);
                     }
                     else if (item == "cylinder") {
-                        /* Skip cylinders for now. */
+                        check = CheckCylinder (labels, params, nlabel);
                     }
 
                     if (!check) {

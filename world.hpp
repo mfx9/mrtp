@@ -46,18 +46,25 @@
 class World {
     Camera    *camera;
     Light     *light;
-    /* One-way linked lists, not continuous 
-        tables. */
+    /*
+     * One-way linked lists, not continuous 
+     * tables.
+     */
     Plane     *planes;
     Sphere    *spheres;
     Cylinder  *cylinders;
     unsigned int nplanes, nspheres, 
         ncylinders;
     Buffer    *buffer;
+
+    Parser    *parser_;
+    double     fov_;
+    unsigned int width_, heigth_;
 public:
     World (Parser *parser, unsigned int width,
         unsigned int heigth, double fov);
     ~World ();
+    bool Initialize ();
     /*
      * Manipulation of objects, adding, 
      * removing, etc.
@@ -67,15 +74,19 @@ public:
         Color *colora, Color *colorb, double texscale);
     unsigned int AddSphere (Vector *center, double radius,
         Color *color);
+    unsigned int AddCylinder (Vector *A, Vector *B,
+        double radius, Color *color);
 
     unsigned int AddPlane_FromEntry (Entry *entry);
     unsigned int AddSphere_FromEntry (Entry *entry);
+    unsigned int AddCylinder_FromEntry (Entry *entry);
     unsigned int AddLight_FromEntry (Entry *entry);
     unsigned int AddCamera_FromEntry (Entry *entry,
         unsigned int width, unsigned int heigth, double fov);
 
     unsigned int PopPlane ();
     unsigned int PopSphere ();
+    unsigned int PopCylinder ();
     /*
      * Rendering, writing output, etc.
      *
