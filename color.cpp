@@ -26,37 +26,57 @@ Color::Color () {
     COLOR_ZERO ();
 }
 
-#ifdef FLOAT_COLOR
-    Color::Color (float r, float g, float b) {
-        COLOR_TRIM (r, g, b);
+Color::Color (float r, float g, float b) {
+    COLOR_TRIM (r, g, b);
+    #ifdef FLOAT_COLOR
         red   = r;
         green = g;
         blue  = b;
-    }
-#else
-    Color::Color (unsigned char r, 
-            unsigned char g, unsigned char b) {
-        red   = r;
-        green = g;
-        blue  = b;
-    }
-#endif
+    #else
+        red   = FLOAT_TO_BYTE (r);
+        green = FLOAT_TO_BYTE (g);
+        blue  = FLOAT_TO_BYTE (b);
+    #endif
+}
 
-#ifdef FLOAT_COLOR
-    void Color::Set (float r, float g, float b) {
-        COLOR_TRIM (r, g, b);
+Color::Color (unsigned char r, 
+        unsigned char g, unsigned char b) {
+    #ifdef FLOAT_COLOR
+        red   = BYTE_TO_FLOAT (r);
+        green = BYTE_TO_FLOAT (g);
+        blue  = BYTE_TO_FLOAT (b);
+    #else
         red   = r;
         green = g;
         blue  = b;
-    }
-#else
-    void Color::Set (unsigned char r, 
-            unsigned char g, unsigned char b) {
+    #endif
+}
+
+void Color::Set (float r, float g, float b) {
+    COLOR_TRIM (r, g, b);
+    #ifdef FLOAT_COLOR
         red   = r;
         green = g;
         blue  = b;
-    }
-#endif
+    #else
+        red   = FLOAT_TO_BYTE (r);
+        green = FLOAT_TO_BYTE (g);
+        blue  = FLOAT_TO_BYTE (b);
+    #endif
+}
+
+void Color::Set (unsigned char r, 
+        unsigned char g, unsigned char b) {
+    #ifdef FLOAT_COLOR
+        red   = BYTE_TO_FLOAT (r);
+        green = BYTE_TO_FLOAT (g);
+        blue  = BYTE_TO_FLOAT (b);
+    #else
+        red   = r;
+        green = g;
+        blue  = b;
+    #endif
+}
 
 void Color::Zero () {
     COLOR_ZERO ();
@@ -68,7 +88,7 @@ void Color::CopyTo (Color *other) {
     other->blue  = blue;
 }
 
-void Color::Convert (unsigned char *cr, 
+void Color::GetBytes (unsigned char *cr, 
         unsigned char *cg, unsigned char *cb) {
     #ifdef FLOAT_COLOR
         *cr = FLOAT_TO_BYTE (red);
@@ -81,14 +101,29 @@ void Color::Convert (unsigned char *cr,
     #endif
 }
 
+void Color::GetFloats (float *fr, float *fg, 
+        float *fb) {
+    #ifdef FLOAT_COLOR
+        *fr = red;
+        *fg = green;
+        *fb = blue;
+    #else
+        *fr = BYTE_TO_FLOAT (red);
+        *fg = BYTE_TO_FLOAT (green);
+        *fb = BYTE_TO_FLOAT (blue);
+    #endif
+}
+
 void Color::Scale_InPlace (double scale) {
     /*
      * Scale is between <0, 1>
      */
-    if (scale < 0.)
-        scale = 0.;
-    else if (scale > 1.)
-        scale = 1.;
+    if (scale < 0.0f) {
+        scale = 0.0f;
+    }
+    else if (scale > 1.0f) {
+        scale = 1.0f;
+    }
     #ifdef FLOAT_COLOR
         red   = red   * (float) scale;
         green = green * (float) scale;

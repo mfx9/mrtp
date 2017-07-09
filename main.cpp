@@ -28,8 +28,6 @@ using namespace std;
 #include "parser.hpp"
 
 
-#define HELP_SPACING { cout << endl; }
-
 /* Defaults. */
 #define DEFAULT_OUTPUT  "output.png"
 #define DEFAULT_WIDTH    640
@@ -73,12 +71,11 @@ void HelpScreen (string program) {
 }
 
 int main (int argc, char **argv) {
-    unsigned int i, len, timeStart, timeStop;
+    unsigned int i, timeStart, timeStop;
     string  text, next, foo, bar;
     stringstream convert ("test");
     size_t pos;
     bool   resok;
-    char   c;
 
     /* 
      * Modifiable parameters.
@@ -88,7 +85,8 @@ int main (int argc, char **argv) {
     string  output = DEFAULT_OUTPUT;
     double  fov    = DEFAULT_FOV;
     unsigned int width = DEFAULT_WIDTH,
-        heigth = DEFAULT_HEIGTH;
+        height = DEFAULT_HEIGTH;
+
 
     if (argc < 2) {
         HelpScreen (argv[0]);
@@ -135,14 +133,14 @@ int main (int argc, char **argv) {
                 else {
                     convert.clear ();
                     convert.str (bar);
-                    convert >> heigth;
+                    convert >> height;
                     if (!convert) {
                         resok = false;
                     }
                     convert.clear ();
                 }
                 if ((width < MIN_WIDTH) || (width > MAX_WIDTH) ||
-                    (heigth < MIN_HEIGTH) || (heigth > MAX_HEIGTH)) {
+                    (height < MIN_HEIGTH) || (height > MAX_HEIGTH)) {
                     resok = false;
                 }
             }
@@ -201,17 +199,17 @@ int main (int argc, char **argv) {
     }
 
     cout << fixed << setprecision (1);
-    cout << "Parameters: width=" << width << ", heigth=" << heigth << 
+    cout << "Parameters: width=" << width << ", height=" << height << 
         ", fov=" << fov << endl;
 
-    World world (&parser, width, heigth, fov);
+    World world (&parser, width, height, fov);
     world.Initialize ();
     cout << "Rendering..." << endl;
     timeStart = clock ();
     world.Render ();
     timeStop = clock ();
 
-    cout << "Elapsed time: " << 
+    cout << "OK. Elapsed time: " << 
         ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
         " sec" << endl;
     world.WritePNG (output);

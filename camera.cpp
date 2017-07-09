@@ -25,7 +25,7 @@ Camera::Camera (Vector *origin, Vector *target,
     origin->CopyTo (&eye);
     target->CopyTo (&lookat);
     width  = (double) w;
-    heigth = (double) h;
+    height = (double) h;
     ratio  = w / h;
     perspective = ratio / (2. * tan (fov / 2. * M_PI / 180.));
     rotation = rot;
@@ -37,7 +37,7 @@ Camera::~Camera () {
 void Camera::GetDimensions (unsigned int *w, 
         unsigned int *h) {
     *w = width;
-    *h = heigth;
+    *h = height;
 }
 
 void Camera::GetEye (Vector *vector) {
@@ -102,7 +102,7 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
     Vector horiz, verti;
     horiz = (ww - wo) * (1. / width );
     horiz.CopyTo (vw);
-    verti = (wh - wo) * (1. / heigth);
+    verti = (wh - wo) * (1. / height);
     verti.CopyTo (vh);
     wo.CopyTo (vo);
 }

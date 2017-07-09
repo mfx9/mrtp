@@ -59,10 +59,10 @@ class World {
 
     Parser    *parser_;
     double     fov_;
-    unsigned int width_, heigth_;
+    unsigned int width_, height_;
 public:
     World (Parser *parser, unsigned int width,
-        unsigned int heigth, double fov);
+        unsigned int height, double fov);
     ~World ();
     bool Initialize ();
     /*
@@ -82,7 +82,7 @@ public:
     unsigned int AddCylinder_FromEntry (Entry *entry);
     unsigned int AddLight_FromEntry (Entry *entry);
     unsigned int AddCamera_FromEntry (Entry *entry,
-        unsigned int width, unsigned int heigth, double fov);
+        unsigned int width, unsigned int height, double fov);
 
     unsigned int PopPlane ();
     unsigned int PopSphere ();

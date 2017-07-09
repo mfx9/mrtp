@@ -31,11 +31,12 @@ using namespace png;
 
 class Buffer {
     Color *data;
-    unsigned int width, heigth;
+    unsigned int width, height;
 public:
     Buffer (unsigned int w,
         unsigned int h);
     ~Buffer ();
+    bool Allocate ();
     void Clear ();
     void Text (string text, unsigned int x,
         unsigned int y, Color *color);

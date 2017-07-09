@@ -21,14 +21,28 @@
 
 Buffer::Buffer (unsigned int w,
         unsigned int h) {
-    size_t size = (size_t) (w * h);
-    data   = new Color [size];
+    data   = NULL;
     width  = w;
-    heigth = h;
+    height = h;
+}
+
+bool Buffer::Allocate () {
+    if (data == NULL) {
+        size_t size;
+        size = (size_t) (width * height);
+        data = new Color [size];
+        return true;
+    }
+    return false;
 }
 
 Buffer::~Buffer () {
-    delete[] data;
+    if (data != NULL) {
+        /*
+         * Deallocate data.
+         */
+        delete[] data;
+    }
 }
 
 Color *Buffer::GetPointer () {
@@ -40,23 +54,23 @@ void Buffer::Clear () {
     Color *bp;
 
     for (bp = &data[0], i = 0; 
-        i < width * heigth; i++, bp++) {
+        i < width * height; i++, bp++) {
             bp->Zero ();
     }
 }
 
 void Buffer::WriteToPNG (string filename) {
-    image< rgb_pixel > image (width, heigth);
+    image< rgb_pixel > image (width, height);
     rgb_pixel *pixel;
     unsigned char r, g, b;
     unsigned int i, j;
     Color *bp;
 
     bp = &data[0];
-    for (i = 0; i < heigth; i++) {
+    for (i = 0; i < height; i++) {
         pixel = &image[i][0];
         for (j = 0; j < width; j++) {
-            bp->Convert (&r, &g, &b);
+            bp->GetBytes (&r, &g, &b);
             bp++;
             pixel->red   = r;
             pixel->green = g;

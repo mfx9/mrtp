@@ -28,7 +28,7 @@
 
 class Camera {
     Vector  eye, lookat;
-    double  width, heigth;
+    double  width, height;
     double  ratio;   /*  width/height  */
     double  perspective;
     double  rotation;

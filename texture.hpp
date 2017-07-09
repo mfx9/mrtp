@@ -25,14 +25,18 @@ using namespace std;
 #include "png.hpp"
 using namespace png;
 
-#include "buffer.hpp"
 #include "color.hpp"
 
 
-class Texture : public Buffer {
+class Texture {
+    Color *data;
+    unsigned int width, height;
 public:
+    Texture ();
+    ~Texture ();
     bool LoadFromPNG (string filename);
-    void Generate (Color *cola, Color *colb);
+    void Generate (Color *cola, Color *colb,
+        unsigned int w, unsigned int h);
 };
 
 #endif /* _TEXTURE_H */

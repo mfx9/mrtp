@@ -20,7 +20,7 @@
 
 
 World::World (Parser *parser, unsigned int width,
-        unsigned int heigth, double fov) {
+        unsigned int height, double fov) {
     /* 
      * Initialize. 
      */
@@ -38,7 +38,7 @@ World::World (Parser *parser, unsigned int width,
 
     parser_  =  parser;
     width_   =  width;
-    heigth_  =  heigth;
+    height_  =  height;
     fov_     =  fov;
 }
 
@@ -49,14 +49,15 @@ bool World::Initialize () {
     /*
      * Allocate buffer.
      */
-    buffer = new Buffer (width_, heigth_);
+    buffer = new Buffer (width_, height_);
+    buffer->Allocate ();
 
     do {
         nentries = parser_->PopEntry (&entry);
         entry.GetLabel (&label);
 
         if (label == "camera")
-            AddCamera_FromEntry (&entry, width_, heigth_, fov_);
+            AddCamera_FromEntry (&entry, width_, height_, fov_);
         else if (label == "light")
             AddLight_FromEntry (&entry);
         else if (label == "plane")
@@ -210,7 +211,7 @@ unsigned int World::AddCylinder (Vector *A, Vector *B,
 }
 
 unsigned int World::AddCamera_FromEntry (Entry *entry,
-        unsigned int width, unsigned int heigth, double fov) {
+        unsigned int width, unsigned int height, double fov) {
     unsigned int i = 999;
     double  value;
     string  key;
@@ -229,7 +230,7 @@ unsigned int World::AddCamera_FromEntry (Entry *entry,
         Vector position (x0, y0, z0),
             lookat (lx, ly, lz);
         camera = new Camera (&position, &lookat, 
-            width, heigth, fov, rot);
+            width, height, fov, rot);
     }
     return 1;
 }
@@ -472,19 +473,19 @@ void World::Render () {
     Color *bp;
     Vector vw, vh, vo, eye,
         horiz, verti, origin, direction;
-    unsigned int width, heigth, i, j;
+    unsigned int width, height, i, j;
     /*
      * Initialize.
      */
     camera->CalculateVectors (&vw, &vh, &vo);
-    camera->GetDimensions (&width, &heigth);
+    camera->GetDimensions (&width, &height);
     camera->GetEye (&eye);
 
     bp = buffer->GetPointer ();
     /*
      * Trace a ray for every pixel.
      */
-    for (j = 0; j < heigth; j++) {
+    for (j = 0; j < height; j++) {
         for (i = 0; i < width; i++) {
             horiz     = vw * (double) i;
             verti     = vh * (double) j;

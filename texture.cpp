@@ -19,12 +19,57 @@
 #include "texture.hpp"
 
 
+Texture::Texture () {
+    data   = NULL;
+    width  = 0;
+    height = 0;
+}
+
+Texture::~Texture () {
+    if (data != NULL) {
+        delete[] data;
+    }
+}
+
 bool Texture::LoadFromPNG (string filename) {
+    if (data != NULL) {
+        return false;
+    }
+    /*
+     * Open texture file.
+     */
+    const char *fn = filename.c_str ();
+    image< rgb_pixel > image (fn);
+    /*
+     * Allocate texture buffer.
+     */
+    width  = image.get_width ();
+    height = image.get_height ();
+    data   = new Color [(size_t) width * height];
+    /*
+     * Copy data file->buffer.
+     */
+    unsigned char  r, g, b;
+    unsigned int   i, j;
+    rgb_pixel     *pixel;
+    Color         *color;
+
+    color = &data[0];
+    for (i = 0; i < height; i++) {
+        pixel = &image[i][0];
+
+        for (j = 0; j < width; j++) {
+            r = pixel->red;
+            g = pixel->green;
+            b = pixel->blue;
+            pixel++;
+            color->Set (r, g, b);
+            color++;
+        }
+    }
     return true;
 }
 
-void Generate (Color *cola, Color *colb) {
-    /*
-     * Generate random texture.
-     */
+void Texture::Generate (Color *cola, Color *colb,
+        unsigned int w, unsigned int h) {
 }
