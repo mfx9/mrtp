@@ -31,14 +31,14 @@ using namespace std;
 #define DEFAULT_OUTPUT   "output.png"
 #define DEFAULT_WIDTH     640
 #define DEFAULT_HEIGHT    480
-#define DEFAULT_FOV        70.0f
-#define DEFAULT_DISTANCE   60.0f
-#define DEFAULT_SHADOW      0.25f
+#define DEFAULT_FOV        70.0
+#define DEFAULT_DISTANCE   60.0
+#define DEFAULT_SHADOW      0.25
 #define DEFAULT_MODEL     LIGHT_MODEL_QUADRATIC
 
 /* Program limits. */
-#define MIN_FOV        50.0f
-#define MAX_FOV       170.0f
+#define MIN_FOV        50.0
+#define MAX_FOV       170.0
 #define MIN_WIDTH     320
 #define MAX_WIDTH    4096
 #define MIN_HEIGHT    240
@@ -232,7 +232,7 @@ int main (int argc, char **argv) {
                 cout << "Unable to convert shadow to double." << endl;
                 return EXIT_FAIL;
             }
-            if ((shadow < 0.0f) || (shadow > 1.0f)) {
+            if ((shadow < 0.0) || (shadow > 1.0)) {
                 cout << "Invalid shadow factor." << endl;
                 return EXIT_FAIL;
             }

@@ -22,21 +22,21 @@
 #define FLOAT_COLOR  1
 
 
-#define FLOAT_TO_BYTE(c) (unsigned char) (c * 255.0f)
-#define BYTE_TO_FLOAT(c) ((float) c) * (1.0f / 255.0f)
+#define FLOAT_TO_BYTE(c) (unsigned char) (c * 255.0)
+#define BYTE_TO_FLOAT(c) ((float) c) * (1.0 / 255.0)
 
-#define COLOR_TRIM(r, g, b) { if (r > 1.0f) r = 1.0f; \
-    else if (r < 0.0f) r = 0.0f; \
+#define COLOR_TRIM(r, g, b) { if (r > 1.0) r = 1.0; \
+    else if (r < 0.0) r = 0.0; \
         \
-    if (g > 1.0f) g = 1.0f; \
-    else if (g < 0.0f) g = 0.0f; \
+    if (g > 1.0) g = 1.0; \
+    else if (g < 0.0) g = 0.0; \
         \
-    if (b > 1.0f) b = 1.0f; \
-    else if (b < 0.0f) b = 0.0f; }
+    if (b > 1.0) b = 1.0; \
+    else if (b < 0.0) b = 0.0; }
 
 #ifdef FLOAT_COLOR
-#define COLOR_ZERO() { red = 0.0f; green = 0.0f; \
-    blue = 0.0f; }
+#define COLOR_ZERO() { red = 0.0; green = 0.0; \
+    blue = 0.0; }
 #else
 #define COLOR_ZERO() { red = 0; green = 0; \
     blue = 0; }

@@ -29,28 +29,38 @@
 
 // #define DEBUG_ACTORS   1
 
-#define TOLERANCE  0.000001f
+#define TOLERANCE  0.000001
 #define IS_ZERO(x) ((x > -TOLERANCE) && (x < TOLERANCE))
 #define IS_NOT_ZERO(x) ((x <= -TOLERANCE) || (x >= TOLERANCE))
 
-#define SOLVE_QUADRATIC(a, b, c, delta, sqdelta, ta, tb, t, mint, maxt) \
-    delta = b * b - 4.0f * a * c; \
-    if (delta < 0.0f) { \
-        t = -1.0f; \
+/*
+ * Macro to solve a quadratic equation for t.
+ *
+ * Since t is a scale in: P = O + t*D, return
+ * only the smaller t and within the limits of (mint, maxt).
+ *
+ * Otherwise return -1.
+ */
+#define SOLVE_QUADRATIC(a, b, c, t, mint, maxt) \
+    double delta; \
+    delta = b * b - 4.0 * a * c; \
+    if (delta < 0.0) { \
+        t = -1.0; \
     } \
     else { \
         if IS_ZERO (delta) { \
-            t = -b / (2.0f * a); \
+            t = -b / (2.0 * a); \
         } \
         else { \
+            double sqdelta, ta, tb; \
             sqdelta = sqrt (delta); \
-            t  = 0.5f / a; \
+            t  = 0.5 / a; \
             ta = (-b - sqdelta) * t; \
             tb = (-b + sqdelta) * t; \
             t  = (ta < tb) ? ta : tb; \
         } \
         if ((t < mint) || (t > maxt)) \
-            t = -1.0f; \
+            t = -1.0; \
     }
 
 class Sphere {

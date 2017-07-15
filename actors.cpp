@@ -99,14 +99,14 @@ void Plane::DetermineColor (Vector *inter,
 
 double Plane::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
-    double bar, d = -1.0f;
+    double bar, d = -1.0;
 
     bar = (*direction) * normal;
     if IS_NOT_ZERO (bar) {
         d = -((*origin - center) * normal) / bar;
 
         if ((d < mind) || (d > maxd))
-            d = -1.0f;
+            d = -1.0;
     }
     return d;
 }
@@ -149,14 +149,12 @@ double Sphere::Solve (Vector *origin, Vector *direction,
     Vector T;
     T = (*origin) - center;
 
-    double a, b, c;
+    double a, b, c, d;
     a  = direction->DotSelf ();
-    b  = 2.0f * (*direction * T);
+    b  = 2.0 * (*direction * T);
     c  = T.DotSelf () - (R * R);
 
-    double delta, sqdelta, ta, tb, d;
-    SOLVE_QUADRATIC (a, b, c, delta, sqdelta, 
-        ta, tb, d, mind, maxd);
+    SOLVE_QUADRATIC (a, b, c, d, mind, maxd);
     return d;
 }
 
@@ -240,15 +238,13 @@ double Cylinder::Solve (Vector *O, Vector *D,
     f  = (R * R) - (T * T);
 
     /* Solving a quadratic equation for t. */
-    double aa, bb, cc;
-    aa = 1.0f - (b * b);
-    bb = 2.0f * (a - b * d);
+    double aa, bb, cc, t;
+    aa = 1.0 - (b * b);
+    bb = 2.0 * (a - b * d);
     cc = -(d * d) - f;
 
-    double delta, sqdelta, ta, tb, t;
-    SOLVE_QUADRATIC (aa, bb, cc, delta, sqdelta, 
-        ta, tb, t, mind, maxd);
-    if (t > 0.0f) {
+    SOLVE_QUADRATIC (aa, bb, cc, t, mind, maxd);
+    if (t > 0.0) {
         alpha = d + t * b;
     }
     return t;

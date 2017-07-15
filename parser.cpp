@@ -341,7 +341,7 @@ void Parser::Parse () {
                         labels[nlabel++] = prev;
                         accu = "";
                     }
-                    else if (c == ';') {
+                    else if (c == ';' || c == ',') {
                         values[nvalue++] = prev;
                         accu = "";
                     }

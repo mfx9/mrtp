@@ -465,13 +465,13 @@ void World::TraceRay (Vector *origin, Vector *direction,
          *
          */
         if (model == LIGHT_MODEL_LINEAR) {
-            fade = 1.0f - (raylen / maxdist);
+            fade = 1.0 - (raylen / maxdist);
         }
         else if (model == LIGHT_MODEL_QUADRATIC) {
-            fade = 1.0f - sqr (raylen / maxdist);
+            fade = 1.0 - sqr (raylen / maxdist);
         }
         else {  /* if (model == LIGHT_MODEL_NONE) */
-            fade = 1.0f;
+            fade = 1.0;
         }
         dot *= fade;
         objcol.Scale_InPlace (dot);
