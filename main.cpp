@@ -27,7 +27,9 @@ using namespace std;
 #include "parser.hpp"
 
 
-/* Default settings. */
+/*
+ * Default settings.
+ */
 #define DEFAULT_OUTPUT   "output.png"
 #define DEFAULT_WIDTH     640
 #define DEFAULT_HEIGHT    480
@@ -36,15 +38,19 @@ using namespace std;
 #define DEFAULT_SHADOW      0.25
 #define DEFAULT_MODEL     LIGHT_MODEL_QUADRATIC
 
-/* Program limits. */
+/*
+ * Program limits.
+ */
 #define MIN_FOV        50.0
 #define MAX_FOV       170.0
-#define MIN_WIDTH     320
-#define MAX_WIDTH    4096
-#define MIN_HEIGHT    240
-#define MAX_HEIGHT   3072
+#define MIN_WIDTH   (DEFAULT_WIDTH  /  2)
+#define MAX_WIDTH   (DEFAULT_WIDTH  * 10)
+#define MIN_HEIGHT  (DEFAULT_HEIGHT /  2)
+#define MAX_HEIGHT  (DEFAULT_HEIGHT * 10)
 
-/* Exit codes. */
+/*
+ * Exit codes.
+ */
 #define EXIT_OK    0
 #define EXIT_FAIL  1
 
@@ -89,15 +95,15 @@ int main (int argc, char **argv) {
     /* 
      * Modifiable parameters.
      */
-    bool    quiet       = false;
-    string  input       = "";
-    string  output      = DEFAULT_OUTPUT;
-    double  fov         = DEFAULT_FOV;
-    double  distance    = DEFAULT_DISTANCE;
-    double  shadow      = DEFAULT_SHADOW;
-    char    model       = DEFAULT_MODEL;
-    unsigned int width  = DEFAULT_WIDTH;
-    unsigned int height = DEFAULT_HEIGHT;
+    bool    quiet      =  false;
+    string  input      =  "";
+    string  output     =  DEFAULT_OUTPUT;
+    double  fov        =  DEFAULT_FOV;
+    double  distance   =  DEFAULT_DISTANCE;
+    double  shadow     =  DEFAULT_SHADOW;
+    char    model      =  DEFAULT_MODEL;
+    unsigned int width   =  DEFAULT_WIDTH;
+    unsigned int height  =  DEFAULT_HEIGHT;
 
 
     if (argc < 2) {
@@ -106,17 +112,32 @@ int main (int argc, char **argv) {
     }
     for (i = 1; i < argc; i++) {
         text = argv[i]; 
+        /*
+         * Help screen.
+         */
         if ((text == "-h") || (text == "--help")) {
             HelpScreen (argv[0]);
             return EXIT_OK;
         }
+
+        /*
+         * Quiet mode.
+         */
         else if ((text == "-q") || (text == "--quiet")) {
             quiet = true;
         }
+
+        /*
+         * Print version.
+         */
         else if ((text == "-v") || (text == "--version")) {
             cout << "Version: XXX" << endl;
             return EXIT_OK;
         }
+
+        /*
+         * Set resolution.
+         */
         else if ((text == "-r") || (text == "--resolution")) {
             if (i == (argc - 1)) {
                 cout << "Resolution not given." << endl;
@@ -161,6 +182,10 @@ int main (int argc, char **argv) {
                 return EXIT_FAIL;
             }
         }
+
+        /*
+         * Set field of vision.
+         */
         else if ((text == "-f") || (text == "--fov")) {
             if (i == (argc - 1)) {
                 cout << "Field of vision not given." << endl;
@@ -179,6 +204,10 @@ int main (int argc, char **argv) {
                 return EXIT_FAIL;
             }
         }
+
+        /*
+         * Set output filename.
+         */
         else if ((text == "-o") || (text == "--output")) {
             if (i == (argc - 1)) {
                 cout << "Output file not given." << endl;
@@ -187,6 +216,10 @@ int main (int argc, char **argv) {
             output = argv[++i];
             /* Check for a valid filename. */
         }
+
+        /*
+         * Set light quenching model.
+         */
         else if ((text == "-m") || (text == "--model")) {
             if (i == (argc - 1)) {
                 cout << "Light quenching model not given." << endl;
@@ -207,6 +240,10 @@ int main (int argc, char **argv) {
                 return EXIT_FAIL;
             }
         }
+
+        /*
+         * Set distance for light quenching model.
+         */
         else if ((text == "-d") || (text == "--distance")) {
             if (i == (argc - 1)) {
                 cout << "Distance to quench light not given." << endl;
@@ -220,6 +257,10 @@ int main (int argc, char **argv) {
                 return EXIT_FAIL;
             }
         }
+
+        /*
+         * Set shadow factor.
+         */
         else if ((text == "-s") || (text == "--shadow")) {
             if (i == (argc - 1)) {
                 cout << "Shadow factor not given." << endl;
@@ -237,6 +278,10 @@ int main (int argc, char **argv) {
                 return EXIT_FAIL;
             }
         }
+
+        /*
+         * Get the input file.
+         */
         else {
             if (text.at (0) == '-') {
                 cout << "Undefined option: \"" << text << "\"" << endl;
@@ -252,7 +297,7 @@ int main (int argc, char **argv) {
         return EXIT_FAIL;
     }
 
-    Parser parser (input);
+    Parser parser (&input);
     parser.Parse ();
     if (parser.GetStatus () != STATUS_OK) {
         cout << "Error parsing file: \"" << input 
@@ -260,8 +305,8 @@ int main (int argc, char **argv) {
         return EXIT_FAIL;
     }
 
-    World world (&parser, width, height, fov, 
-        distance, shadow, model);
+    World world (&parser, width, height, fov, distance, 
+        shadow, model);
     world.Initialize ();
 
     cout << "Rendering..." << endl;

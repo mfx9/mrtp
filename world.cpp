@@ -48,41 +48,156 @@ World::World (Parser *parser, unsigned int width,
 }
 
 bool World::Initialize () {
-    Entry  entry;
-    string label;
+    Entry   entry;
+    string  label;
     unsigned int nentries;
+
+    string  key,
+        texts[MAX_COMPONENTS];
+    double  reals[MAX_COMPONENTS];
+    char    type;
+    unsigned int i;
+
     /*
      * Allocate buffer.
      */
     buffer = new Buffer (width_, height_);
     buffer->Allocate ();
 
+    /*
+     * Allocate camera, light, actors, etc.
+     */
     do {
         nentries = parser_->PopEntry (&entry);
         entry.GetLabel (&label);
+        i = MAX_LINES;
 
-        if (label == "camera")
-            AddCamera_FromEntry (&entry, width_, height_, fov_);
-        else if (label == "light")
-            AddLight_FromEntry (&entry);
-        else if (label == "plane")
-            AddPlane_FromEntry (&entry);
-        else if (label == "sphere")
-            AddSphere_FromEntry (&entry);
-        else if (label == "cylinder")
-            AddCylinder_FromEntry (&entry);
+        /* DEBUG
+        entry.Print (); */
+
+        /*
+         * Add a camera.
+         */
+        if (label == "camera") {
+            Vector position, target;
+            double roll;
+
+            while (entry.GetData (&key, &type, reals, texts, &i)) {
+                if (key == "position") {
+                    position.Set (reals[0], reals[1], reals[2]);
+                }
+                else if (key == "target") {
+                    target.Set (reals[0], reals[1], reals[2]);
+                }
+                else {  /* if (key == "roll") */
+                    roll = reals[0];
+                }
+            }
+            camera = new Camera (&position, &target, width_, 
+                height_, fov_, roll);
+        }
+
+        /*
+         * Add a light.
+         */
+        else if (label == "light") {
+            Vector position;
+
+            entry.GetData (&key, &type, reals, texts, &i);
+            position.Set (reals[0], reals[1], reals[2]);
+
+            light = new Light (&position);
+        }
+
+        /*
+         * Add a plane.
+         */
+        else if (label == "plane") {
+            Vector  center, normal;
+            Color   ca, cb;
+            double  scale;
+
+            while (entry.GetData (&key, &type, reals, texts, &i)) {
+                if (key == "center") {
+                    center.Set (reals[0], reals[1], reals[2]);
+                }
+                else if (key == "normal") {
+                    normal.Set (reals[0], reals[1], reals[2]);
+                }
+                else if (key == "scale") {
+                    scale = reals[0];
+                }
+                else if (key == "cola") {
+                    ca.Set (0.0f, 1.0f, 1.0f);
+                }
+                else {  /* if (key == "colb") */
+                    cb.Set (0.0f, 1.0f, 0.0f);
+                }
+            }
+            AddPlane (&center, &normal, &ca, &cb, scale);
+        }
+
+        /*
+         * Add a sphere.
+         */
+        else if (label == "sphere") {
+            Vector  position;
+            double  radius;
+            Color   color;
+
+            while (entry.GetData (&key, &type, reals, texts, &i)) {
+                if (key == "position") {
+                    position.Set (reals[0], reals[1], reals[2]);
+                }
+                else if (key == "radius") {
+                    radius = reals[0];
+                }
+                else {  /* if (key == "color") */
+                    color.Set (1.0f, 1.0f, 1.0f);
+                }
+            }
+            AddSphere (&position, radius, &color);
+        }
+
+        /*
+         * Add a cylinder.
+         */
+        else if (label == "cylinder") {
+            Vector  axisa, axisb;
+            double  radius;
+            Color   color;
+
+            while (entry.GetData (&key, &type, reals, texts, &i)) {
+                if (key == "a") {
+                    axisa.Set (reals[0], reals[1], reals[2]);
+                }
+                else if (key == "b") {
+                    axisb.Set (reals[0], reals[1], reals[2]);
+                }
+                else if (key == "radius") {
+                    radius = reals[0];
+                }
+                else {  /* if (key == "color") */
+                    color.Set (1.0f, 1.0f, 1.0f);
+                }
+            }
+            AddCylinder (&axisa, &axisb, radius, &color);
+        }
     } while (nentries > 0);
 
     return true;
 }
 
 World::~World () {
-    if (camera != NULL)
+    if (camera != NULL) {
         delete camera;
-    if (light  != NULL)
+    }
+    if (light  != NULL) {
         delete light;
-    if (buffer != NULL)
+    }
+    if (buffer != NULL) {
         delete buffer;
+    }
 
     /* Clear all planes. */
     do {
@@ -215,123 +330,6 @@ unsigned int World::AddCylinder (Vector *A, Vector *B,
     return (++ncylinders);
 }
 
-unsigned int World::AddCamera_FromEntry (Entry *entry,
-        unsigned int width, unsigned int height, double fov) {
-    unsigned int i = 999;
-    double  value;
-    string  key;
-    double  x0, y0, z0, lx, ly, lz, rot;
-
-    if (camera == NULL) {
-        while (entry->GetPair (&key, &value, &i)) {
-            if      (key == LABEL_CAMERA_X   )  x0  = value;
-            else if (key == LABEL_CAMERA_Y   )  y0  = value;
-            else if (key == LABEL_CAMERA_Z   )  z0  = value;
-            else if (key == LABEL_CAMERA_LX  )  lx  = value;
-            else if (key == LABEL_CAMERA_LY  )  ly  = value;
-            else if (key == LABEL_CAMERA_LZ  )  lz  = value;
-            else if (key == LABEL_CAMERA_ROT )  rot = value;
-        }
-        Vector position (x0, y0, z0),
-            lookat (lx, ly, lz);
-        camera = new Camera (&position, &lookat, 
-            width, height, fov, rot);
-    }
-    return 1;
-}
-
-unsigned int World::AddLight_FromEntry (Entry *entry) {
-    unsigned int i = 999;
-    double  value;
-    string  key;
-    double  x0, y0, z0;
-
-    if (light == NULL) {
-        while (entry->GetPair (&key, &value, &i)) {
-            if      (key == LABEL_LIGHT_X  )  x0 = value;
-            else if (key == LABEL_LIGHT_Y  )  y0 = value;
-            else if (key == LABEL_LIGHT_Z  )  z0 = value;
-        }
-        Vector position (x0, y0, z0);
-        light = new Light (&position);
-    }
-    return 1;
-}
-
-unsigned int World::AddPlane_FromEntry (Entry *entry) {
-    unsigned int i = 999;
-    double  value;
-    string  key;
-    double  x0, y0, z0, A, B, C, scale;
-    float   cola_r, cola_g, cola_b, colb_r, 
-                colb_g, colb_b;
-    while (entry->GetPair (&key, &value, &i)) {
-        if      (key == LABEL_PLANE_X0  )  x0 = value;
-        else if (key == LABEL_PLANE_Y0  )  y0 = value;
-        else if (key == LABEL_PLANE_Z0  )  z0 = value;
-        else if (key == LABEL_PLANE_A   )  A  = value;
-        else if (key == LABEL_PLANE_B   )  B  = value;
-        else if (key == LABEL_PLANE_C   )  C  = value;
-        else if (key == LABEL_PLANE_SCALE   )  scale  = value; 
-        else if (key == LABEL_PLANE_COLA_R  )  cola_r = (float) value;
-        else if (key == LABEL_PLANE_COLA_G  )  cola_g = (float) value;
-        else if (key == LABEL_PLANE_COLA_B  )  cola_b = (float) value;
-        else if (key == LABEL_PLANE_COLB_R  )  colb_r = (float) value;
-        else if (key == LABEL_PLANE_COLB_G  )  colb_g = (float) value;
-        else if (key == LABEL_PLANE_COLB_B  )  colb_b = (float) value;
-    }
-    Vector center (x0, y0, z0);
-    Vector normal (A, B, C);
-    Color cola (cola_r, cola_g, cola_b), 
-        colb (colb_r, colb_g, colb_b);
-    return AddPlane (&center, &normal, &cola, &colb, scale);
-}
-
-unsigned int World::AddSphere_FromEntry (Entry *entry) {
-    unsigned int i = 999;
-    double  value;
-    string  key;
-    double  x0, y0, z0, R;
-    float   col_r, col_g, col_b;
-
-    while (entry->GetPair (&key, &value, &i)) {
-        if      (key == LABEL_SPHERE_X0  )  x0 = value;
-        else if (key == LABEL_SPHERE_Y0  )  y0 = value;
-        else if (key == LABEL_SPHERE_Z0  )  z0 = value;
-        else if (key == LABEL_SPHERE_R   )  R  = value;
-        else if (key == LABEL_SPHERE_COL_R  )  col_r = (float) value;
-        else if (key == LABEL_SPHERE_COL_G  )  col_g = (float) value;
-        else if (key == LABEL_SPHERE_COL_B  )  col_b = (float) value;
-    }
-    Vector center (x0, y0, z0);
-    Color col (col_r, col_g, col_b);
-    return AddSphere (&center, R, &col);
-}
-
-unsigned int World::AddCylinder_FromEntry (Entry *entry) {
-    unsigned int i = 999;
-    double  value;
-    string  key;
-    double  R, ax, ay, az, bx, by, bz;
-    float   col_r, col_g, col_b;
-
-    while (entry->GetPair (&key, &value, &i)) {
-        if      (key == LABEL_CYLINDER_AX  )  ax = value;
-        else if (key == LABEL_CYLINDER_AY  )  ay = value;
-        else if (key == LABEL_CYLINDER_AZ  )  az = value;
-        else if (key == LABEL_CYLINDER_BX  )  bx = value;
-        else if (key == LABEL_CYLINDER_BY  )  by = value;
-        else if (key == LABEL_CYLINDER_BZ  )  bz = value;
-        else if (key == LABEL_CYLINDER_R   )  R  = value;
-        else if (key == LABEL_CYLINDER_COL_R  )  col_r = (float) value;
-        else if (key == LABEL_CYLINDER_COL_G  )  col_g = (float) value;
-        else if (key == LABEL_CYLINDER_COL_B  )  col_b = (float) value;
-    }
-    Vector A (ax, ay, az), B (bx, by, bz);
-    Color col (col_r, col_g, col_b);
-    return AddCylinder (&A, &B, R, &col);
-}
-
 void World::TraceRay (Vector *origin, Vector *direction,
         Color *color) {
     Plane    *plane, *hitplane;
@@ -426,8 +424,8 @@ void World::TraceRay (Vector *origin, Vector *direction,
         dot = normal * tl;
 
         /*
-         * Planes cannot cast shadows so check
-         *   only for spheres and cylinder.
+         * Planes cannot cast shadows so check only for
+         * spheres and cylinder.
          *
          */
         isshadow = false;
@@ -461,7 +459,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
         }
         /*
          * Decrease light intensity for objects further
-         *   away from the light.
+         * away from the light.
          *
          */
         if (model == LIGHT_MODEL_LINEAR) {

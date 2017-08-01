@@ -19,341 +19,416 @@
 #include "parser.hpp"
 
 
-bool Parser::CheckCamera (string *labels, double *params, 
-        unsigned int npairs) {
-    unsigned int j, flags = 0x00;
-    for (j = 0; j < npairs; j++) {
-        if      (labels[j] == LABEL_CAMERA_X   )  flags |= CAMERA_X;
-        else if (labels[j] == LABEL_CAMERA_Y   )  flags |= CAMERA_Y;
-        else if (labels[j] == LABEL_CAMERA_Z   )  flags |= CAMERA_Z;
-        else if (labels[j] == LABEL_CAMERA_LX  )  flags |= CAMERA_LX;
-        else if (labels[j] == LABEL_CAMERA_LY  )  flags |= CAMERA_LY;
-        else if (labels[j] == LABEL_CAMERA_LZ  )  flags |= CAMERA_LZ;
-        else if (labels[j] == LABEL_CAMERA_ROT )  flags |= CAMERA_ROT;
-        else {
-            cout << "Undefined parameter in camera: \"" << labels[j] 
-                << "\"" << endl;
-            return false;
-        }
-    }
-    if (flags != CAMERA_COMPLETE) {
-        cout << "Incomplete camera definition." << endl;
-        return false;
-    }
-    return true;
-}
-
-bool Parser::CheckLight (string *labels, double *params, 
-        unsigned int npairs) {
-    unsigned int j, flags = 0x00;
-    for (j = 0; j < npairs; j++) {
-        if      (labels[j] == LABEL_LIGHT_X  ) flags |= LIGHT_X;
-        else if (labels[j] == LABEL_LIGHT_Y  ) flags |= LIGHT_Y;
-        else if (labels[j] == LABEL_LIGHT_Z  ) flags |= LIGHT_Z;
-        else {
-            cout << "Undefined parameter in light: \"" << labels[j] 
-                << "\"" << endl;
-            return false;
-        }
-    }
-    if (flags != LIGHT_COMPLETE) {
-        cout << "Incomplete light definition." << endl;
-        return false;
-    }
-    return true;
-}
-
-bool Parser::CheckPlane (string *labels, double *params, 
-        unsigned int npairs) {
-    unsigned int j, flags = 0x00;
-    for (j = 0; j < npairs; j++) {
-        if      (labels[j] == LABEL_PLANE_X0  )  flags |= PLANE_X0;
-        else if (labels[j] == LABEL_PLANE_Y0  )  flags |= PLANE_Y0;
-        else if (labels[j] == LABEL_PLANE_Z0  )  flags |= PLANE_Z0;
-        else if (labels[j] == LABEL_PLANE_A   )  flags |= PLANE_A;
-        else if (labels[j] == LABEL_PLANE_B   )  flags |= PLANE_B;
-        else if (labels[j] == LABEL_PLANE_C   )  flags |= PLANE_C;
-        else if (labels[j] == LABEL_PLANE_SCALE   )  flags |= PLANE_SCALE;
-        else if (labels[j] == LABEL_PLANE_COLA_R  )  flags |= PLANE_COLA_R;
-        else if (labels[j] == LABEL_PLANE_COLA_G  )  flags |= PLANE_COLA_G;
-        else if (labels[j] == LABEL_PLANE_COLA_B  )  flags |= PLANE_COLA_B;
-        else if (labels[j] == LABEL_PLANE_COLB_R  )  flags |= PLANE_COLB_R;
-        else if (labels[j] == LABEL_PLANE_COLB_G  )  flags |= PLANE_COLB_G;
-        else if (labels[j] == LABEL_PLANE_COLB_B  )  flags |= PLANE_COLB_B;
-        else {
-            cout << "Undefined parameter in plane: \"" << labels[j] 
-                << "\"" << endl;
-            return false;
-        }
-    }
-    if (flags != PLANE_COMPLETE) {
-        cout << "Incomplete plane definition." << endl;
-        return false;
-    }
-    return true;
-}
-
-bool Parser::CheckSphere (string *labels, double *params, 
-        unsigned int npairs) {
-    unsigned int j, flags = 0x00;
-    for (j = 0; j < npairs; j++) {
-        if      (labels[j] == LABEL_SPHERE_X0  )  flags |= SPHERE_X0;
-        else if (labels[j] == LABEL_SPHERE_Y0  )  flags |= SPHERE_Y0;
-        else if (labels[j] == LABEL_SPHERE_Z0  )  flags |= SPHERE_Z0;
-        else if (labels[j] == LABEL_SPHERE_R   )  flags |= SPHERE_R;
-        else if (labels[j] == LABEL_SPHERE_COL_R )  flags |= SPHERE_COL_R;
-        else if (labels[j] == LABEL_SPHERE_COL_G )  flags |= SPHERE_COL_G;
-        else if (labels[j] == LABEL_SPHERE_COL_B )  flags |= SPHERE_COL_B;
-        else {
-            cout << "Undefined parameter in sphere: \"" << labels[j] 
-                << "\"" << endl;
-            return false;
-        }
-    }
-    if (flags != SPHERE_COMPLETE) {
-        cout << "Incomplete sphere definition." << endl;
-        return false;
-    }
-    return true;
-}
-
-bool Parser::CheckCylinder (string *labels, double *params, 
-        unsigned int npairs) {
-    unsigned int j, flags = 0x00;
-    for (j = 0; j < npairs; j++) {
-        if      (labels[j] == LABEL_CYLINDER_AX  )  flags |= CYLINDER_AX;
-        else if (labels[j] == LABEL_CYLINDER_AY  )  flags |= CYLINDER_AY;
-        else if (labels[j] == LABEL_CYLINDER_AZ  )  flags |= CYLINDER_AZ;
-        else if (labels[j] == LABEL_CYLINDER_BX  )  flags |= CYLINDER_BX;
-        else if (labels[j] == LABEL_CYLINDER_BY  )  flags |= CYLINDER_BY;
-        else if (labels[j] == LABEL_CYLINDER_BZ  )  flags |= CYLINDER_BZ;
-        else if (labels[j] == LABEL_CYLINDER_R   )  flags |= CYLINDER_R;
-        else if (labels[j] == LABEL_CYLINDER_COL_R )  flags |= CYLINDER_COL_R;
-        else if (labels[j] == LABEL_CYLINDER_COL_G )  flags |= CYLINDER_COL_G;
-        else if (labels[j] == LABEL_CYLINDER_COL_B )  flags |= CYLINDER_COL_B;
-        else {
-            cout << "Undefined parameter in cylinder: \"" << labels[j] 
-                << "\"" << endl;
-            return false;
-        }
-    }
-    if (flags != CYLINDER_COMPLETE) {
-        cout << "Incomplete cylinder definition." << endl;
-        return false;
-    }
-    return true;
-}
-
-Parser::Parser (string fn) {
-    status   = STATUS_NEW;
-    filename = fn;
-    nentries = 0;
+Parser::Parser (string *filename) {
+    status_   = STATUS_NEW;
+    filename_ = (*filename);
+    nentries_ = 0;
 }
 
 Parser::~Parser () {
-    if (nentries > 0) {
+    if (nentries_ > 0) {
         /*
          * Remove all entries.
          *
          */
         do {
             PopEntry (NULL);
-        } while (nentries > 0);
+        } while (nentries_ > 0);
     }
 }
 
-int Parser::GetStatus () {
-    return status;
+char Parser::GetStatus () {
+    return status_;
 }
 
-unsigned int Parser::AddEntry (string title, string *lab, 
-        double *par, unsigned int np) {
+unsigned int Parser::AddEntry (Entry *temp) {
     Entry *entry, *next, *last;
 
-    entry = new Entry (title, lab, par, np);
-    if (nentries < 1) {
-        entries = entry;
+    entry  = new Entry ();
+    temp->CopyTo (entry);
+
+    if (nentries_ < 1) {
+        entries_ = entry;
     }
     else {
-        next = entries;
+        next = entries_;
         do {
             last = next;
             next = last->GetNext ();
         } while (next != NULL);
         last->SetNext (entry);
     }
-    return (++nentries);
+    return (++nentries_);
 }
 
 unsigned int Parser::PopEntry (Entry *entry) {
     Entry *prev, *next, *last;
 
-    if (nentries > 0) {
-        last = entries;
+    if (nentries_ > 0) {
+        last = entries_;
         prev = NULL;
         while ((next = last->GetNext ()) != NULL) {
             prev = last;
             last = next;
         }
-        if (prev != NULL)
+        if (prev != NULL) {
             prev->SetNext (NULL);
-        if (entry != NULL)
+        }
+        if (entry != NULL) {
             last->CopyTo (entry);
+        }
         delete last;
-        nentries--;
+        nentries_--;
     }
-    return nentries;
+    return nentries_;
+}
+
+bool Parser::TokenizeLine (string *line, string *tokens,
+        unsigned int *ntokens) {
+    /*
+     * Split a line to tokens.
+     *
+     * Remove redundant blank characters and comments.
+     */
+    char    c, pc;
+    string  accu;
+    unsigned int i, ti, len;
+
+    ti  = 0;
+    len = line->length ();
+
+    if (len > 0) {
+        accu = "";
+        pc   = line->at (0);
+
+        for (i = 0; i < len; i++) {
+            c = line->at (i);
+            if IS_COMMENT (c) {
+                break;
+            }
+            if IS_NOT_WHITE (c) {
+                accu += c;
+            }
+            if ((IS_WHITE (c) && IS_NOT_WHITE (pc))
+                    || (i == (len - 1))) {
+                if (ti == MAX_TOKENS) {
+                    return false;
+                }
+                tokens[ti++] = accu;
+                accu = "";
+            }
+            pc = c;
+        }
+        if (accu != "") {
+            tokens[ti++] = accu;
+        }
+    }
+    (*ntokens) = ti;
+    return true;
+}
+
+bool Parser::ConvertTokens (string *tokens, 
+        unsigned int ntokens, double *out) {
+    /*
+     * Try to convert tokens to real numbers.
+     */
+    double        test;
+    unsigned int  i;
+    stringstream  convert;
+
+    for (i = 0; i < ntokens; i++) {
+        convert.str (tokens[i]);
+        convert >> test;
+        if (!convert) {
+            return false;
+        }
+        out[i] = test;
+        convert.clear ();
+    }
+    return true;
+}
+
+char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
+        unsigned int sizes[], unsigned int npar, unsigned int *errline, 
+        string *errmsg, Entry *entry) {
+    unsigned int  i, j;
+    unsigned int  ntokens, nlabels;
+
+    unsigned char flags = 0,
+        pattern = 0;
+    bool    check, found;
+    string  label;
+
+    double output[MAX_COMPONENTS];
+
+
+    const string *labels,
+        camera[] = {"position", "target", "roll"},
+        light[] = {"position"},
+        plane[] = {"center", "normal", "cola", "colb", "scale"},  // , "texture"
+        sphere[] = {"position", "radius", "color"},
+        cylinder[] = {"a", "b", "radius", "color"};
+
+    if ((*item) == "camera") {
+        labels = camera;
+        nlabels = sizeof (camera) / sizeof (camera[0]);
+    }
+    else if ((*item) == "light") {
+        labels = light;
+        nlabels = sizeof (light) / sizeof (light[0]);
+    }
+    else if ((*item) == "plane") {
+        labels = plane;
+        nlabels = sizeof (plane) / sizeof (plane[0]);
+    }
+    else if ((*item) == "sphere") {
+        labels = sphere;
+        nlabels = sizeof (sphere) / sizeof (sphere[0]);
+    }
+    else {  /* if ((*item) == "cylinder") */
+        labels = cylinder;
+        nlabels = sizeof (cylinder) / sizeof (cylinder[0]);
+    }
+
+    /*
+     * Assign the label.
+     */
+    entry->SetLabel (item);
+
+    /*
+     * Build a pattern.
+     */
+    for (i = 0; i < nlabels; i++) {
+        pattern |= (unsigned char) (1 << i);
+    }
+
+    for (i = 0; i < npar; i++) {
+        label = collect[i][0];
+        /* DEBUG
+        cout << (*item) << ": " << label << endl;  */
+
+        (*errline) = i;
+        /*
+         * Check if the label exists.
+         */
+        found = false;
+        for (j = 0; j < nlabels; j++) {
+            if (labels[j] == label) {
+                found = true;
+            }
+        }
+        if (!found) {
+            (*errmsg) = label;
+            return CODE_ALIEN;
+        }
+
+        /*
+         * Parameters are usually 3D vectors (including 
+         * colors).
+         */
+        ntokens = 4;
+        /*
+         * Parameters that are not vectors.
+         */
+        if ((label == "roll") || (label == "scale")
+                || (label == "radius") || (label == "texture")) {
+            ntokens = 2;
+        }
+
+        if (sizes[i] != ntokens) {
+            return CODE_WRONG_SIZE;
+        }
+        /*
+         * Parameters are real numbers, except textures.
+         */
+        if (label != "texture") {
+            check = ConvertTokens (&collect[i][1], (ntokens - 1), output);
+            if (!check) {
+                return CODE_WRONG_TYPE;
+            }
+            entry->AddReal (&label, output, (ntokens - 1));
+        }
+        else {
+            entry->AddText (&label, &collect[i][1], 1);
+        }
+
+        /*
+         * Check if all parameter lines are present.
+         */
+        for (j = 0; j < nlabels; j++) {
+            if (labels[j] == label) {
+                /*
+                 * Check for redundant parameters.
+                 */
+                if ((flags >> j) & 1) {
+                    (*errmsg) = label;
+                    return CODE_REDUNDANT;
+                }
+                flags |= (unsigned char) (1 << j);
+                break;
+            }
+        }
+    }
+    if (flags != pattern) {
+        return CODE_MISSING;
+    }
+    return CODE_OK;
 }
 
 void Parser::Parse () {
-    const char *fn = filename.c_str ();
+    const char *fn = filename_.c_str ();
     ifstream config (fn);
 
-    string line, accu, prev, item;
-    unsigned int i, j, nlines, len;
-    char mode, c;
+    string tokens[MAX_TOKENS];
+    unsigned int ntokens;
 
-    string labels[MAX_PARM], values[MAX_PARM];
-    unsigned int nlabel, nvalue;
+    string collect[MAX_LINES][MAX_TOKENS];
+    unsigned int npar, sizes[MAX_LINES];
 
-    double test, params[MAX_PARM];
-    stringstream convert ("test");
+    unsigned int i, nlines,
+        errline, start,
+        ncam, nlig, nact;
 
-    unsigned int ncam, nlig;
     bool check;
+    char mode, code;
 
-    status = STATUS_FAIL;
+    string line, item, msg;
+    Entry  entry;
 
+
+    status_ = STATUS_FAIL;
 
     if (!config.is_open ()) {
-        cout << "File \"" << filename 
+        cout << "File \"" << filename_ 
             << "\" cannot be opened." << endl;
         return;
     }
+    /*
+     * Initialize.
+     */
     mode   = MODE_OPEN;
-    accu   = "";
     nlines = 0;
     ncam   = 0;
     nlig   = 0;
+    nact   = 0;
+
 
     while (getline (config, line)) {
         nlines++;
-        i = 0;
-        len = line.length ();
-        while (i < len) {
-            c = line.at (i++);
-            if ((c == ' ') || (c == '\n') || (c == '\t'))
-                continue;
-            if (c == '#')
-                break;
-            accu += c;
 
+        check = TokenizeLine (&line, tokens, &ntokens);
+        if (!check) {
+            cout << "Line " << nlines << 
+                ": Too many tokens." << endl;
+            config.close ();
+            return;
+        }
+        /* DEBUG 
+        cout << nlines << ", " << ntokens << ": ";
+        for (i = 0; i < ntokens; i++) {
+            cout << "\"" << tokens[i] << "\" ";
+        }
+        cout << endl; */
+
+        if (ntokens > 0) {
+            /*
+             * Not a blank line.
+             *
+             */
             if (mode == MODE_OPEN) {
-                if (c == '{') {
-                    if ((prev == "camera") || (prev == "light") 
-                            || (prev == "plane") || (prev == "sphere") 
-                            || (prev == "cylinder")) {
-                        mode   = MODE_READ;
-                        item   = prev;
-                        nlabel = 0;
-                        nvalue = 0;
-                        accu   = "";
-                    }
-                    else {
-                        cout << "Line " << nlines << ": Undefined item: \"" 
-                            << prev << "\"" << endl;
-                        config.close ();
-                        return;
-                    }
-                }
-            }
-            else {  /* mode == MODE_READ */
-                if (c == '}') {
-                    values[nvalue++] = prev;
-                    mode = MODE_OPEN;
-                    accu = "";
-                    if (nlabel != nvalue) {
-                        cout << "Line " << nlines 
-                            << ": Numbers of labels and values do not match." << endl;
-                        config.close ();
-                        return;
-                    }
-                    j = 0;
-                    while (j < nvalue) {
-                        convert.str (values[j]);
-                        convert >> test;
-                        if (!convert) {
-                            cout << "Line " << nlines << ": Unable to convert \"" 
-                                << values[j] << "\" to double." << endl;
+                item = tokens[0];
+                if ((item == "camera") || (item == "light")
+                        || (item == "plane") || (item == "sphere")
+                        || (item == "cylinder")) {
+                    mode  = MODE_READ;
+                    npar  = 0;
+                    start = nlines;
+
+                    if (item == "camera") {
+                        if ((++ncam) > 1) {
+                            cout << "Line " << nlines 
+                                << ": Multiple camera entries." << endl;
                             config.close ();
                             return;
                         }
-                        convert.clear ();
-                        params[j++] = test;
-                    }
-
-                    if (item == "camera") {
-                        if ((++ncam) < 2) {
-                            check = CheckCamera (labels, params, nlabel);
-                        }
-                        else {
-                            cout << "Line " << nlines 
-                                << ": Multiple camera entries." << endl;
-                            check = false;
-                        }
                     }
                     else if (item == "light") {
-                        if ((++nlig) < 2) {
-                            check = CheckLight (labels, params, nlabel);
-                        }
-                        else {
+                        if ((++nlig) > 1) {
                             cout << "Line " << nlines 
                                 << ": Multiple light entries." << endl;
-                            check = false;
+                            config.close ();
+                            return;
                         }
                     }
-                    else if (item == "plane") {
-                        check = CheckPlane (labels, params, nlabel);
+                    else {
+                        nact++;
                     }
-                    else if (item == "sphere") {
-                        check = CheckSphere (labels, params, nlabel);
-                    }
-                    else if (item == "cylinder") {
-                        check = CheckCylinder (labels, params, nlabel);
-                    }
-
-                    if (!check) {
-                        config.close ();
-                        return;
-                    }
-                    AddEntry (item, labels, params, nlabel);
                 }
                 else {
-                    if (c == '=') {
-                        for (j = 0; j < nlabel; j++) {
-                            if (labels[j] == prev) {
-                                cout << "Line " << nlines << ": Repeated \"" 
-                                    << prev << "\" parameter." << endl;
-                                config.close ();
-                                return;
-                            }
-                        }
-                        labels[nlabel++] = prev;
-                        accu = "";
-                    }
-                    else if (c == ';' || c == ',') {
-                        values[nvalue++] = prev;
-                        accu = "";
-                    }
-                    if ((nlabel == (MAX_PARM - 1)) || (nvalue == (MAX_PARM - 1))) {
-                        cout << "Line " << nlines 
-                            << ": Number of parameters exceeded." << endl;
-                        config.close ();
-                        return;
-                    }
+                    cout << "Line " << nlines << ": Unrecognized item \"" 
+                        << item << "\"." << endl;
+                    config.close ();
+                    return;
                 }
             }
-            prev = accu;
+            else {
+                if (npar == MAX_LINES) {
+                    cout << "Line " << nlines << 
+                        ": Too many parameter lines." << endl;
+                    config.close ();
+                    return;
+                }
+                for (i = 0; i < ntokens; i++) {
+                    collect[npar][i] = tokens[i];
+                }
+                sizes[npar++] = ntokens;
+            }
+        }
+        else {
+            /*
+             * Blank line.
+             *
+             * If the number of tokens is zero, but the line
+             * contains a comment, it is not an actual 
+             * blank line.
+             */
+            if (line.length () != 0) {
+                continue;
+            }
+
+            if (mode == MODE_READ) {
+                mode = MODE_OPEN;
+
+                code = CheckItem (&item, collect, sizes, npar, 
+                    &errline, &msg, &entry);
+            
+                if (code != CODE_OK) {
+                    if (code == CODE_ALIEN) {
+                        cout << "Line " << (start + errline + 1) 
+                            << ": Unrecognized parameter \"" << msg << "\"." << endl;
+                    }
+                    else if (code == CODE_WRONG_TYPE) {
+                        cout << "Line " << (start + errline + 1) 
+                            << ": Wrong type of component(s)." << endl;
+                    }
+                    else if (code == CODE_WRONG_SIZE) {
+                        cout << "Line " << (start + errline + 1) 
+                            << ": Wrong number of components." << endl;
+                    }
+                    else if (code == CODE_MISSING) {
+                        cout << "Line " << start << ": Missing parameter in " 
+                            << item << "." << endl;
+                    }
+                    else {  /* if (code == CODE_REDUNDANT) */
+                        cout << "Line " << (start + errline + 1) 
+                            << ": Redundant parameter \"" << msg << "\"." << endl;
+                    }
+                    config.close ();
+                    return;
+                }
+                AddEntry (&entry);
+                entry.Clear ();
+            }
         }
     }
     config.close ();
@@ -366,87 +441,197 @@ void Parser::Parse () {
         cout << "Light not found." << endl;
         return;
     }
-    status = STATUS_OK;
-    cout << "Parsing complete, found " << nentries 
+    if (nact < 1) {
+        cout << "Scene contains no actors." << endl;
+        return;
+    }
+    status_ = STATUS_OK;
+    cout << "Parsing complete, created " << nentries_ 
         << " entries." << endl;
+
+    /* DEBUG
+    Entry *ep = entries_;
+    if (nentries_ > 0) {
+        do {
+            ep->Print ();
+            ep = ep->GetNext ();
+        } while (ep != NULL);
+    } */
 }
 
-Entry::Entry (string title, string *labels, double *params,
-        unsigned int npairs) {
-    unsigned int i;
 
-    keys   = new string [npairs];
-    values = new double [npairs];
-    nitems = npairs;
-    label  = title;
-    for (i = 0; i < npairs; i++) {
-        keys[i] = labels[i];
-        values[i] = params[i];
-    }
+/*****************************
+ *          Entries          *
+ *****************************/
+Entry::Entry (string *label) {
+    label_ = (*label);
+    next_  = NULL;
+    npar_  = 0;
 }
 
 Entry::Entry () {
-    nitems = 0;
+    label_ = "default";
+    next_  = NULL;
+    npar_  = 0;
 }
 
 Entry::~Entry () {
-    if (nitems > 0) {
-        delete[] keys;
-        delete[] values;
-    }
+}
+
+void Entry::Clear () {
+    npar_ = 0;
 }
 
 Entry *Entry::GetNext () {
-    return next;
+    return next_;
 }
 
-void Entry::SetNext (Entry *n) {
-    next = n;
+void Entry::SetNext (Entry *next) {
+    next_ = next;
+}
+
+void Entry::GetLabel (string *label) {
+    (*label) = label_;
+}
+
+void Entry::SetLabel (string *label) {
+    label_ = (*label);
 }
 
 void Entry::CopyTo (Entry *other) {
-    unsigned int i;
+    unsigned int i, j;
 
-    if (other->nitems != nitems) {
-        if (other->nitems > 0) {
-            delete[] other->keys;
-            delete[] other->values;
+    other->label_ = label_;
+    other->npar_ = npar_;
+
+    for (i = 0; i < npar_; i++) {
+        other->keys_[i] = keys_[i];
+        other->type_[i] = type_[i];
+
+        for (j = 0; j < MAX_COMPONENTS; j++) {
+            if (type_[i] == TYPE_REAL) {
+                other->real_[i][j] = real_[i][j];
+            }
+            else {  /* if (type[i] == TYPE_TEXT) */
+                other->text_[i][j] = text_[i][j];
+            }
         }
-        other->keys   = new string [nitems];
-        other->values = new double [nitems];
-        other->nitems = nitems;
-    }
-    other->label = label;
-    other->next  = next;
-    for (i = 0; i < nitems; i++) {
-        other->keys[i] = keys[i];
-        other->values[i] = values[i];
     }
 }
 
-bool Entry::GetPair (string *key, double *value,
-        unsigned int *i) {
-    /*
-     * Before this method is called for the first time,
-     *   i must be set to a high number (exceeding
-     *   the actual number of pairs, for example 999).
-     *
-     * The method is supposed to be called iteratively
-     *   in a while type of loop.
-     *
-     */
-    unsigned int j;
+void Entry::Print () {
+    unsigned int i, j;
 
-    if (*i < 1)
-        return false;
-    if (*i > nitems) (*i) = nitems;
-    j = (*i) - 1;
-    (*key)   =   keys[j];
-    (*value) = values[j];
-    (*i)--;
+    cout << "** Entry: " << label_ << endl;
+    cout << "npar=" << npar_ << endl;
+
+    if (npar_ > 0) {
+        for (i = 0; i < npar_; i++) {
+            cout << "Key " << keys_[i] << ": ";
+        
+            for (j = 0; j < MAX_COMPONENTS; j++) {
+                if (type_[i] == TYPE_TEXT) {
+                    if (text_[i][j] != "") {
+                        cout << "\"" << text_[i] << "\" ";
+                    }
+                    else {
+                        cout << "\"\" ";
+                    }
+                }
+                else {  /* if (type[i] == TYPE_REAL) */
+                    cout << real_[i][j] << " ";
+                }
+            }
+            cout << endl;
+        }
+    }
+}
+
+bool Entry::AddText (string *key, string *text, 
+        unsigned int ntext) {
+    unsigned int i;
+
+    for (i = 0; i < ntext; i++) {
+        text_[npar_][i] = text[i];
+    }
+    type_[npar_] = TYPE_TEXT;
+    keys_[npar_] = (*key);
+    npar_++;
+
     return true;
 }
 
-void Entry::GetLabel (string *title) {
-    (*title) = label;
+bool Entry::AddReal (string *key, double *real, 
+        unsigned int nreal) {
+    unsigned int i;
+
+    for (i = 0; i < nreal; i++) {
+        real_[npar_][i] = real[i];
+    }
+    type_[npar_] = TYPE_REAL;
+    keys_[npar_] = (*key);
+    npar_++;
+
+    return true;
+}
+
+bool Entry::GetData (string *key, char *type, double *reals, 
+        string *texts, unsigned int *i) {
+    /*
+     * Connect the parser with the actual initialization 
+     * of actors.
+     *
+     * Before this method is called for the first time,
+     * i must be set to MAX_LINES.
+     *
+     * The method is supposed to be called iteratively
+     * in a while type of loop, until false is returned.
+     *
+     */
+    unsigned int j, k;
+
+    if ((*i) < 1) {
+        return false;
+    }
+    if ((*i) > npar_) {
+        (*i) = npar_;
+    }
+    j = (*i) - 1;
+
+    if (type_[j] == TYPE_REAL) {
+        // reals = real_[j];
+        for (k = 0; k < MAX_COMPONENTS; k++) {
+            reals[k] = real_[j][k];
+        }
+    }
+    else {  /* (type_[j] == TYPE_TEXT) */
+        // texts = text_[j];
+        for (k = 0; k < MAX_COMPONENTS; k++) {
+            texts[k] = text_[j][k];
+        }
+    }
+    (*key)  = keys_[j];
+    (*type) = type_[j];
+
+    /* DEBUG
+    cout << "Key: " << (*key) << endl;
+    if ((*type) == TYPE_TEXT) {
+        cout << "Type: TEXT " << endl;
+    }
+    else {
+        cout << "Type: REAL " << endl;
+    }
+    for (j = 0; j < MAX_COMPONENTS; j++) {
+        if ((*type) == TYPE_TEXT) {
+            cout << texts[j] << " ";
+        }
+        else {
+            cout << reals[j] << " ";
+        }
+    }
+    cout << endl;
+    DEBUG ENDS */
+
+    (*i)--;
+    return true;
 }

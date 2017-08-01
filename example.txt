@@ -1,77 +1,180 @@
-light {x = -3.00, y = 3.00, z = 5.00}
+camera
+position    11.0    4.0    7.0
+target       0.0    0.0    0.0
+roll         0.0
 
-plane {
-    x0 = 0.00, y0 = 0.00, z0 = 0.00,
-    A  = 0.00, B  = 0.00, C  = 1.00,
-    cola_r = 0.0, cola_g = 0.5, cola_b = 1.0,
-    colb_r = 0.0, colb_g = 1.0, colb_b = 0.0,
-    texscale = 2.00
-}
+light
+position   -3.0   3.0   5.0
 
-camera {
-    x = 11.00, y = 4.00, z = 7.00,
-    lx = 0.00, ly = 0.00, lz = 0.00,
-    rot = 0.00
-}
+plane
+center   0.0   0.0   0.0
+normal   0.0   0.0   1.0
+cola     0.0   1.0   1.0
+colb     0.0   0.5   0.0
+scale    2.0
+# texture  "ground.png"
 
-sphere {x0 =  7.00, y0 =  0.00, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+# plane
+# center   0.0   0.0 -12.0
+# normal   1.0   0.0   0.01
+# cola     0.0   1.0   1.0
+# colb     0.0   0.5   0.5
+# scale    2.0
+# texture  "ground.png"
 
-sphere {x0 =  6.84, y0 =  1.45, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 0.0}
+cylinder
+a       0.0     0.0     0.0
+b       0.0     0.0     1.0
+radius  1.0
+color   0.25    0.25    1.0
 
-sphere {x0 =  6.39, y0 =  2.84, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 0.0, col_b = 1.0}
+sphere
+position   7.00    0.00    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  5.66, y0 =  4.11, z0 =  0.60, R =  0.60,  col_r = 1.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   6.84    1.45    0.60
+radius   0.60
+color  0.0   1.0   0.0
 
-sphere {x0 =  4.68, y0 =  5.20, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   6.39    2.84    0.60
+radius   0.60
+color  0.0   0.0   1.0
 
-sphere {x0 =  3.50, y0 =  6.06, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 0.0, col_b = 1.0}
+sphere
+position   5.66    4.11    0.60
+radius   0.60
+color  1.0   1.0   1.0
 
-sphere {x0 =  2.16, y0 =  6.65, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   4.68    5.20    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  0.73, y0 =  6.96, z0 =  0.60, R =  0.60,  col_r = 1.0, col_g = 0.0, col_b = 1.0}
+sphere
+position   3.50    6.06    0.60
+radius   0.60
+color  0.0   0.0   1.0
 
-sphere {x0 = -0.73, y0 =  6.96, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   2.16    6.65    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -2.16, y0 =  6.65, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 0.0, col_b = 1.0}
+sphere
+position   0.73    6.96    0.60
+radius   0.60
+color  1.0   0.0   1.0
 
-sphere {x0 = -3.50, y0 =  6.06, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 0.0}
+sphere
+position  -0.73    6.96    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -4.68, y0 =  5.20, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -2.16    6.65    0.60
+radius   0.60
+color  0.0   0.0   1.0
 
-sphere {x0 = -5.66, y0 =  4.11, z0 =  0.60, R =  0.60,  col_r = 1.0, col_g = 0.0, col_b = 1.0}
+sphere
+position  -3.50    6.06    0.60
+radius   0.60
+color  0.0   1.0   0.0
 
-sphere {x0 = -6.39, y0 =  2.84, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -4.68    5.20    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -6.84, y0 =  1.45, z0 =  0.60, R =  0.60,  col_r = 0.5, col_g = 0.5, col_b = 1.0}
+sphere
+position  -5.66    4.11    0.60
+radius   0.60
+color  1.0   0.0   1.0
 
-sphere {x0 = -7.00, y0 =  0.00, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -6.39    2.84    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -6.84, y0 = -1.45, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -6.84    1.45    0.60
+radius   0.60
+color  0.5   0.5   1.0
 
-sphere {x0 = -6.39, y0 = -2.84, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -7.00    0.00    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -5.66, y0 = -4.11, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -6.84   -1.45    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -4.68, y0 = -5.20, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -6.39   -2.84    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -3.50, y0 = -6.06, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -5.66   -4.11    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -2.16, y0 = -6.65, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -4.68   -5.20    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 = -0.73, y0 = -6.96, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -3.50   -6.06    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  0.73, y0 = -6.96, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -2.16   -6.65    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  2.16, y0 = -6.65, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position  -0.73   -6.96    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  3.50, y0 = -6.06, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   0.73   -6.96    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  4.68, y0 = -5.20, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   2.16   -6.65    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  5.66, y0 = -4.11, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   3.50   -6.06    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  6.39, y0 = -2.84, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   4.68   -5.20    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-sphere {x0 =  6.84, y0 = -1.45, z0 =  0.60, R =  0.60,  col_r = 0.0, col_g = 1.0, col_b = 1.0}
+sphere
+position   5.66   -4.11    0.60
+radius   0.60
+color  0.0   1.0   1.0
 
-#  cylinderxy {x0 = 0.0000, y0 = 0.0000, R = 1.0000, col_a = 1.0, col_b = 1.0, col_c = 1.0}
+sphere
+position   6.39   -2.84    0.60
+radius   0.60
+color  0.0   1.0   1.0
+
+sphere
+position   6.84   -1.45    0.60
+radius   0.60
+color  0.0   1.0   1.0
+

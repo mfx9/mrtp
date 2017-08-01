@@ -23,32 +23,33 @@
 
 
 class Vector {
-    double x, y, z;
+    double x_, y_, z_;
 public:
     ~Vector ();
     Vector ();
-    Vector (double newx, double newy,
-        double newz);
-    void Set (double newx, double newy,
-        double newz);
+    Vector (double x, double y,
+        double z);
+    void Set (double x, double y,
+        double z);
     double Len ();
     double DotSelf ();
     void Scale_InPlace (double scale);
     void Normalize_InPlace ();
     void CopyTo (Vector *other);
-    /*
-     * Operators:
-     *
-     *    (+) Sum of two vectors
-     *    (-) Difference of two vectors
-     *    (^) Cross product
-     *    (*) Dot product
-     *    (*) Scaling
-     */
+
+    /* Sum of two vectors. */
     Vector operator+ (Vector &other);
+
+    /* Difference of two vectors. */
     Vector operator- (Vector &other);
+
+    /* Cross product. */
     Vector operator^ (Vector &other);
+
+    /* Dot product. */
     double operator* (Vector &other);
+
+    /* Scaling. */
     Vector operator* (double scale);
 };
 

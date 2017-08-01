@@ -45,9 +45,9 @@
 
 
 class World {
-    Buffer *buffer;
-    Camera *camera;
-    Light  *light;
+    Buffer  *buffer;
+    Camera  *camera;
+    Light   *light;
 
     /* Model to quench light with 
      * increasing distance.
@@ -101,13 +101,6 @@ public:
         Color *color);
     unsigned int AddCylinder (Vector *A, Vector *B,
         double radius, Color *color);
-
-    unsigned int AddPlane_FromEntry (Entry *entry);
-    unsigned int AddSphere_FromEntry (Entry *entry);
-    unsigned int AddCylinder_FromEntry (Entry *entry);
-    unsigned int AddLight_FromEntry (Entry *entry);
-    unsigned int AddCamera_FromEntry (Entry *entry,
-        unsigned int width, unsigned int height, double fov);
 
     unsigned int PopPlane ();
     unsigned int PopSphere ();
