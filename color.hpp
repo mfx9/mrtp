@@ -19,62 +19,58 @@
 #ifndef _COLOR_H
 #define _COLOR_H
 
-#define FLOAT_COLOR  1
+/*
+ * Macros.
+ */
+#define FLOAT_TO_BYTE(color) (unsigned char) (color * 255.0)
+#define BYTE_TO_FLOAT(color) ((float) color) / 255.0
 
+#define TRIM_LIMITS(x, min, max) { \
+   if (x < min) { \
+       x = min; \
+   } \
+   else if (x > max) { \
+       x = max; \
+   } }
 
-#define FLOAT_TO_BYTE(c) (unsigned char) (c * 255.0)
-#define BYTE_TO_FLOAT(c) ((float) c) * (1.0 / 255.0)
-
-#define COLOR_TRIM(r, g, b) { if (r > 1.0) r = 1.0; \
-    else if (r < 0.0) r = 0.0; \
-        \
-    if (g > 1.0) g = 1.0; \
-    else if (g < 0.0) g = 0.0; \
-        \
-    if (b > 1.0) b = 1.0; \
-    else if (b < 0.0) b = 0.0; }
-
-#ifdef FLOAT_COLOR
-#define COLOR_ZERO() { red = 0.0; green = 0.0; \
-    blue = 0.0; }
-#else
-#define COLOR_ZERO() { red = 0; green = 0; \
-    blue = 0; }
-#endif
+#define TRIM_COLOR(red, green, blue) { \
+    TRIM_LIMITS (red,   0.0, 1.0); \
+    TRIM_LIMITS (green, 0.0, 1.0); \
+    TRIM_LIMITS (blue,  0.0, 1.0); \
+        }
 
 
 class Color {
-    #ifdef FLOAT_COLOR
-        float red, green, blue;
-    #else
-        unsigned char red, green,
-            blue;
-    #endif
-public:
-    Color ();
-    ~Color ();
-    /*
-     * Set color from floats.
-     */
-    Color (float r, float g, 
-        float b);
-    void Set (float r, float g, 
-        float b);
-    /*
-     * Set color from bytes.
-     */
-    Color (unsigned char r, unsigned char g, 
-        unsigned char b);
-    void Set (unsigned char r, unsigned char g, 
-        unsigned char b);
+    float red_, green_, blue_;
 
-    void Zero ();
+public:
+    /* Constructors, etc. */
+    ~Color ();
+    Color ();
+
+    Color (float red, float green, 
+        float blue);
+    Color (unsigned char red, unsigned char green, 
+        unsigned char blue);
+
+    /* Setters. */
+    void Set (float red, float green, 
+        float blue);
+    void Set (unsigned char red, unsigned char green, 
+        unsigned char blue);
+
+    /* Getters. */
+    void Get (unsigned char *red, unsigned char *green,
+        unsigned char *blue);
+    void Get (float *red, float *green,
+        float *blue);
+
+    /* Copying. */
     void CopyTo (Color *other);
-    void GetBytes (unsigned char *cr, unsigned char *cg,
-        unsigned char *cb);
-    void GetFloats (float *fr, float *fg,
-        float *fb);
+
+    /* Other. */
     void Scale_InPlace (double scale);
+    void Zero ();
 };
 
 #endif /* _COLOR_H */

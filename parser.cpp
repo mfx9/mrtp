@@ -599,13 +599,11 @@ bool Entry::GetData (string *key, char *type, double *reals,
     j = (*i) - 1;
 
     if (type_[j] == TYPE_REAL) {
-        // reals = real_[j];
         for (k = 0; k < MAX_COMPONENTS; k++) {
             reals[k] = real_[j][k];
         }
     }
     else {  /* (type_[j] == TYPE_TEXT) */
-        // texts = text_[j];
         for (k = 0; k < MAX_COMPONENTS; k++) {
             texts[k] = text_[j][k];
         }

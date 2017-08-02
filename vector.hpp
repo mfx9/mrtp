@@ -24,18 +24,28 @@
 
 class Vector {
     double x_, y_, z_;
+
 public:
-    ~Vector ();
+    /* Constructors, etc. */
+    Vector (double x, double y, 
+        double z);
+    Vector (double *coor);
     Vector ();
-    Vector (double x, double y,
+    ~Vector ();
+
+    /* Setters. */
+    void Set (double x, double y, 
         double z);
-    void Set (double x, double y,
-        double z);
+    void Set (double *coor);
+
+    /* Copying. */
+    void CopyTo (Vector *other);
+
+    /* Other. */
     double Len ();
     double DotSelf ();
     void Scale_InPlace (double scale);
     void Normalize_InPlace ();
-    void CopyTo (Vector *other);
 
     /* Sum of two vectors. */
     Vector operator+ (Vector &other);

@@ -28,18 +28,36 @@ Vector::Vector () {
     z_ = 0.0;
 }
 
-Vector::Vector (double x,
-        double y, double z) {
+Vector::Vector (double x, double y, 
+        double z) {
     x_ = x;
     y_ = y;
     z_ = z;
 }
 
-void Vector::Set (double x,
-        double y, double z) {
+Vector::Vector (double *coor) {
+    x_ = coor[0];
+    y_ = coor[1];
+    z_ = coor[2];
+}
+
+void Vector::Set (double x, double y, 
+        double z) {
     x_ = x;
     y_ = y;
     z_ = z;
+}
+
+void Vector::Set (double *coor) {
+    x_ = coor[0];
+    y_ = coor[1];
+    z_ = coor[2];
+}
+
+void Vector::CopyTo (Vector *other) {
+    other->x_ = x_;
+    other->y_ = y_;
+    other->z_ = z_;
 }
 
 double Vector::Len () {
@@ -71,12 +89,6 @@ void Vector::Normalize_InPlace () {
         y_ = 0.0;
         z_ = 0.0;
     }
-}
-
-void Vector::CopyTo (Vector *other) {
-    other->x_ = x_;
-    other->y_ = y_;
-    other->z_ = z_;
 }
 
 Vector Vector::operator+ (Vector &other) {

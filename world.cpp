@@ -84,10 +84,10 @@ bool World::Initialize () {
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
                 if (key == "position") {
-                    position.Set (reals[0], reals[1], reals[2]);
+                    position.Set (reals);
                 }
                 else if (key == "target") {
-                    target.Set (reals[0], reals[1], reals[2]);
+                    target.Set (reals);
                 }
                 else {  /* if (key == "roll") */
                     roll = reals[0];
@@ -104,8 +104,7 @@ bool World::Initialize () {
             Vector position;
 
             entry.GetData (&key, &type, reals, texts, &i);
-            position.Set (reals[0], reals[1], reals[2]);
-
+            position.Set (reals);
             light = new Light (&position);
         }
 
@@ -119,19 +118,23 @@ bool World::Initialize () {
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
                 if (key == "center") {
-                    center.Set (reals[0], reals[1], reals[2]);
+                    center.Set (reals);
                 }
                 else if (key == "normal") {
-                    normal.Set (reals[0], reals[1], reals[2]);
+                    normal.Set (reals);
                 }
                 else if (key == "scale") {
                     scale = reals[0];
                 }
                 else if (key == "cola") {
-                    ca.Set (0.0f, 1.0f, 1.0f);
+                    /*  ca.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);  */
+                    ca.Set (1.0f, 0.0f, 1.0f);
                 }
                 else {  /* if (key == "colb") */
-                    cb.Set (0.0f, 1.0f, 0.0f);
+                    /* cb.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]); */
+                    ca.Set (0.0f, 0.0f, 1.0f);
                 }
             }
             AddPlane (&center, &normal, &ca, &cb, scale);
@@ -147,13 +150,15 @@ bool World::Initialize () {
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
                 if (key == "position") {
-                    position.Set (reals[0], reals[1], reals[2]);
+                    position.Set (reals);
                 }
                 else if (key == "radius") {
                     radius = reals[0];
                 }
                 else {  /* if (key == "color") */
-                    color.Set (1.0f, 1.0f, 1.0f);
+                    /* color.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]); */
+                    color.Set (0.0f, 1.0f, 0.0f);
                 }
             }
             AddSphere (&position, radius, &color);
@@ -169,15 +174,17 @@ bool World::Initialize () {
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
                 if (key == "a") {
-                    axisa.Set (reals[0], reals[1], reals[2]);
+                    axisa.Set (reals);
                 }
                 else if (key == "b") {
-                    axisb.Set (reals[0], reals[1], reals[2]);
+                    axisb.Set (reals);
                 }
                 else if (key == "radius") {
                     radius = reals[0];
                 }
                 else {  /* if (key == "color") */
+                    /* color.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]); */
                     color.Set (1.0f, 1.0f, 1.0f);
                 }
             }

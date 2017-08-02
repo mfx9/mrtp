@@ -23,117 +23,70 @@ Color::~Color () {
 }
 
 Color::Color () {
-    COLOR_ZERO ();
 }
 
-Color::Color (float r, float g, float b) {
-    COLOR_TRIM (r, g, b);
-    #ifdef FLOAT_COLOR
-        red   = r;
-        green = g;
-        blue  = b;
-    #else
-        red   = FLOAT_TO_BYTE (r);
-        green = FLOAT_TO_BYTE (g);
-        blue  = FLOAT_TO_BYTE (b);
-    #endif
+Color::Color (float red, float green, 
+        float blue) {
+    /* TRIM_COLOR (red, green, blue); */
+
+    red_   = red;
+    green_ = green;
+    blue_  = blue;
 }
 
-Color::Color (unsigned char r, 
-        unsigned char g, unsigned char b) {
-    #ifdef FLOAT_COLOR
-        red   = BYTE_TO_FLOAT (r);
-        green = BYTE_TO_FLOAT (g);
-        blue  = BYTE_TO_FLOAT (b);
-    #else
-        red   = r;
-        green = g;
-        blue  = b;
-    #endif
+Color::Color (unsigned char red, 
+        unsigned char green, unsigned char blue) {
+    red_   = BYTE_TO_FLOAT (red);
+    green_ = BYTE_TO_FLOAT (green);
+    blue_  = BYTE_TO_FLOAT (blue);
 }
 
-void Color::Set (float r, float g, float b) {
-    COLOR_TRIM (r, g, b);
-    #ifdef FLOAT_COLOR
-        red   = r;
-        green = g;
-        blue  = b;
-    #else
-        red   = FLOAT_TO_BYTE (r);
-        green = FLOAT_TO_BYTE (g);
-        blue  = FLOAT_TO_BYTE (b);
-    #endif
+void Color::Set (float red, float green, 
+        float blue) {
+    /* TRIM_COLOR (red, green, blue); */
+
+    red_   = red;
+    green_ = green;
+    blue_  = blue;
 }
 
-void Color::Set (unsigned char r, 
-        unsigned char g, unsigned char b) {
-    #ifdef FLOAT_COLOR
-        red   = BYTE_TO_FLOAT (r);
-        green = BYTE_TO_FLOAT (g);
-        blue  = BYTE_TO_FLOAT (b);
-    #else
-        red   = r;
-        green = g;
-        blue  = b;
-    #endif
+void Color::Set (unsigned char red, 
+        unsigned char green, unsigned char blue) {
+    red_   = BYTE_TO_FLOAT (red);
+    green_ = BYTE_TO_FLOAT (green);
+    blue_  = BYTE_TO_FLOAT (blue);
 }
 
-void Color::Zero () {
-    COLOR_ZERO ();
+void Color::Get (unsigned char *red, 
+        unsigned char *green, unsigned char *blue) {
+    *red   = FLOAT_TO_BYTE (red_);
+    *green = FLOAT_TO_BYTE (green_);
+    *blue  = FLOAT_TO_BYTE (blue_);
+}
+
+void Color::Get (float *red, float *green, 
+        float *blue) {
+    *red   = red_;
+    *green = green_;
+    *blue  = blue_;
 }
 
 void Color::CopyTo (Color *other) {
-    other->red   = red;
-    other->green = green;
-    other->blue  = blue;
-}
-
-void Color::GetBytes (unsigned char *cr, 
-        unsigned char *cg, unsigned char *cb) {
-    #ifdef FLOAT_COLOR
-        *cr = FLOAT_TO_BYTE (red);
-        *cg = FLOAT_TO_BYTE (green);
-        *cb = FLOAT_TO_BYTE (blue);
-    #else
-        *cr = red;
-        *cg = green;
-        *cb = blue;
-    #endif
-}
-
-void Color::GetFloats (float *fr, float *fg, 
-        float *fb) {
-    #ifdef FLOAT_COLOR
-        *fr = red;
-        *fg = green;
-        *fb = blue;
-    #else
-        *fr = BYTE_TO_FLOAT (red);
-        *fg = BYTE_TO_FLOAT (green);
-        *fb = BYTE_TO_FLOAT (blue);
-    #endif
+    other->red_   = red_;
+    other->green_ = green_;
+    other->blue_  = blue_;
 }
 
 void Color::Scale_InPlace (double scale) {
-    /*
-     * Scale is between <0, 1>
-     */
-    if (scale < 0.0f) {
-        scale = 0.0f;
-    }
-    else if (scale > 1.0f) {
-        scale = 1.0f;
-    }
-    #ifdef FLOAT_COLOR
-        red   = red   * (float) scale;
-        green = green * (float) scale;
-        blue  = blue  * (float) scale;
-    #else
-        red = FLOAT_TO_BYTE (BYTE_TO_FLOAT 
-            (red) * (float) scale);
-        green = FLOAT_TO_BYTE (BYTE_TO_FLOAT 
-            (green) * (float) scale);
-        blue = FLOAT_TO_BYTE (BYTE_TO_FLOAT 
-            (blue) * (float) scale);
-    #endif
+    TRIM_LIMITS (scale, 0.0, 1.0);
+
+    red_   = red_   * (float) scale;
+    green_ = green_ * (float) scale;
+    blue_  = blue_  * (float) scale;
+}
+
+void Color::Zero () {
+    red_   = 0.0;
+    green_ = 0.0;
+    blue_  = 0.0;
 }

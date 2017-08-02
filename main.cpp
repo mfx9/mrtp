@@ -30,7 +30,6 @@ using namespace std;
 /*
  * Default settings.
  */
-#define DEFAULT_OUTPUT   "output.png"
 #define DEFAULT_WIDTH     640
 #define DEFAULT_HEIGHT    480
 #define DEFAULT_FOV        70.0
@@ -86,18 +85,19 @@ void HelpScreen (string program) {
 }
 
 int main (int argc, char **argv) {
-    unsigned int i, timeStart, timeStop;
+    unsigned int i;
+    size_t  pos;
+    bool    resok;
+
     string  text, next, foo, bar;
-    stringstream convert ("test");
-    size_t pos;
-    bool   resok;
+    stringstream convert;
 
     /* 
      * Modifiable parameters.
      */
     bool    quiet      =  false;
     string  input      =  "";
-    string  output     =  DEFAULT_OUTPUT;
+    string  output     =  "";
     double  fov        =  DEFAULT_FOV;
     double  distance   =  DEFAULT_DISTANCE;
     double  shadow     =  DEFAULT_SHADOW;
@@ -172,9 +172,11 @@ int main (int argc, char **argv) {
                     }
                     convert.clear ();
                 }
-                if ((width < MIN_WIDTH) || (width > MAX_WIDTH) ||
-                    (height < MIN_HEIGHT) || (height > MAX_HEIGHT)) {
-                    resok = false;
+                if (resok) {
+                    if ((width < MIN_WIDTH) || (width > MAX_WIDTH) ||
+                        (height < MIN_HEIGHT) || (height > MAX_HEIGHT)) {
+                        resok = false;
+                    }
                 }
             }
             if (!resok) {
@@ -297,6 +299,18 @@ int main (int argc, char **argv) {
         return EXIT_FAIL;
     }
 
+    if (output == "") {
+        foo = input;
+        pos = input.rfind (".inp");
+        if (pos != string::npos) {
+            foo = input.substr (0, pos);
+        }
+        output = foo + ".png";
+    }
+
+    /*
+     * Parse the input file.
+     */
     Parser parser (&input);
     parser.Parse ();
     if (parser.GetStatus () != STATUS_OK) {
@@ -305,15 +319,26 @@ int main (int argc, char **argv) {
         return EXIT_FAIL;
     }
 
+    /*
+     * Build a world.
+     */
     World world (&parser, width, height, fov, distance, 
         shadow, model);
     world.Initialize ();
+
+    /*
+     * Render.
+     */
+    unsigned int timeStart, timeStop;
 
     cout << "Rendering..." << endl;
     timeStart = clock ();
     world.Render ();
     timeStop = clock ();
 
+    /*
+     * Finalize.
+     */
     cout << "OK. Elapsed time: " << 
         ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
         " sec" << endl;

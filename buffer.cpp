@@ -70,7 +70,7 @@ void Buffer::WriteToPNG (string filename) {
     for (i = 0; i < height; i++) {
         pixel = &image[i][0];
         for (j = 0; j < width; j++) {
-            bp->GetBytes (&r, &g, &b);
+            bp->Get (&r, &g, &b);
             bp++;
             pixel->red   = r;
             pixel->green = g;
