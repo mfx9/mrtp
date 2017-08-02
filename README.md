@@ -23,18 +23,15 @@ development.
 
 For writing output files, Mrtp depends on the 
 [png++ library](http://www.nongnu.org/pngpp/), which is a C++ wrapper 
-for libpng.
-
-In the first step, go to the "png++" directory and type in:
+for libpng. In the first step, go to the "png++" directory and type in:
 
 ```
 make
 ```
 
 It will automatically download and unpack all necessary files. png++ 
-is a header library and does not need compilation.
-
-In the next step, run "make" in the main directory of Mrtp. An executable 
+is a header library and does not need compilation. In the next
+step, run "make" in the main directory of Mrtp. An executable 
 file "mrtp" will be generated that is ready to run. By typing in:
 
 ```
