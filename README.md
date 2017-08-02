@@ -19,7 +19,7 @@ As of now, the program has only basic functionality and is under
 development.
 
 
-_Installation instructions:_
+### Installation instructions.
 
 For writing output files, Mrtp depends on the 
 [png++ library](http://www.nongnu.org/pngpp/), which is a C++ wrapper 
@@ -47,7 +47,7 @@ In the future, I should probably merge the two installation steps
 into one.
 
 
-_Input file format:_
+### Input file format.
 
 A scene (also known as world) in Mrtp is generated based on an input
 file. The input file contains definitions of all "actors" in the scene, 
