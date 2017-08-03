@@ -10,7 +10,7 @@ plane
 center   0.0   0.0   0.0
 normal   0.0   0.0   1.0
 cola     0.0   1.0   1.0
-colb     0.0   0.5   0.0
+colb     1.0   1.0   0.0
 scale    2.0
 # texture  "ground.png"
 

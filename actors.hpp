@@ -27,9 +27,11 @@
 #include "texture.hpp"
 
 
-// #define DEBUG_ACTORS   1
-
 #define TOLERANCE  0.000001
+
+/*
+ * Macros.
+ */
 #define IS_ZERO(x) ((x > -TOLERANCE) && (x < TOLERANCE))
 #define IS_NOT_ZERO(x) ((x <= -TOLERANCE) || (x >= TOLERANCE))
 
@@ -64,73 +66,73 @@
     }
 
 class Sphere {
-    Vector  center;
-    double  R;
-    Color   color;
-    Sphere *next;
+    Vector   center_;
+    double   radius_;
+    Color    color_;
+    Sphere  *next_;
 
 public:
     ~Sphere ();
     Sphere ();
-    Sphere (Vector *c, double radius,
-        Color *col);
+    Sphere (Vector *center, double radius,
+        Color *color);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
-    void GetNormal (Vector *hit, Vector *n);
-    void DetermineColor (Color *col);
+    void GetNormal (Vector *hit, Vector *normal);
+    void DetermineColor (Vector *hit, Color *color);
 
     Sphere *GetNext ();
     void SetNext (Sphere *sphere);
 };
 
 class Plane {
-    Vector  center, normal;
-    Vector  texx, texy;
-    Color   colora, colorb;
-    double  tscale;
-    Texture *texture;
-    bool    istexture;
-    Plane   *next;
+    Vector   center_, normal_,
+        texturex_, texturey_;
+    Color    colora_, colorb_;
+    double   scale_;
+    Texture *texture_;
+    bool     istexture_;
+    Plane   *next_;
 
 public:
     ~Plane ();
     Plane ();
-    Plane (Vector *c, Vector *n, Color *cola, 
-        Color *colb, double texscale);
+    Plane (Vector *center, Vector *normal, Color *colora, 
+        Color *colorb, double texscale);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
-    void GetNormal (Vector *n);
-    void DetermineColor (Vector *inter, Color *col);
+    void GetNormal (Vector *normal);
+    void DetermineColor (Vector *hit, Color *color);
 
     Plane *GetNext ();
     void SetNext (Plane *plane);
 };
 
 class Cylinder {
-    Vector    A, B;
-    double    R, alpha;
-    Color     color;
-    Cylinder *next;
+    Vector    A_, B_;
+    double    radius_, alpha_;
+    Color     color_;
+    Cylinder *next_;
 
 public:
     ~Cylinder ();
     Cylinder ();
     Cylinder (Vector *a, Vector *b, double radius, 
-        Color *col);
+        Color *color);
 
     double Solve (Vector *O, Vector *D,
         double mind, double maxd);
-    void GetNormal (Vector *hit, Vector *n);
-    void DetermineColor (Color *col);
+    void GetNormal (Vector *hit, Vector *normal);
+    void DetermineColor (Vector *hit, Color *color);
 
     Cylinder *GetNext ();
     void SetNext (Cylinder *cylinder);
 };
 
 class Light {
-    Vector  position;
+    Vector  position_;
 
 public:
     Light (Vector *origin);

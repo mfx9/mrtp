@@ -35,7 +35,7 @@ step, run "make" in the main directory of Mrtp. An executable
 file "mrtp" will be generated that is ready to run. By typing in:
 
 ```
-mrtp -h
+./mrtp -h
 ```
 
 you will get a list of available options and an example of use.

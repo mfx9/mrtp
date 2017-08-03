@@ -19,91 +19,103 @@
 #include "actors.hpp"
 
 
-/*
- * Planes.
- */
+/*****************************
+ *          Planes           *
+ *****************************/
 Plane::Plane () {
+    next_ = NULL;
 }
 
 Plane::~Plane () {
 }
 
-Plane::Plane (Vector *c, Vector *n, Color *cola, 
-        Color *colb, double texscale) {
-    next = NULL;
-    c->CopyTo (&center);
-    n->CopyTo (&normal);
-    normal.Normalize_InPlace ();
+Plane::Plane (Vector *center, Vector *normal, Color *colora, 
+        Color *colorb, double texscale) {
+    next_ = NULL;
+    center->CopyTo (&center_);
+
+    normal->CopyTo (&normal_);
+    normal_.Normalize_InPlace ();
+
     /*
      * Texturing.
      */
-    cola->CopyTo (&colora);
-    colb->CopyTo (&colorb);
-    tscale = texscale;
+    colora->CopyTo (&colora_);
+    colorb->CopyTo (&colorb_);
+    scale_ = texscale;
 
     Vector k;
-    normal.CopyTo (&k);
+    normal_.CopyTo (&k);
 
     Vector i (1., 0., 0.), j;
     j = k ^ i;
     j.Normalize_InPlace ();
-    j.CopyTo (&texy);
+    j.CopyTo (&texturey_);
 
     i = j ^ k;
     i.Normalize_InPlace ();
-    i.CopyTo (&texx);
+    i.CopyTo (&texturex_);
 }
 
-Plane *Plane::GetNext () {
-    return next;
-}
+void Plane::DetermineColor (Vector *hit, 
+        Color *color) {
+    Vector  V;
+    double  vx, vy, scale;
+    int     tx, ty;
+    Color  *cp;
 
-void Plane::SetNext (Plane *plane) {
-    next = plane;
-}
-
-void Plane::DetermineColor (Vector *inter, 
-        Color *col) {
-    Vector v;
-    double vx, vy, scale;
-    int tx, ty;
-    Color *cp;
-
-    v = *(inter) - center;
+    V = (*hit) - center_;
     /*
-     * . Calculate components of v (dot
-     *  products).
+     * Calculate components of V (dot products).
+     * 
      */
-    vx    = v * texx;
-    vy    = v * texy;
-    scale = 1. / tscale;
+    vx    = V * texturex_;
+    vy    = V * texturey_;
+    scale = 1.0 / scale_;
     tx    = (int) (vx * scale);
     ty    = (int) (vy * scale);
-    if (vx > 0.)
+
+    if (vx > 0.0) {
         tx--;
-    if (vy > 0.)
-        ty--;
-    if (!(tx & 1)) {
-        if (!(ty & 1))
-            cp = &colora;
-        else
-            cp = &colorb;
-    } else {
-        if (!(ty & 1))
-            cp = &colorb;
-        else
-            cp = &colora;
     }
-    cp->CopyTo (col);
+    if (vy > 0.0) {
+        ty--;
+    }
+
+    /*
+    if (!(tx & 1)) {
+        if (!(ty & 1)) {
+            cp = &colora_;
+        }
+        else {
+            cp = &colorb_;
+        }
+    } else {
+        if (!(ty & 1)) {
+            cp = &colorb_;
+        }
+        else {
+            cp = &colora_;
+        }
+    }
+    */
+    if (!(tx & 1)) {
+        cp = (!(ty & 1)) ? &colora_ : &colorb_;
+    }
+    else {
+        cp = (!(ty & 1)) ? &colorb_ : &colora_;
+    }
+
+    cp->CopyTo (color);
 }
 
 double Plane::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
     double bar, d = -1.0;
 
-    bar = (*direction) * normal;
+    bar = (*direction) * normal_;
     if IS_NOT_ZERO (bar) {
-        d = -((*origin - center) * normal) / bar;
+        d = -((*origin - center_) * normal_) / bar;
 
         if ((d < mind) || (d > maxd))
             d = -1.0;
@@ -111,103 +123,116 @@ double Plane::Solve (Vector *origin, Vector *direction,
     return d;
 }
 
-void Plane::GetNormal (Vector *n) {
-    normal.CopyTo (n);
+void Plane::GetNormal (Vector *normal) {
+    normal_.CopyTo (normal);
 }
 
-/*
- * Spheres.
- */
+Plane *Plane::GetNext () {
+    return next_;
+}
+
+void Plane::SetNext (Plane *plane) {
+    next_ = plane;
+}
+
+
+/*****************************
+ *          Spheres          *
+ *****************************/
 Sphere::Sphere () {
+    next_ = NULL;
 }
 
 Sphere::~Sphere () {
 }
 
-Sphere::Sphere (Vector *c, double radius,
-        Color *col) {
-    c->CopyTo (&center);
-    next = NULL;
-    R = radius;
-    col->CopyTo (&color);
-}
-
-Sphere *Sphere::GetNext () {
-    return next;
-}
-
-void Sphere::SetNext (Sphere *sphere) {
-    next = sphere;
-}
-
-void Sphere::DetermineColor (Color *col) {
-    color.CopyTo (col);
+Sphere::Sphere (Vector *center, double radius,
+        Color *color) {
+    center->CopyTo (&center_);
+    color->CopyTo (&color_);
+    next_   = NULL;
+    radius_ = radius;
 }
 
 double Sphere::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
     Vector T;
-    T = (*origin) - center;
+    T = (*origin) - center_;
 
     double a, b, c, d;
-    a  = direction->DotSelf ();
+    a  = (*direction) * (*direction);
     b  = 2.0 * (*direction * T);
-    c  = T.DotSelf () - (R * R);
+    c  = (T * T) - (radius_ * radius_);
 
     SOLVE_QUADRATIC (a, b, c, d, mind, maxd);
     return d;
 }
 
-void Sphere::GetNormal (Vector *hit, Vector *n) {
+void Sphere::GetNormal (Vector *hit, Vector *normal) {
     Vector T;
 
-    T = (*hit) - center;
+    T = (*hit) - center_;
     T.Normalize_InPlace ();
-    T.CopyTo (n);
+    T.CopyTo (normal);
 }
 
-/*
- * Cylinders.
- */
+void Sphere::DetermineColor (Vector *hit, 
+        Color *color) {
+    color_.CopyTo (color);
+}
+
+Sphere *Sphere::GetNext () {
+    return next_;
+}
+
+void Sphere::SetNext (Sphere *sphere) {
+    next_ = sphere;
+}
+
+
+/*****************************
+ *         Cylinders         *
+ *****************************/
 Cylinder::Cylinder () {
+    next_ = NULL;
 }
 
 Cylinder::~Cylinder () {
 }
 
 Cylinder::Cylinder (Vector *a, Vector *b, double radius, 
-        Color *col) {
+        Color *color) {
     /*
-     * Cylinder's direction.
+     * Direction of the cylinder.
      */
-    Vector T;
-    T = (*b) - (*a);
-    T.Normalize_InPlace ();
-    T.CopyTo (&B);
+    B_ = (*b) - (*a);
+    B_.Normalize_InPlace ();
+
     /*
      * Radius and origin.
      */
-    a->CopyTo (&A);
-    R = radius;
+    a->CopyTo (&A_);
+    radius_ = radius;
+
     /*
      * Color, etc.
      */
-    col->CopyTo (&color);
-    next = NULL;
+    color->CopyTo (&color_);
+    next_ = NULL;
 }
 
 double Cylinder::Solve (Vector *O, Vector *D,
         double mind, double maxd) {
     /*
      * Capital letters are vectors.
-     *   A     :  Origin    of cylinder
-     *   B     :  Direction of cylinder
-     *   O     :  Origin    of ray
-     *   D     :  Direction of ray
-     *   P     :  Hit point on cylinder's surface
-     *   X     :  Point on cylinder's axis closest to the hit point
-     *   t     :  Distance between ray's      origin and P
-     *   alpha :  Distance between cylinder's origin and X
+     *   A       Origin    of cylinder
+     *   B       Direction of cylinder
+     *   O       Origin    of ray
+     *   D       Direction of ray
+     *   P       Hit point on cylinder's surface
+     *   X       Point on cylinder's axis closest to the hit point
+     *   t       Distance between ray's      origin and P
+     *   alpha   Distance between cylinder's origin and X
      *
      *  (P - X) . B = 0
      *  |P - X| = R  => (P - X) . (P - X) = R^2
@@ -229,13 +254,13 @@ double Cylinder::Solve (Vector *O, Vector *D,
      *
      */
     Vector T;
-    T = (*O) - A;
+    T = (*O) - A_;
 
     double a, b, d, f;
-    a  = T * (*D);
-    b  = B * (*D);
-    d  = T * B;
-    f  = (R * R) - (T * T);
+    a  = T  * (*D);
+    b  = B_ * (*D);
+    d  = T  * B_;
+    f  = (radius_ * radius_) - (T * T);
 
     /* Solving a quadratic equation for t. */
     double aa, bb, cc, t;
@@ -245,45 +270,47 @@ double Cylinder::Solve (Vector *O, Vector *D,
 
     SOLVE_QUADRATIC (aa, bb, cc, t, mind, maxd);
     if (t > 0.0) {
-        alpha = d + t * b;
+        alpha_ = d + t * b;
     }
     return t;
 }
 
-void Cylinder::GetNormal (Vector *hit, Vector *n) {
+void Cylinder::GetNormal (Vector *hit, Vector *normal) {
     Vector T, Q, N;
 
-    B.CopyTo (&T);
-    T.Scale_InPlace (alpha);
-    Q = A + T;
+    B_.CopyTo (&T);
+    T.Scale_InPlace (alpha_);
+    Q = A_ + T;
     N = (*hit) - Q;
     N.Normalize_InPlace ();
-    N.CopyTo (n);
+    N.CopyTo (normal);
 }
 
-void Cylinder::DetermineColor (Color *col) {
-    color.CopyTo (col);
+void Cylinder::DetermineColor (Vector *hit, 
+        Color *color) {
+    color_.CopyTo (color);
 }
 
 Cylinder *Cylinder::GetNext () {
-    return next;
+    return next_;
 }
 
 void Cylinder::SetNext (Cylinder *cylinder) {
-    next = cylinder;
+    next_ = cylinder;
 }
 
-/*
- * Light.
- */
+
+/*****************************
+ *           Light           *
+ *****************************/
 Light::Light (Vector *origin) {
-    origin->CopyTo (&position);
+    origin->CopyTo (&position_);
 }
 
 Light::~Light () {
 }
 
 void Light::GetToLight (Vector *hit, Vector *tolight) {
-    Vector subtract = position - (*hit);
-    subtract.CopyTo (tolight);
+    Vector T = position_ - (*hit);
+    T.CopyTo (tolight);
 }

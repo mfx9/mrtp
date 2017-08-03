@@ -36,7 +36,6 @@ bool Buffer::Allocate () {
      */
     if (data_ == NULL) {
         size_t size = (size_t) (width_ * height_);
-
         data_ = new Color [size];
         return true;
     }

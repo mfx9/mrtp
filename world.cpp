@@ -412,11 +412,11 @@ void World::TraceRay (Vector *origin, Vector *direction,
                 break;
             case HIT_SPHERE:
                 hitsphere->GetNormal (&inter, &normal);
-                hitsphere->DetermineColor (&objcol);
+                hitsphere->DetermineColor (&inter, &objcol);
                 break;
             case HIT_CYLINDER:
                 hitcylinder->GetNormal (&inter, &normal);
-                hitcylinder->DetermineColor (&objcol);
+                hitcylinder->DetermineColor (&inter, &objcol);
                 break;
         }
         /*

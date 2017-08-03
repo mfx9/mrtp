@@ -54,13 +54,16 @@ bool Texture::Allocate () {
      * No checking is done for whether the file
      * exists, etc.
      */
+    if (data_ != NULL) {
+        return false;
+    }
     const char *fn = (filename_).c_str ();
     image< rgb_pixel >  image (fn);
 
     width_  = image.get_width ();
     height_ = image.get_height ();
 
-    size_t  size = (size_t) (width_ * height_);
+    size_t size = (size_t) (width_ * height_);
     data_ = new Color [size];
 
     /*
