@@ -21,26 +21,30 @@
 
 #include <cmath>
 #include <cstdio>
+
 #include "vector.hpp"
 
-// #define DEBUG_CAMERA  1
+/*
+ * Macros.
+ */
+#define DEG_TO_RAD(angle) (angle * M_PI / 180.0)
 
 
 class Camera {
-    Vector  eye, lookat;
-    double  width, height;
-    double  ratio;   /*  width/height  */
-    double  perspective;
-    double  rotation;
+    Vector  eye_, lookat_;
+    double  width_, height_,
+        ratio_, perspective_, rotation_;
+
 public:
     Camera (Vector *origin, Vector *target,
-        unsigned int w, unsigned int h, double fov, 
-        double rot);
+        unsigned int width, unsigned int height, 
+        double fov, double roll);
     ~Camera ();
+
     void CalculateVectors (Vector *vw, Vector *vh,
         Vector *vo);
-    void GetDimensions (unsigned int *w,
-        unsigned int *h);
+    void GetDimensions (unsigned int *width,
+        unsigned int *height);
     void GetEye (Vector *vector);
 };
 

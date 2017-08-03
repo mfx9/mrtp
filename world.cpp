@@ -26,25 +26,28 @@ World::World (Parser *parser, unsigned int width,
     /* 
      * Initialize. 
      */
-    nplanes    = 0;
-    nspheres   = 0;
-    ncylinders = 0;
+    nplanes_    = 0;
+    nspheres_   = 0;
+    ncylinders_ = 0;
 
-    planes     = NULL;
-    spheres    = NULL;
-    cylinders  = NULL;
-    buffer     = NULL;
-    camera     = NULL;
-    light      = NULL;
+    /*
+     * Set all pointers to NULL.
+     */
+    planes_     = NULL;
+    spheres_    = NULL;
+    cylinders_  = NULL;
+    buffer_     = NULL;
+    camera_     = NULL;
+    light_      = NULL;
 
-    maxdist  = distance;
-    shadow   = shadowfactor;
-    model    = lightmodel;
+    maxdist_  = distance;
+    shadow_   = shadowfactor;
+    model_    = lightmodel;
 
-    parser_  =  parser;
-    width_   =  width;
-    height_  =  height;
-    fov_     =  fov;
+    parser_   = parser;
+    width_    = width;
+    height_   = height;
+    fov_      = fov;
 }
 
 bool World::Initialize () {
@@ -59,10 +62,10 @@ bool World::Initialize () {
     unsigned int i;
 
     /*
-     * Allocate buffer.
+     * Allocate a buffer.
      */
-    buffer = new Buffer (width_, height_);
-    buffer->Allocate ();
+    buffer_ = new Buffer (width_, height_);
+    buffer_->Allocate ();
 
     /*
      * Allocate camera, light, actors, etc.
@@ -93,7 +96,7 @@ bool World::Initialize () {
                     roll = reals[0];
                 }
             }
-            camera = new Camera (&position, &target, width_, 
+            camera_ = new Camera (&position, &target, width_, 
                 height_, fov_, roll);
         }
 
@@ -105,7 +108,7 @@ bool World::Initialize () {
 
             entry.GetData (&key, &type, reals, texts, &i);
             position.Set (reals);
-            light = new Light (&position);
+            light_ = new Light (&position);
         }
 
         /*
@@ -127,14 +130,12 @@ bool World::Initialize () {
                     scale = reals[0];
                 }
                 else if (key == "cola") {
-                    /*  ca.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);  */
-                    ca.Set (1.0f, 0.0f, 1.0f);
+                    ca.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);
                 }
                 else {  /* if (key == "colb") */
-                    /* cb.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]); */
-                    ca.Set (0.0f, 0.0f, 1.0f);
+                    cb.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);
                 }
             }
             AddPlane (&center, &normal, &ca, &cb, scale);
@@ -156,9 +157,8 @@ bool World::Initialize () {
                     radius = reals[0];
                 }
                 else {  /* if (key == "color") */
-                    /* color.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]); */
-                    color.Set (0.0f, 1.0f, 0.0f);
+                    color.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);
                 }
             }
             AddSphere (&position, radius, &color);
@@ -183,9 +183,8 @@ bool World::Initialize () {
                     radius = reals[0];
                 }
                 else {  /* if (key == "color") */
-                    /* color.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]); */
-                    color.Set (1.0f, 1.0f, 1.0f);
+                    color.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);
                 }
             }
             AddCylinder (&axisa, &axisb, radius, &color);
@@ -196,87 +195,87 @@ bool World::Initialize () {
 }
 
 World::~World () {
-    if (camera != NULL) {
-        delete camera;
+    if (camera_ != NULL) {
+        delete camera_;
     }
-    if (light  != NULL) {
-        delete light;
+    if (light_  != NULL) {
+        delete light_;
     }
-    if (buffer != NULL) {
-        delete buffer;
+    if (buffer_ != NULL) {
+        delete buffer_;
     }
 
     /* Clear all planes. */
     do {
         PopPlane ();
-    } while (nplanes > 0);
+    } while (nplanes_ > 0);
 
     /* Clear all spheres. */
     do {
         PopSphere ();
-    } while (nspheres > 0);
+    } while (nspheres_ > 0);
 
     /* Clear all cylinders. */
     do {
         PopCylinder ();
-    } while (ncylinders > 0);
+    } while (ncylinders_ > 0);
 }
 
 unsigned int World::PopPlane () {
     Plane *prev, *next, *last;
 
-    if (nplanes > 0) {
-        last = planes;
+    if (nplanes_ > 0) {
+        last = planes_;
         prev = NULL;
         while ((next = last->GetNext ()) != NULL) {
             prev = last;
             last = next;
         }
-        if (prev != NULL)
+        if (prev != NULL) {
             prev->SetNext (NULL);
+        }
         delete last;
-        nplanes--;
+        nplanes_--;
     }
-    /* Returns zero if there are no planes left. */ 
-    return nplanes;
+    return nplanes_;
 }
 
 unsigned int World::PopSphere () {
     Sphere *prev, *next, *last;
 
-    if (nspheres > 0) {
-        last = spheres;
+    if (nspheres_ > 0) {
+        last = spheres_;
         prev = NULL;
         while ((next = last->GetNext ()) != NULL) {
             prev = last;
             last = next;
         }
-        if (prev != NULL)
+        if (prev != NULL) {
             prev->SetNext (NULL);
+        }
         delete last;
-        nspheres--;
+        nspheres_--;
     }
-    /* Returns zero if there are no spheres left. */ 
-    return nspheres;
+    return nspheres_;
 }
 
 unsigned int World::PopCylinder () {
     Cylinder *prev, *next, *last;
 
-    if (ncylinders > 0) {
-        last = cylinders;
+    if (ncylinders_ > 0) {
+        last = cylinders_;
         prev = NULL;
         while ((next = last->GetNext ()) != NULL) {
             prev = last;
             last = next;
         }
-        if (prev != NULL)
+        if (prev != NULL) {
             prev->SetNext (NULL);
+        }
         delete last;
-        ncylinders--;
+        ncylinders_--;
     }
-    /* Returns zero if there are no cylinders left. */ 
-    return ncylinders;
+    return ncylinders_;
 }
 
 unsigned int World::AddPlane (Vector *center, Vector *normal,
@@ -285,18 +284,18 @@ unsigned int World::AddPlane (Vector *center, Vector *normal,
 
     plane = new Plane (center, normal, colora, 
         colorb, texscale);
-    if (nplanes < 1) {
-        planes = plane;
+    if (nplanes_ < 1) {
+        planes_ = plane;
     }
     else {
-        next = planes;
+        next = planes_;
         do {
             last = next;
             next = last->GetNext ();
         } while (next != NULL);
         last->SetNext (plane);
     }
-    return (++nplanes);
+    return (++nplanes_);
 }
 
 unsigned int World::AddSphere (Vector *center, double radius,
@@ -304,18 +303,18 @@ unsigned int World::AddSphere (Vector *center, double radius,
     Sphere *next, *last, *sphere;
 
     sphere = new Sphere (center, radius, color);
-    if (nspheres < 1) {
-        spheres = sphere;
+    if (nspheres_ < 1) {
+        spheres_ = sphere;
     }
     else {
-        next = spheres;
+        next = spheres_;
         do {
             last = next;
             next = last->GetNext ();
         } while (next != NULL);
         last->SetNext (sphere);
     }
-    return (++nspheres);
+    return (++nspheres_);
 }
 
 unsigned int World::AddCylinder (Vector *A, Vector *B, 
@@ -323,18 +322,18 @@ unsigned int World::AddCylinder (Vector *A, Vector *B,
     Cylinder *next, *last, *cylinder;
 
     cylinder = new Cylinder (A, B, radius, color);
-    if (ncylinders < 1) {
-        cylinders = cylinder;
+    if (ncylinders_ < 1) {
+        cylinders_ = cylinder;
     }
     else {
-        next = cylinders;
+        next = cylinders_;
         do {
             last = next;
             next = last->GetNext ();
         } while (next != NULL);
         last->SetNext (cylinder);
     }
-    return (++ncylinders);
+    return (++ncylinders_);
 }
 
 void World::TraceRay (Vector *origin, Vector *direction,
@@ -352,15 +351,15 @@ void World::TraceRay (Vector *origin, Vector *direction,
      * Initialize.
      */
     color->Zero ();
-    currd  = maxdist;
+    currd  = maxdist_;
     hit    = HIT_NULL;
     /*
      * Search for planes.
      */
-    plane    = planes;
+    plane    = planes_;
     hitplane = NULL;
     while (plane != NULL) {
-        dist = plane->Solve (origin, direction, 0., maxdist);
+        dist = plane->Solve (origin, direction, 0., maxdist_);
         if ((dist > 0.) && (dist < currd)) {
             currd    = dist;
             hitplane = plane;
@@ -372,10 +371,10 @@ void World::TraceRay (Vector *origin, Vector *direction,
     /*
      * Search for spheres.
      */
-    sphere    = spheres;
+    sphere    = spheres_;
     hitsphere = NULL;
     while (sphere != NULL) {
-        dist  = sphere->Solve (origin, direction, 0., maxdist);
+        dist  = sphere->Solve (origin, direction, 0., maxdist_);
         if ((dist > 0.) && (dist < currd)) {
             currd     = dist;
             hitsphere = sphere;
@@ -387,10 +386,10 @@ void World::TraceRay (Vector *origin, Vector *direction,
     /*
      * Search for cylinders. 
      */
-    cylinder    = cylinders;
+    cylinder    = cylinders_;
     hitcylinder = NULL;
     while (cylinder != NULL) {
-        dist  = cylinder->Solve (origin, direction, 0., maxdist);
+        dist  = cylinder->Solve (origin, direction, 0., maxdist_);
         if ((dist > 0.) && (dist < currd)) {
             currd       = dist;
             hitcylinder = cylinder;
@@ -425,7 +424,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
          *   and light.
          *
          */
-        light->GetToLight (&inter, &tl);
+        light_->GetToLight (&inter, &tl);
         raylen = tl.Len ();
         tl.Normalize_InPlace ();
         dot = normal * tl;
@@ -436,7 +435,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
          *
          */
         isshadow = false;
-        sphere   = spheres;
+        sphere   = spheres_;
         while (sphere != NULL) {
             if (sphere != hitsphere) {
                 dist = sphere->Solve (&inter, &tl, 0., raylen);
@@ -448,7 +447,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
             sphere = sphere->GetNext ();
         }
         if (!isshadow) {
-            cylinder   = cylinders;
+            cylinder   = cylinders_;
             while (cylinder != NULL) {
                 if (cylinder != hitcylinder) {
                     dist = cylinder->Solve (&inter, &tl, 0., raylen);
@@ -462,20 +461,20 @@ void World::TraceRay (Vector *origin, Vector *direction,
         }
 
         if (isshadow) {
-            dot *= shadow;
+            dot *= shadow_;
         }
         /*
          * Decrease light intensity for objects further
          * away from the light.
          *
          */
-        if (model == LIGHT_MODEL_LINEAR) {
-            fade = 1.0 - (raylen / maxdist);
+        if (model_ == LIGHT_MODEL_LINEAR) {
+            fade = 1.0 - (raylen / maxdist_);
         }
-        else if (model == LIGHT_MODEL_QUADRATIC) {
-            fade = 1.0 - sqr (raylen / maxdist);
+        else if (model_ == LIGHT_MODEL_QUADRATIC) {
+            fade = 1.0 - sqr (raylen / maxdist_);
         }
-        else {  /* if (model == LIGHT_MODEL_NONE) */
+        else {  /* if (model_ == LIGHT_MODEL_NONE) */
             fade = 1.0;
         }
         dot *= fade;
@@ -491,20 +490,20 @@ void World::Render () {
     Color *bp;
     Vector vw, vh, vo, eye,
         horiz, verti, origin, direction;
-    unsigned int width, height, i, j;
+    unsigned int i, j;
+
     /*
      * Initialize.
      */
-    camera->CalculateVectors (&vw, &vh, &vo);
-    camera->GetDimensions (&width, &height);
-    camera->GetEye (&eye);
+    camera_->CalculateVectors (&vw, &vh, &vo);
+    camera_->GetEye (&eye);
 
-    bp = buffer->GetPointer ();
+    bp = buffer_->GetPointer ();
     /*
      * Trace a ray for every pixel.
      */
-    for (j = 0; j < height; j++) {
-        for (i = 0; i < width; i++) {
+    for (j = 0; j < height_; j++) {
+        for (i = 0; i < width_; i++) {
             horiz     = vw * (double) i;
             verti     = vh * (double) j;
             origin    = vo + horiz + verti;
@@ -516,10 +515,9 @@ void World::Render () {
     }
 }
 
-void World::WritePNG (string filename) {
+void World::WritePNG (string *filename) {
     /*
-    Color blue (0., 0., 1.);
-    buffer->Text ("BUFFER TEST.", 0, 0, &blue);
-    */
-    buffer->WriteToPNG (filename);
+     * Save image.
+     */
+    buffer_->WriteToPNG (filename);
 }

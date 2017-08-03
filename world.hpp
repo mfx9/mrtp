@@ -45,44 +45,49 @@
 
 
 class World {
-    Buffer  *buffer;
-    Camera  *camera;
-    Light   *light;
+    Buffer  *buffer_;
 
-    /* Model to quench light with 
-     * increasing distance.
-     *
-     * At maxdist, the light is fully
-     * quenched, unless the model 
-     * is "none". 
-     */
-    char    model;
-    double  maxdist;
+    Camera  *camera_;
+    Light   *light_;
+
     /*
-     * Shadow factor between <0..1>,
-     * defines how "deep" shadows are.
+     * Model to quench light with increasing
+     * distance.
+     *
+     * At maxdist, the light is fully quenched,
+     * unless the model is "none". 
      */
-    double  shadow;
+    char    model_;
+    double  maxdist_;
+
+    /*
+     * Shadow factor between <0..1>, defines how
+     * "deep" shadows are.
+     */
+    double  shadow_;
+
     /*
      * Maximum distance reached by rays.
      */
-    double  cutoff;
+    double  cutoff_;
+
     /*
-     * Planes, spheres and cylinders
-     * are one-way linked lists.
+     * Planes, spheres and cylinders are one-way
+     * linked lists.
      */
-    Plane        *planes;
-    unsigned int  nplanes;
+    Plane        *planes_;
+    unsigned int  nplanes_;
 
-    Sphere       *spheres;
-    unsigned int  nspheres;
+    Sphere       *spheres_;
+    unsigned int  nspheres_;
 
-    Cylinder     *cylinders;
-    unsigned int  ncylinders;
+    Cylinder     *cylinders_;
+    unsigned int  ncylinders_;
 
     Parser    *parser_;
     double     fov_;
     unsigned int width_, height_;
+
 public:
     World (Parser *parser, unsigned int width,
         unsigned int height, double fov,
@@ -90,10 +95,9 @@ public:
         char lightmodel);
     ~World ();
     bool Initialize ();
+
     /*
-     * Manipulation of objects, adding, 
-     * removing, etc.
-     *
+     * Manipulation of objects, adding, removing, etc.
      */
     unsigned int AddPlane (Vector *center, Vector *normal,
         Color *colora, Color *colorb, double texscale);
@@ -105,6 +109,7 @@ public:
     unsigned int PopPlane ();
     unsigned int PopSphere ();
     unsigned int PopCylinder ();
+
     /*
      * Rendering, writing output, etc.
      *
@@ -112,7 +117,7 @@ public:
     void TraceRay (Vector *origin, Vector *direction,
         Color *color);
     void Render ();
-    void WritePNG (string filename);
+    void WritePNG (string *filename);
 };
 
 #endif /* _WORLD_H */

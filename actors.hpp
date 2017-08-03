@@ -68,6 +68,7 @@ class Sphere {
     double  R;
     Color   color;
     Sphere *next;
+
 public:
     ~Sphere ();
     Sphere ();
@@ -91,6 +92,7 @@ class Plane {
     Texture *texture;
     bool    istexture;
     Plane   *next;
+
 public:
     ~Plane ();
     Plane ();
@@ -111,12 +113,10 @@ class Cylinder {
     double    R, alpha;
     Color     color;
     Cylinder *next;
+
 public:
     ~Cylinder ();
     Cylinder ();
-    /*
-     * Points a and b define cylinder's axis.
-     */
     Cylinder (Vector *a, Vector *b, double radius, 
         Color *col);
 
@@ -131,6 +131,7 @@ public:
 
 class Light {
     Vector  position;
+
 public:
     Light (Vector *origin);
     ~Light ();

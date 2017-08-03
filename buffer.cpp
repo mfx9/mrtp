@@ -19,57 +19,79 @@
 #include "buffer.hpp"
 
 
-Buffer::Buffer (unsigned int w,
-        unsigned int h) {
-    data   = NULL;
-    width  = w;
-    height = h;
+Buffer::Buffer (unsigned int width, 
+        unsigned int height) {
+    /*
+     * Constructor.
+     */
+    data_   =  NULL;
+    width_  =  width;
+    height_ =  height;
 }
 
 bool Buffer::Allocate () {
-    if (data == NULL) {
-        size_t size;
-        size = (size_t) (width * height);
-        data = new Color [size];
+    /*
+     * Allocate buffer.
+     *
+     */
+    if (data_ == NULL) {
+        size_t size = (size_t) (width_ * height_);
+
+        data_ = new Color [size];
         return true;
     }
     return false;
 }
 
 Buffer::~Buffer () {
-    if (data != NULL) {
-        /*
-         * Deallocate data.
-         */
-        delete[] data;
+    /*
+     * Deallocate buffer.
+     *
+     */
+    if (data_ != NULL) {
+        delete[] data_;
     }
 }
 
 Color *Buffer::GetPointer () {
-    return &data[0];
+    /*
+     * Get a pointer to the beginning
+     * of data.
+     *
+     */
+    return &data_[0];
 }
 
 void Buffer::Clear () {
-    unsigned int i;
-    Color *bp;
+    /*
+     * Fill the buffer with black.
+     *
+     */
+    unsigned int i = 0;
+    Color  *bp = &data_[0];
 
-    for (bp = &data[0], i = 0; 
-        i < width * height; i++, bp++) {
-            bp->Zero ();
+    for (; i < (width_ * height_); i++) {
+        (bp++)->Zero ();
     }
 }
 
-void Buffer::WriteToPNG (string filename) {
-    image< rgb_pixel > image (width, height);
-    rgb_pixel *pixel;
+void Buffer::WriteToPNG (string *filename) {
+    /*
+     * Save the buffer to a PNG file.
+     *
+     */
     unsigned char r, g, b;
-    unsigned int i, j;
+    unsigned int  i, j;
     Color *bp;
 
-    bp = &data[0];
-    for (i = 0; i < height; i++) {
+    image< rgb_pixel > image (width_, height_);
+    rgb_pixel  *pixel;
+
+    bp = &data_[0];
+    for (i = 0; i < height_; i++) {
+
         pixel = &image[i][0];
-        for (j = 0; j < width; j++) {
+        for (j = 0; j < width_; j++) {
             bp->Get (&r, &g, &b);
             bp++;
             pixel->red   = r;
@@ -78,34 +100,6 @@ void Buffer::WriteToPNG (string filename) {
             pixel++;
         }
     }
-    image.write (filename.c_str ());
-}
-
-void Buffer::Text (string text, unsigned int x,
-        unsigned int y, Color *color) {
-    unsigned char *fp, letter, idx, byte;
-    char *tp;
-    Color *bp, *sav;
-    int row, col;
-
-    tp = &text[0];
-    bp = &data[x + y * width];
-
-    while (*tp != 0) {
-        letter = *(tp++);
-        idx  = (letter - ' ') & 63;
-        fp   = &fontdata[idx << 3];
-        sav  = bp;
-
-        for (row = 7; row >= 0; row--) {
-            byte = *(fp++);
-            for (col = 7; col >= 0; col--) {
-                if ((byte >> col) & 1)
-                    color->CopyTo (bp);
-                bp++;
-            }
-            bp += (width - 8);
-        }
-        bp = sav + 8;
-    }
+    const char *fn = (*filename).c_str ();
+    image.write (fn);
 }

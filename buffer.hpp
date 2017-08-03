@@ -26,22 +26,22 @@ using namespace std;
 using namespace png;
 
 #include "color.hpp"
-#include "fontdata.hpp"
 
 
 class Buffer {
-    Color *data;
-    unsigned int width, height;
+    Color  *data_;
+    unsigned int width_, height_;
+
 public:
-    Buffer (unsigned int w,
-        unsigned int h);
+    Buffer (unsigned int width, 
+        unsigned int height);
     ~Buffer ();
+
     bool Allocate ();
     void Clear ();
-    void Text (string text, unsigned int x,
-        unsigned int y, Color *color);
+
     Color *GetPointer ();
-    void WriteToPNG (string filename);
+    void WriteToPNG (string *filename);
 };
 
 #endif /* _BUFFER_H */

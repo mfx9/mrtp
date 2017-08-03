@@ -29,14 +29,16 @@ using namespace png;
 
 
 class Texture {
-    Color *data;
-    unsigned int width, height;
+    unsigned int width_, height_;
+    Color  *data_;
+    string  filename_;
+
 public:
-    Texture ();
+    Texture (string *filename);
     ~Texture ();
-    bool LoadFromPNG (string filename);
-    void Generate (Color *cola, Color *colb,
-        unsigned int w, unsigned int h);
+
+    bool Allocate ();
+    Color *GetPointer ();
 };
 
 #endif /* _TEXTURE_H */

@@ -20,89 +20,95 @@
 
 
 Camera::Camera (Vector *origin, Vector *target,
-        unsigned int w, unsigned int h, double fov, 
-        double rot) {
-    origin->CopyTo (&eye);
-    target->CopyTo (&lookat);
-    width  = (double) w;
-    height = (double) h;
-    ratio  = w / h;
-    perspective = ratio / (2. * tan (fov / 2. * M_PI / 180.));
-    rotation = rot;
+        unsigned int width, unsigned int height, double fov, 
+        double roll) {
+    /*
+     * Constructor.
+     *
+     */
+    origin->CopyTo (&eye_);
+    target->CopyTo (&lookat_);
+
+    width_       = (double) width;
+    height_      = (double) height;
+    rotation_    = roll;
+    ratio_       = width / height;
+    perspective_ = ratio_ / (2.0 * tan (DEG_TO_RAD (fov / 2.0)));
 }
 
 Camera::~Camera () {
 }
 
-void Camera::GetDimensions (unsigned int *w, 
-        unsigned int *h) {
-    *w = width;
-    *h = height;
+void Camera::GetDimensions (unsigned int *width, 
+        unsigned int *height) {
+    *width  = width_;
+    *height = height_;
 }
 
 void Camera::GetEye (Vector *vector) {
-    eye.CopyTo (vector);
+    eye_.CopyTo (vector);
 }
 
 void Camera::CalculateVectors (Vector *vw, Vector *vh,
         Vector *vo) {
     /*
-     * . Method calculates vectors that span the window.
+     * Calculate vectors that span the window.
      */
 
     /*
-     * . i is the vector between the camera and
-     *  the center of the window.
+     * i is a vector between the camera and
+     * the center of the window.
      */
-    Vector i;
-    i = lookat - eye;
+    Vector i = lookat_ - eye_;
     i.Normalize_InPlace ();
+
     /*
-     * if (i.x == 0. && i.y == 0.)
+     * if (i.x == 0.0 && i.y == 0.0)
      *     return false;
      */
-
-    Vector j, k (0., 0., 1.);
+    Vector j, k (0.0, 0.0, 1.0);
     j = i ^ k;
     j.Normalize_InPlace ();
+
     /*
-     * . Flip the cross-product instead?
+     * Flip the cross-product instead?
      */
-    j.Scale_InPlace (-1.);
+    j.Scale_InPlace (-1.0);
     k = i ^ j;
     k.Normalize_InPlace ();
+
     /*
-     * . Apply camera rotation around
-     *  the axis of i.
+     * TODO
+     * Apply camera rotation around
+     * the axis of i.
      */
 
     /*
-     * . Calculate the central point of
-     *  the window.
+     * Calculate the central point of the window.
      */
-    Vector center;
-    center = (i * perspective) + eye;
-    /*
-     * . Modify vectors.
-     */
-    j.Scale_InPlace (.5);     //ratio * .5
-    k.Scale_InPlace (.5);
+    Vector center = (i * perspective_) + eye_;
 
     /*
-     * . Find 3 corners of the window.
+     * Modify vectors (use ratio_ ?).
      */
-    Vector wo, ww, wh;
-    wo = center + j + k;
-    ww = center - j + k;
-    wh = center + j - k;
+    j.Scale_InPlace (0.5);
+    k.Scale_InPlace (0.5);
 
     /*
-     * . Find vectors spanning the window.
+     * Find three corners of the window.
      */
-    Vector horiz, verti;
-    horiz = (ww - wo) * (1. / width );
-    horiz.CopyTo (vw);
-    verti = (wh - wo) * (1. / height);
-    verti.CopyTo (vh);
+    Vector wo = center + j + k;
+    Vector ww = center - j + k;
+    Vector wh = center + j - k;
+
+    /*
+     * Find vectors spanning the window.
+     */
     wo.CopyTo (vo);
+
+    Vector horiz = (ww - wo) * (1.0 / width_ );
+    horiz.CopyTo (vw);
+
+    Vector verti = (wh - wo) * (1.0 / height_);
+    verti.CopyTo (vh);
 }

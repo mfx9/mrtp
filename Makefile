@@ -1,11 +1,11 @@
 # . Makefile for mrtp
 
 PNGVER  = 0.2.9
-CFLAGS  = -Ipng++/png++-${PNGVER} -O2 -W -Wall -pedantic
+CFLAGS  = -Ipng++/png++-${PNGVER} -W -Wall -pedantic  # -O2 
 CC      = g++
 
 OBJ = main.o actors.o vector.o world.o camera.o  \
-    color.o buffer.o parser.o fontdata.o texture.o
+    color.o buffer.o parser.o texture.o
 
 
 default: mrtp
@@ -37,9 +37,6 @@ buffer.o: buffer.cpp buffer.hpp
 parser.o: parser.cpp parser.hpp
 	$(CC) $(CFLAGS) -c parser.cpp -o parser.o
 
-fontdata.o: fontdata.cpp fontdata.hpp
-	$(CC) $(CFLAGS) -c fontdata.cpp -o fontdata.o
-
 texture.o: texture.cpp texture.hpp
 	$(CC) $(CFLAGS) -c texture.cpp -o texture.o
 
@@ -53,5 +50,4 @@ clean:
 	if [ -e  color.o    ]  ;  then  rm -v  color.o     ;  fi
 	if [ -e  buffer.o   ]  ;  then  rm -v  buffer.o    ;  fi
 	if [ -e  parser.o   ]  ;  then  rm -v  parser.o    ;  fi
-	if [ -e  fontdata.o ]  ;  then  rm -v  fontdata.o  ;  fi
 	if [ -e  texture.o  ]  ;  then  rm -v  texture.o   ;  fi

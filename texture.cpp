@@ -19,33 +19,50 @@
 #include "texture.hpp"
 
 
-Texture::Texture () {
-    data   = NULL;
-    width  = 0;
-    height = 0;
+Texture::Texture (string *filename) {
+    /*
+     * Constructor.
+     */
+    filename_ = (*filename);
+    data_     =  NULL;
+    width_    =  -1;
+    height_   =  -1;
 }
 
 Texture::~Texture () {
-    if (data != NULL) {
-        delete[] data;
+    /*
+     * Deallocate.
+     */
+    if (data_ != NULL) {
+        delete[] data_;
     }
 }
 
-bool Texture::LoadFromPNG (string filename) {
-    if (data != NULL) {
-        return false;
-    }
+Color *Texture::GetPointer () {
     /*
-     * Open texture file.
+     * Get a pointer to the beginning
+     * of data.
      */
-    const char *fn = filename.c_str ();
-    image< rgb_pixel > image (fn);
+    return &data_[0];
+}
+
+bool Texture::Allocate () {
     /*
-     * Allocate texture buffer.
+     * Allocate a texture and load data from 
+     * a PNG file.
+     *
+     * No checking is done for whether the file
+     * exists, etc.
      */
-    width  = image.get_width ();
-    height = image.get_height ();
-    data   = new Color [(size_t) (width * height)];
+    const char *fn = (filename_).c_str ();
+    image< rgb_pixel >  image (fn);
+
+    width_  = image.get_width ();
+    height_ = image.get_height ();
+
+    size_t  size = (size_t) (width_ * height_);
+    data_ = new Color [size];
+
     /*
      * Copy data file->buffer.
      */
@@ -54,11 +71,11 @@ bool Texture::LoadFromPNG (string filename) {
     rgb_pixel     *pixel;
     Color         *color;
 
-    color = &data[0];
-    for (i = 0; i < height; i++) {
+    color = &data_[0];
+    for (i = 0; i < height_; i++) {
         pixel = &image[i][0];
 
-        for (j = 0; j < width; j++) {
+        for (j = 0; j < width_; j++) {
             r = pixel->red;
             g = pixel->green;
             b = pixel->blue;
@@ -67,9 +84,9 @@ bool Texture::LoadFromPNG (string filename) {
             color++;
         }
     }
-    return true;
-}
 
-void Texture::Generate (Color *cola, Color *colb,
-        unsigned int w, unsigned int h) {
+    /*
+     * Finalize.
+     */
+    return true;
 }

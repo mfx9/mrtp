@@ -342,7 +342,7 @@ int main (int argc, char **argv) {
     cout << "OK. Elapsed time: " << 
         ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
         " sec" << endl;
-    world.WritePNG (output);
+    world.WritePNG (&output);
 
     return EXIT_OK;
 }
