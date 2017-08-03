@@ -40,9 +40,6 @@ mrtp -h
 
 you will get a list of available options and an example of use.
 
-In the future, I should probably merge the two installation steps 
-into one.
-
 
 ## Input file format
 
