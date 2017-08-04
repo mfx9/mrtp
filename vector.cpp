@@ -54,6 +54,13 @@ void Vector::Set (double *coor) {
     z_ = coor[2];
 }
 
+void Vector::Get (double *x, double *y,
+       double *z) {
+    (*x) = x_;
+    (*y) = y_;
+    (*z) = z_;
+}
+
 void Vector::CopyTo (Vector *other) {
     other->x_ = x_;
     other->y_ = y_;
@@ -129,4 +136,39 @@ Vector Vector::operator* (double scale) {
     o.y_ = y_ * scale;
     o.z_ = z_ * scale;
     return o;
+}
+
+void Vector::Associated_InPlace () {
+    /*
+     * Method finds the major component of a vector
+     * and generates an "associated" unit vector.
+     *
+     * A cross product of the vector with its "associated" 
+     * vector should give a non-zero vector.
+     */
+    double x = 0.0, y = 0.0, z = 0.0;
+
+    if (x_ > y_) {
+        if (x_ > z_) {
+            /* Major component is x. */
+            y = 1.0;
+        }
+        else {  /* if (x_ <= z_) */
+            /* Major component is z. */
+            x = 1.0;
+        }
+    }
+    else {  /* if (x_ <= y_) */
+        if (y_ > z_) {
+            /* Major component is y. */
+            z = 1.0;
+        }
+        else {  /* if (y_ <= z_) */
+            /* Major component is z. */
+            x = 1.0;
+        }
+    }
+    x_ = x;
+    y_ = y;
+    z_ = z;
 }

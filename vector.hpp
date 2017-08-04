@@ -38,6 +38,10 @@ public:
         double z);
     void Set (double *coor);
 
+    /* Getters. */
+    void Get (double *x, double *y,
+        double *z);
+
     /* Copying. */
     void CopyTo (Vector *other);
 
@@ -46,6 +50,7 @@ public:
     double DotSelf ();
     void Scale_InPlace (double scale);
     void Normalize_InPlace ();
+    void Associated_InPlace ();
 
     /* Sum of two vectors. */
     Vector operator+ (Vector &other);

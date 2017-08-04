@@ -30,31 +30,30 @@ Plane::~Plane () {
 }
 
 Plane::Plane (Vector *center, Vector *normal, Color *colora, 
-        Color *colorb, double texscale) {
+        Color *colorb, double scale) {
     next_ = NULL;
     center->CopyTo (&center_);
 
     normal->CopyTo (&normal_);
     normal_.Normalize_InPlace ();
 
-    /*
-     * Texturing.
-     */
     colora->CopyTo (&colora_);
     colorb->CopyTo (&colorb_);
-    scale_ = texscale;
+    scale_ = scale;
 
-    Vector k;
-    normal_.CopyTo (&k);
+    /*
+     * Prepare texturing.
+     */
+    Vector T;
 
-    Vector i (1., 0., 0.), j;
-    j = k ^ i;
-    j.Normalize_InPlace ();
-    j.CopyTo (&texturey_);
+    normal_.CopyTo (&T);
+    T.Associated_InPlace ();
 
-    i = j ^ k;
-    i.Normalize_InPlace ();
-    i.CopyTo (&texturex_);
+    texturex_ = normal_ ^ T;
+    texturex_.Normalize_InPlace ();
+
+    texturey_ = normal_ ^ texturex_;
+    texturey_.Normalize_InPlace ();
 }
 
 void Plane::DetermineColor (Vector *hit, 

@@ -99,7 +99,7 @@ public:
     ~Plane ();
     Plane ();
     Plane (Vector *center, Vector *normal, Color *colora, 
-        Color *colorb, double texscale);
+        Color *colorb, double scale);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
