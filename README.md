@@ -1,5 +1,5 @@
 # Mrtp
-<img src="./sample.png" alt="Sample image" width="640" />
+<img src="./sample.png" alt="Sample image" width="400" />
 
 
 A simple raytracing tool to explore programming in C++.
