@@ -25,10 +25,11 @@
 
 #include "vector.hpp"
 #include "actors.hpp"
-#include "buffer.hpp"
-#include "color.hpp"
 #include "camera.hpp"
 #include "parser.hpp"
+#include "buffer.hpp"
+#include "color.hpp"
+#include "texture.hpp"
 
 
 // #define DEBUG_WORLD     1
@@ -84,6 +85,9 @@ class World {
     Cylinder     *cylinders_;
     unsigned int  ncylinders_;
 
+    Texture      *textures_;
+    unsigned int  ntextures_;
+
     Parser    *parser_;
     double     fov_;
     unsigned int width_, height_;
@@ -99,16 +103,18 @@ public:
     /*
      * Manipulation of objects, adding, removing, etc.
      */
-    unsigned int AddPlane (Vector *center, Vector *normal,
-        Color *colora, Color *colorb, double texscale);
-    unsigned int AddSphere (Vector *center, double radius,
+    void AddPlane (Vector *center, Vector *normal,
+        Color *colora, Color *colorb, double texscale, Texture *texture);
+    void AddSphere (Vector *center, double radius,
         Color *color);
-    unsigned int AddCylinder (Vector *A, Vector *B,
+    void AddCylinder (Vector *A, Vector *B,
         double radius, Color *color);
+    Texture *AddTexture (string *filename);
 
     unsigned int PopPlane ();
     unsigned int PopSphere ();
     unsigned int PopCylinder ();
+    unsigned int PopTexture ();
 
     /*
      * Rendering, writing output, etc.

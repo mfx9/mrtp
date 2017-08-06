@@ -145,6 +145,7 @@ void Vector::Associated_InPlace () {
      *
      * A cross product of the vector with its "associated" 
      * vector should give a non-zero vector.
+     *
      */
     double x = 0.0, y = 0.0, z = 0.0;
 

@@ -30,7 +30,7 @@ Plane::~Plane () {
 }
 
 Plane::Plane (Vector *center, Vector *normal, Color *colora, 
-        Color *colorb, double scale) {
+        Color *colorb, double scale, Texture *texture) {
     next_ = NULL;
     center->CopyTo (&center_);
 
@@ -43,6 +43,7 @@ Plane::Plane (Vector *center, Vector *normal, Color *colora,
 
     /*
      * Prepare texturing.
+     *
      */
     Vector T;
 
@@ -54,13 +55,16 @@ Plane::Plane (Vector *center, Vector *normal, Color *colora,
 
     texturey_ = normal_ ^ texturex_;
     texturey_.Normalize_InPlace ();
+
+    /*
+     * Assign a pointer to the texture (can be NULL).
+     */
+    texture_ = texture;
 }
 
-void Plane::DetermineColor (Vector *hit, 
-        Color *color) {
+void Plane::DetermineColor (Vector *hit, Color *color) {
     Vector  V;
-    double  vx, vy, scale;
-    int     tx, ty;
+    double  vx, vy;
     Color  *cp;
 
     V = (*hit) - center_;
@@ -68,43 +72,44 @@ void Plane::DetermineColor (Vector *hit,
      * Calculate components of V (dot products).
      * 
      */
-    vx    = V * texturex_;
-    vy    = V * texturey_;
-    scale = 1.0 / scale_;
-    tx    = (int) (vx * scale);
-    ty    = (int) (vy * scale);
+    vx = V * texturex_;
+    vy = V * texturey_;
 
-    if (vx > 0.0) {
-        tx--;
+    if (texture_ != NULL) {
+        /*
+         * Use actual textures in texture mapping.
+         */
+        cp = texture_->GetColor (vx, vy, scale_);
     }
-    if (vy > 0.0) {
-        ty--;
+    else {
+        /*
+         * Generate a checkerboard pattern 
+         * from two colors.
+         */
+        double  vx, vy, scale;
+        int     tx, ty;
+
+        scale = 1.0 / scale_;
+        tx    = (int) (vx * scale);
+        ty    = (int) (vy * scale);
+        if (vx > 0.0) {
+            tx--;
+        }
+        if (vy > 0.0) {
+            ty--;
+        }
+        
+        if (!(tx & 1)) {
+            cp = (!(ty & 1)) ? &colora_ : &colorb_;
+        }
+        else {
+            cp = (!(ty & 1)) ? &colorb_ : &colora_;
+        }
     }
 
     /*
-    if (!(tx & 1)) {
-        if (!(ty & 1)) {
-            cp = &colora_;
-        }
-        else {
-            cp = &colorb_;
-        }
-    } else {
-        if (!(ty & 1)) {
-            cp = &colorb_;
-        }
-        else {
-            cp = &colora_;
-        }
-    }
-    */
-    if (!(tx & 1)) {
-        cp = (!(ty & 1)) ? &colora_ : &colorb_;
-    }
-    else {
-        cp = (!(ty & 1)) ? &colorb_ : &colora_;
-    }
-
+     * Finalize.
+     */
     cp->CopyTo (color);
 }
 

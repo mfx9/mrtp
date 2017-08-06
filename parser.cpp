@@ -151,13 +151,14 @@ bool Parser::ConvertTokens (string *tokens,
 char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
         unsigned int sizes[], unsigned int npar, unsigned int *errline, 
         string *errmsg, Entry *entry) {
-    unsigned int  i, j;
-    unsigned int  ntokens, nlabels;
+    unsigned int  i, j, ntokens, 
+        nlabels, position;
 
     unsigned char flags = 0,
         pattern = 0;
     bool    check, found;
-    string  label;
+    string  label, filename, 
+        extension;
 
     double output[MAX_COMPONENTS];
 
@@ -165,7 +166,7 @@ char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
     const string *labels,
         camera[] = {"position", "target", "roll"},
         light[] = {"position"},
-        plane[] = {"center", "normal", "cola", "colb", "scale"},  // , "texture"
+        plane[] = {"center", "normal", "texture", "scale"},  // , "cola", "colb", 
         sphere[] = {"position", "radius", "color"},
         cylinder[] = {"a", "b", "radius", "color"};
 
@@ -249,7 +250,35 @@ char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
             entry->AddReal (&label, output, (ntokens - 1));
         }
         else {
-            entry->AddText (&label, &collect[i][1], 1);
+            filename = collect[i][1];
+            /*
+             * Check for a valid filename.
+             */
+            position = filename.length () - 1;
+            if ((filename.at (0) != '"') || (filename.at (position) != '"')) {
+                return CODE_FILENAME;
+            }
+            filename = filename.substr (1, position - 1);
+
+            /*
+             * Check for a valid extension.
+             */
+            extension = filename.substr (position - 4, 3);
+            if (extension != "png") {
+                return CODE_FILENAME;
+            }
+
+            /*
+             * Check if the file exists.
+             */
+            const char *fn = filename.c_str ();
+            ifstream file (fn);
+
+            if (!file.good ()) {
+                (*errmsg) = filename;
+                return CODE_NOT_FOUND;
+            }
+            entry->AddText (&label, &filename, 1);
         }
 
         /*
@@ -419,9 +448,17 @@ void Parser::Parse () {
                         cout << "Line " << start << ": Missing parameter in " 
                             << item << "." << endl;
                     }
-                    else {  /* if (code == CODE_REDUNDANT) */
+                    else if (code == CODE_REDUNDANT) {
                         cout << "Line " << (start + errline + 1) 
                             << ": Redundant parameter \"" << msg << "\"." << endl;
+                    }
+                    else if (code == CODE_FILENAME) {
+                        cout << "Line " << (start + errline + 1) 
+                            << ": Invalid filename." << endl;
+                    }
+                    else {  /* if (code == CODE_NOT_FOUND) */
+                        cout << "Line " << (start + errline + 1) 
+                            << ": Texture file \"" << msg << "\" not found." << endl;
                     }
                     config.close ();
                     return;
@@ -532,7 +569,7 @@ void Entry::Print () {
             for (j = 0; j < MAX_COMPONENTS; j++) {
                 if (type_[i] == TYPE_TEXT) {
                     if (text_[i][j] != "") {
-                        cout << "\"" << text_[i] << "\" ";
+                        cout << "\"" << text_[i][j] << "\" ";
                     }
                     else {
                         cout << "\"\" ";

@@ -25,6 +25,7 @@ Texture::Texture (string *filename) {
      */
     filename_ = (*filename);
     data_     =  NULL;
+    next_     =  NULL;
     width_    =  -1;
     height_   =  -1;
 }
@@ -38,25 +39,44 @@ Texture::~Texture () {
     }
 }
 
-Color *Texture::GetPointer () {
+Color *Texture::GetColor (double fracx, double fracy, 
+        double scale) {
+    unsigned int u, v;
+
     /*
-     * Get a pointer to the beginning
-     * of data.
+     * fracx, fracy are within a range of <0..1> and
+     * define fractions of the x- and y-dimension 
+     * of a texture.
+     *
+     * A reasonable scale for a 256x256 texture is 0.15.
      */
-    return &data_[0];
+    u = ((unsigned int) (fracx * width_ * scale)) % width_;
+
+    v = ((unsigned int) (fracy * height_ * scale)) % height_;
+
+    return &data_[(size_t) (u + v * width_)];
 }
 
-bool Texture::Allocate () {
+Texture *Texture::GetNext () {
+    return next_;
+}
+
+void Texture::SetNext (Texture *next) {
+    next_ = next;
+}
+
+bool Texture::CheckFilename (string *filename) {
+    return ((*filename) == filename_);
+}
+
+void Texture::Allocate () {
     /*
-     * Allocate a texture and load data from 
-     * a PNG file.
+     * Load color data from a PDB file.
      *
-     * No checking is done for whether the file
-     * exists, etc.
+     * No checking (for file, memory, etc.) 
+     * is done.
+     *
      */
-    if (data_ != NULL) {
-        return false;
-    }
     const char *fn = (filename_).c_str ();
     image< rgb_pixel >  image (fn);
 
@@ -67,29 +87,23 @@ bool Texture::Allocate () {
     data_ = new Color [size];
 
     /*
-     * Copy data file->buffer.
+     * Copy data file -> buffer.
+     *
      */
-    unsigned char  r, g, b;
+    unsigned char  red, green, blue;
     unsigned int   i, j;
     rgb_pixel     *pixel;
     Color         *color;
 
     color = &data_[0];
     for (i = 0; i < height_; i++) {
-        pixel = &image[i][0];
 
-        for (j = 0; j < width_; j++) {
-            r = pixel->red;
-            g = pixel->green;
-            b = pixel->blue;
-            pixel++;
-            color->Set (r, g, b);
-            color++;
+        pixel = &image[i][0];
+        for (j = 0; j < width_; j++, pixel++, color++) {
+            red   = pixel->red;
+            green = pixel->green;
+            blue  = pixel->blue;
+            color->Set (red, green, blue);
         }
     }
-
-    /*
-     * Finalize.
-     */
-    return true;
 }

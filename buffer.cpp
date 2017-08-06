@@ -69,8 +69,8 @@ void Buffer::Clear () {
     unsigned int i = 0;
     Color  *bp = &data_[0];
 
-    for (; i < (width_ * height_); i++) {
-        (bp++)->Zero ();
+    for (; i < (width_ * height_); i++, bp++) {
+        bp->Zero ();
     }
 }
 
@@ -79,7 +79,7 @@ void Buffer::WriteToPNG (string *filename) {
      * Save the buffer to a PNG file.
      *
      */
-    unsigned char r, g, b;
+    unsigned char red, green, blue;
     unsigned int  i, j;
     Color *bp;
 
@@ -90,13 +90,11 @@ void Buffer::WriteToPNG (string *filename) {
     for (i = 0; i < height_; i++) {
 
         pixel = &image[i][0];
-        for (j = 0; j < width_; j++) {
-            bp->Get (&r, &g, &b);
-            bp++;
-            pixel->red   = r;
-            pixel->green = g;
-            pixel->blue  = b;
-            pixel++;
+        for (j = 0; j < width_; j++, bp++, pixel++) {
+            bp->Get (&red, &green, &blue);
+            pixel->red   = red;
+            pixel->green = green;
+            pixel->blue  = blue;
         }
     }
     const char *fn = (*filename).c_str ();

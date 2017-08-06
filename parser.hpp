@@ -51,17 +51,17 @@ using namespace std;
 #define CODE_WRONG_SIZE  3
 #define CODE_MISSING     4
 #define CODE_REDUNDANT   5
+#define CODE_FILENAME    6
+#define CODE_NOT_FOUND   7
 
 /*
  * Macros.
  */
 #define IS_COMMENT(c) (c == '#')
 
-#define IS_WHITE(c) ((c == ' ') || \
-    (c == '\t'))
+#define IS_WHITE(c) ((c == ' ') || (c == '\t'))
 
-#define IS_NOT_WHITE(c) ((c != ' ') && \
-    (c != '\t'))
+#define IS_NOT_WHITE(c) ((c != ' ') && (c != '\t'))
 
 
 class Entry {

@@ -30,15 +30,21 @@ using namespace png;
 
 class Texture {
     unsigned int width_, height_;
-    Color  *data_;
-    string  filename_;
+    Color   *data_;
+    string   filename_;
+    Texture *next_;
 
 public:
     Texture (string *filename);
     ~Texture ();
 
-    bool Allocate ();
-    Color *GetPointer ();
+    void Allocate ();
+    bool CheckFilename (string *filename);
+    Color *GetColor (double fracx, double fracy, 
+        double scale);
+
+    Texture *GetNext ();
+    void SetNext (Texture *next);
 };
 
 #endif /* _TEXTURE_H */

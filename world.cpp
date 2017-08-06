@@ -29,6 +29,7 @@ World::World (Parser *parser, unsigned int width,
     nplanes_    = 0;
     nspheres_   = 0;
     ncylinders_ = 0;
+    ntextures_  = 0;
 
     /*
      * Set all pointers to NULL.
@@ -36,6 +37,7 @@ World::World (Parser *parser, unsigned int width,
     planes_     = NULL;
     spheres_    = NULL;
     cylinders_  = NULL;
+    textures_   = NULL;
     buffer_     = NULL;
     camera_     = NULL;
     light_      = NULL;
@@ -115,9 +117,10 @@ bool World::Initialize () {
          * Add a plane.
          */
         else if (label == "plane") {
-            Vector  center, normal;
-            Color   ca, cb;
-            double  scale;
+            Vector    center, normal;
+            Color     ca, cb;
+            double    scale;
+            Texture  *tp = NULL;
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
                 if (key == "center") {
@@ -129,16 +132,11 @@ bool World::Initialize () {
                 else if (key == "scale") {
                     scale = reals[0];
                 }
-                else if (key == "cola") {
-                    ca.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);
-                }
-                else {  /* if (key == "colb") */
-                    cb.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);
+                else {  /* if (key == "texture") */
+                    tp = AddTexture (&texts[0]);
                 }
             }
-            AddPlane (&center, &normal, &ca, &cb, scale);
+            AddPlane (&center, &normal, &ca, &cb, scale, tp);
         }
 
         /*
@@ -219,6 +217,11 @@ World::~World () {
     do {
         PopCylinder ();
     } while (ncylinders_ > 0);
+
+    /* Clear all textures. */
+    do {
+        PopTexture ();
+    } while (ntextures_ > 0);
 }
 
 unsigned int World::PopPlane () {
@@ -278,12 +281,32 @@ unsigned int World::PopCylinder () {
     return ncylinders_;
 }
 
-unsigned int World::AddPlane (Vector *center, Vector *normal,
-        Color *colora, Color *colorb, double texscale) {
+unsigned int World::PopTexture () {
+    Texture *prev, *next, *last;
+
+    if (ntextures_ > 0) {
+        last = textures_;
+        prev = NULL;
+        while ((next = last->GetNext ()) != NULL) {
+            prev = last;
+            last = next;
+        }
+        if (prev != NULL) {
+            prev->SetNext (NULL);
+        }
+        delete last;
+        ntextures_--;
+    }
+    return ntextures_;
+}
+
+void World::AddPlane (Vector *center, Vector *normal,
+        Color *colora, Color *colorb, double texscale, 
+        Texture *texture) {
     Plane *next, *last, *plane;
 
     plane = new Plane (center, normal, colora, 
-        colorb, texscale);
+        colorb, texscale, texture);
     if (nplanes_ < 1) {
         planes_ = plane;
     }
@@ -295,10 +318,10 @@ unsigned int World::AddPlane (Vector *center, Vector *normal,
         } while (next != NULL);
         last->SetNext (plane);
     }
-    return (++nplanes_);
+    nplanes_++;
 }
 
-unsigned int World::AddSphere (Vector *center, double radius,
+void World::AddSphere (Vector *center, double radius,
         Color *color) {
     Sphere *next, *last, *sphere;
 
@@ -314,10 +337,10 @@ unsigned int World::AddSphere (Vector *center, double radius,
         } while (next != NULL);
         last->SetNext (sphere);
     }
-    return (++nspheres_);
+    nspheres_++;
 }
 
-unsigned int World::AddCylinder (Vector *A, Vector *B, 
+void World::AddCylinder (Vector *A, Vector *B, 
         double radius, Color *color) {
     Cylinder *next, *last, *cylinder;
 
@@ -333,7 +356,51 @@ unsigned int World::AddCylinder (Vector *A, Vector *B,
         } while (next != NULL);
         last->SetNext (cylinder);
     }
-    return (++ncylinders_);
+    ncylinders_++;
+}
+
+Texture *World::AddTexture (string *filename) {
+    Texture *next, *last, *texture;
+    bool  found;
+
+    /*
+     * Do not add a texture that already exists. 
+     */
+    if (ntextures_ > 0) {
+        next  = textures_;
+        found = false;
+        do {
+            last = next;
+            if (last->CheckFilename (filename)) {
+                found = true;
+                break;
+            }
+            next = last->GetNext ();
+        } while (next != NULL);
+        if (found) {
+            return last;
+        }
+    }
+
+    /*
+     * Create a new texture.
+     */
+    texture = new Texture (filename);
+    texture->Allocate ();
+
+    if (ntextures_ < 1) {
+        textures_ = texture;
+    }
+    else {
+        next = textures_;
+        do {
+            last = next;
+            next = last->GetNext ();
+        } while (next != NULL);
+        last->SetNext (texture);
+    }
+    ntextures_++;
+    return texture;
 }
 
 void World::TraceRay (Vector *origin, Vector *direction,
@@ -353,6 +420,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
     color->Zero ();
     currd  = maxdist_;
     hit    = HIT_NULL;
+
     /*
      * Search for planes.
      */
@@ -400,8 +468,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
 
     if (hit != HIT_NULL) {
         /*
-         * Found intersection of the current ray 
-         *   and an object.
+         * Found a ray/object intersection.
          */
         inter = ((*direction) * currd) + (*origin);
 

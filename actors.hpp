@@ -92,14 +92,13 @@ class Plane {
     Color    colora_, colorb_;
     double   scale_;
     Texture *texture_;
-    bool     istexture_;
     Plane   *next_;
 
 public:
     ~Plane ();
     Plane ();
     Plane (Vector *center, Vector *normal, Color *colora, 
-        Color *colorb, double scale);
+        Color *colorb, double scale, Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);

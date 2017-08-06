@@ -20,6 +20,7 @@
 using namespace std;
 
 #include <sstream>
+#include <iomanip>
 #include <string>
 #include <ctime>
 
@@ -325,21 +326,22 @@ int main (int argc, char **argv) {
     World world (&parser, width, height, fov, distance, 
         shadow, model);
     world.Initialize ();
+    cout << "Built world." << endl;
 
     /*
      * Render.
      */
     unsigned int timeStart, timeStop;
 
-    cout << "Rendering..." << endl;
     timeStart = clock ();
+    cout << "Rendering..." << endl;
     world.Render ();
     timeStop = clock ();
 
     /*
      * Finalize.
      */
-    cout << "OK. Elapsed time: " << 
+    cout << "OK. Elapsed time: " << setprecision (2) <<
         ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
         " sec" << endl;
     world.WritePNG (&output);

@@ -1,5 +1,5 @@
 # Mrtp
-<img src="./sample.png" alt="Sample image" width="320" />
+<img src="./sample.png" alt="Sample image" width="640" />
 
 
 A simple raytracing tool to explore programming in C++.
@@ -51,19 +51,25 @@ definitions, one for a camera and one for a source of light.
 The input file has the following structure:
 
 ```
-camera
-position    11.0   4.0   7.0
-target       0.0   0.0   0.0
-roll         0.0
-            
-light       
-position    -3.0   3.0   5.0
-            
 # Example comment.
-sphere      
-position     7.0   0.0   0.6
-radius       0.6
-color        0.0   1.0   1.0
+camera
+position   11.0   4.0   7.0
+target      0.0   0.0   0.0
+roll        0.0
+
+light
+position   -3.0   3.0   5.0
+
+plane
+center      0.0   0.0   0.0
+normal      0.0   0.0   1.0
+scale       0.2
+texture    "textures/04univ3.png"
+
+sphere
+position    7.0   0.0   0.6
+radius      0.6
+color       0.0   1.0   1.0
 
 <more actors or EOF>
 ```
