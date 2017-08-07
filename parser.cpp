@@ -41,6 +41,10 @@ char Parser::GetStatus () {
     return status_;
 }
 
+unsigned int Parser::GetNumberEntries () {
+    return nentries_;
+}
+
 unsigned int Parser::AddEntry (Entry *temp) {
     Entry *entry, *next, *last;
 
@@ -328,7 +332,7 @@ void Parser::Parse () {
     status_ = STATUS_FAIL;
 
     if (!config.is_open ()) {
-        cout << "File \"" << filename_ 
+        cerr << "File \"" << filename_ 
             << "\" cannot be opened." << endl;
         return;
     }
@@ -347,7 +351,7 @@ void Parser::Parse () {
 
         check = TokenizeLine (&line, tokens, &ntokens);
         if (!check) {
-            cout << "Line " << nlines << 
+            cerr << "Line " << nlines << 
                 ": Too many tokens." << endl;
             config.close ();
             return;
@@ -375,7 +379,7 @@ void Parser::Parse () {
 
                     if (item == "camera") {
                         if ((++ncam) > 1) {
-                            cout << "Line " << nlines 
+                            cerr << "Line " << nlines 
                                 << ": Multiple camera entries." << endl;
                             config.close ();
                             return;
@@ -383,7 +387,7 @@ void Parser::Parse () {
                     }
                     else if (item == "light") {
                         if ((++nlig) > 1) {
-                            cout << "Line " << nlines 
+                            cerr << "Line " << nlines 
                                 << ": Multiple light entries." << endl;
                             config.close ();
                             return;
@@ -394,7 +398,7 @@ void Parser::Parse () {
                     }
                 }
                 else {
-                    cout << "Line " << nlines << ": Unrecognized item \"" 
+                    cerr << "Line " << nlines << ": Unrecognized item \"" 
                         << item << "\"." << endl;
                     config.close ();
                     return;
@@ -402,7 +406,7 @@ void Parser::Parse () {
             }
             else {
                 if (npar == MAX_LINES) {
-                    cout << "Line " << nlines << 
+                    cerr << "Line " << nlines << 
                         ": Too many parameter lines." << endl;
                     config.close ();
                     return;
@@ -433,31 +437,31 @@ void Parser::Parse () {
             
                 if (code != CODE_OK) {
                     if (code == CODE_ALIEN) {
-                        cout << "Line " << (start + errline + 1) 
+                        cerr << "Line " << (start + errline + 1) 
                             << ": Unrecognized parameter \"" << msg << "\"." << endl;
                     }
                     else if (code == CODE_WRONG_TYPE) {
-                        cout << "Line " << (start + errline + 1) 
+                        cerr << "Line " << (start + errline + 1) 
                             << ": Wrong type of component(s)." << endl;
                     }
                     else if (code == CODE_WRONG_SIZE) {
-                        cout << "Line " << (start + errline + 1) 
+                        cerr << "Line " << (start + errline + 1) 
                             << ": Wrong number of components." << endl;
                     }
                     else if (code == CODE_MISSING) {
-                        cout << "Line " << start << ": Missing parameter in " 
+                        cerr << "Line " << start << ": Missing parameter in " 
                             << item << "." << endl;
                     }
                     else if (code == CODE_REDUNDANT) {
-                        cout << "Line " << (start + errline + 1) 
+                        cerr << "Line " << (start + errline + 1) 
                             << ": Redundant parameter \"" << msg << "\"." << endl;
                     }
                     else if (code == CODE_FILENAME) {
-                        cout << "Line " << (start + errline + 1) 
+                        cerr << "Line " << (start + errline + 1) 
                             << ": Invalid filename." << endl;
                     }
                     else {  /* if (code == CODE_NOT_FOUND) */
-                        cout << "Line " << (start + errline + 1) 
+                        cerr << "Line " << (start + errline + 1) 
                             << ": Texture file \"" << msg << "\" not found." << endl;
                     }
                     config.close ();
@@ -471,20 +475,18 @@ void Parser::Parse () {
     config.close ();
 
     if (ncam < 1) {
-        cout << "Camera not found." << endl;
+        cerr << "Camera not found." << endl;
         return;
     }
     if (nlig < 1) {
-        cout << "Light not found." << endl;
+        cerr << "Light not found." << endl;
         return;
     }
     if (nact < 1) {
-        cout << "Scene contains no actors." << endl;
+        cerr << "Scene contains no actors." << endl;
         return;
     }
     status_ = STATUS_OK;
-    cout << "Parsing complete, created " << nentries_ 
-        << " entries." << endl;
 
     /* DEBUG
     Entry *ep = entries_;

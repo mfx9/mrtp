@@ -138,6 +138,7 @@ public:
     ~Parser ();
     void Parse ();
     char GetStatus ();
+    unsigned int GetNumberEntries ();
     unsigned int PopEntry (Entry *entry);
 };
 

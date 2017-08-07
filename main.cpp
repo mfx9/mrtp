@@ -60,9 +60,9 @@ void HelpScreen (string program) {
     cout << "Options:\n"
             "    -h, --help\n"
             "      Print this help screen.\n\n"
-            /*
             "    -q, --quiet\n"
-            "      Supress all output, except errors.\n\n"
+            "      Supress all messages, except errors.\n\n"
+            /*
             "    -v, --version\n"
             "      Version of the program.\n\n"
             */
@@ -82,7 +82,7 @@ void HelpScreen (string program) {
             "    -s, --shadow\n"
             "      Shadow factor (default is 0.25).\n\n"
             "Example:\n";
-    cout << "    " << program << " -r 1024x768 -o test.png test.txt" << endl;
+    cout << "    " << program << " -r 1024x768 -o test.png test.inp" << endl;
 }
 
 int main (int argc, char **argv) {
@@ -141,7 +141,7 @@ int main (int argc, char **argv) {
          */
         else if ((text == "-r") || (text == "--resolution")) {
             if (i == (argc - 1)) {
-                cout << "Resolution not given." << endl;
+                cerr << "Resolution not given." << endl;
                 return EXIT_FAIL;
             }
             next  = argv[++i];
@@ -181,7 +181,7 @@ int main (int argc, char **argv) {
                 }
             }
             if (!resok) {
-                cout << "Invalid resolution." << endl;
+                cerr << "Invalid resolution." << endl;
                 return EXIT_FAIL;
             }
         }
@@ -191,19 +191,19 @@ int main (int argc, char **argv) {
          */
         else if ((text == "-f") || (text == "--fov")) {
             if (i == (argc - 1)) {
-                cout << "Field of vision not given." << endl;
+                cerr << "Field of vision not given." << endl;
                 return EXIT_FAIL;
             }
             next = argv[++i];
             convert.str (next);
             convert >> fov;
             if (!convert) {
-                cout << "Unable to convert fov to double." << endl;
+                cerr << "Unable to convert fov to double." << endl;
                 return EXIT_FAIL;
             }
             convert.clear ();
             if ((fov < MIN_FOV) || (fov > MAX_FOV)) {
-                cout << "Invalid fov." << endl;
+                cerr << "Invalid fov." << endl;
                 return EXIT_FAIL;
             }
         }
@@ -213,7 +213,7 @@ int main (int argc, char **argv) {
          */
         else if ((text == "-o") || (text == "--output")) {
             if (i == (argc - 1)) {
-                cout << "Output file not given." << endl;
+                cerr << "Output file not given." << endl;
                 return EXIT_FAIL;
             }
             output = argv[++i];
@@ -225,7 +225,7 @@ int main (int argc, char **argv) {
          */
         else if ((text == "-m") || (text == "--model")) {
             if (i == (argc - 1)) {
-                cout << "Light quenching model not given." << endl;
+                cerr << "Light quenching model not given." << endl;
                 return EXIT_FAIL;
             }
             next = argv[++i];
@@ -239,7 +239,7 @@ int main (int argc, char **argv) {
                 model = LIGHT_MODEL_QUADRATIC;
             }
             else {
-                cout << "Unsupported light model." << endl;
+                cerr << "Unsupported light model." << endl;
                 return EXIT_FAIL;
             }
         }
@@ -249,14 +249,14 @@ int main (int argc, char **argv) {
          */
         else if ((text == "-d") || (text == "--distance")) {
             if (i == (argc - 1)) {
-                cout << "Distance to quench light not given." << endl;
+                cerr << "Distance to quench light not given." << endl;
                 return EXIT_FAIL;
             }
             next = argv[++i];
             convert.str (next);
             convert >> distance;
             if (!convert) {
-                cout << "Unable to convert distance to double." << endl;
+                cerr << "Unable to convert distance to double." << endl;
                 return EXIT_FAIL;
             }
         }
@@ -266,18 +266,18 @@ int main (int argc, char **argv) {
          */
         else if ((text == "-s") || (text == "--shadow")) {
             if (i == (argc - 1)) {
-                cout << "Shadow factor not given." << endl;
+                cerr << "Shadow factor not given." << endl;
                 return EXIT_FAIL;
             }
             next = argv[++i];
             convert.str (next);
             convert >> shadow;
             if (!convert) {
-                cout << "Unable to convert shadow to double." << endl;
+                cerr << "Unable to convert shadow to double." << endl;
                 return EXIT_FAIL;
             }
             if ((shadow < 0.0) || (shadow > 1.0)) {
-                cout << "Invalid shadow factor." << endl;
+                cerr << "Invalid shadow factor." << endl;
                 return EXIT_FAIL;
             }
         }
@@ -287,7 +287,7 @@ int main (int argc, char **argv) {
          */
         else {
             if (text.at (0) == '-') {
-                cout << "Undefined option: \"" << text << "\"" << endl;
+                cerr << "Undefined option: \"" << text << "\"" << endl;
                 return EXIT_FAIL;
             }
             input = text;
@@ -296,7 +296,7 @@ int main (int argc, char **argv) {
     }
 
     if (input == "") {
-        cout << "No input file." << endl;
+        cerr << "No input file." << endl;
         return EXIT_FAIL;
     }
 
@@ -315,9 +315,14 @@ int main (int argc, char **argv) {
     Parser parser (&input);
     parser.Parse ();
     if (parser.GetStatus () != STATUS_OK) {
-        cout << "Error parsing file: \"" << input 
+        cerr << "Error parsing file: \"" << input 
             << "\"" << endl;
         return EXIT_FAIL;
+    }
+    if (!quiet) {
+        i = parser.GetNumberEntries ();
+        cout << "Parsing complete, created " << i
+            << " entries." << endl;
     }
 
     /*
@@ -326,7 +331,9 @@ int main (int argc, char **argv) {
     World world (&parser, width, height, fov, distance, 
         shadow, model);
     world.Initialize ();
-    cout << "Built world." << endl;
+    if (!quiet) {
+        cout << "Built world." << endl;
+    }
 
     /*
      * Render.
@@ -334,16 +341,20 @@ int main (int argc, char **argv) {
     unsigned int timeStart, timeStop;
 
     timeStart = clock ();
-    cout << "Rendering..." << endl;
+    if (!quiet) {
+        cout << "Rendering..." << endl;
+    }
     world.Render ();
     timeStop = clock ();
 
     /*
      * Finalize.
      */
-    cout << "OK. Elapsed time: " << setprecision (2) <<
-        ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
-        " sec" << endl;
+    if (!quiet) {
+        cout << "OK. Elapsed time: " << setprecision (2) <<
+            ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
+            " sec" << endl;
+    }
     world.WritePNG (&output);
 
     return EXIT_OK;
