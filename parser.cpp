@@ -170,9 +170,9 @@ char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
     const string *labels,
         camera[] = {"position", "target", "roll"},
         light[] = {"position"},
-        plane[] = {"center", "normal", "texture", "scale"},  // , "cola", "colb", 
-        sphere[] = {"position", "radius", "color"},
-        cylinder[] = {"a", "b", "radius", "color"};
+        plane[] = {"center", "normal", "texture", "scale"},
+        sphere[] = {"position", "radius", "scale", "texture"},
+        cylinder[] = {"center", "target", "radius", "scale", "texture"};
 
     if ((*item) == "camera") {
         labels = camera;

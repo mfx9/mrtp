@@ -321,8 +321,8 @@ int main (int argc, char **argv) {
     }
     if (!quiet) {
         i = parser.GetNumberEntries ();
-        cout << "Parsing complete, created " << i
-            << " entries." << endl;
+        cout << "Parsing complete, created " << i << 
+            " entries." << endl;
     }
 
     /*

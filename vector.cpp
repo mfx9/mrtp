@@ -54,13 +54,6 @@ void Vector::Set (double *coor) {
     z_ = coor[2];
 }
 
-void Vector::Get (double *x, double *y,
-       double *z) {
-    (*x) = x_;
-    (*y) = y_;
-    (*z) = z_;
-}
-
 void Vector::CopyTo (Vector *other) {
     other->x_ = x_;
     other->y_ = y_;
@@ -69,10 +62,6 @@ void Vector::CopyTo (Vector *other) {
 
 double Vector::Len () {
     return sqrt (x_ * x_ + y_ * y_ + z_ * z_);
-}
-
-double Vector::DotSelf () {
-    return (x_ * x_ + y_ * y_ + z_ * z_);
 }
 
 void Vector::Scale_InPlace (double scale) {
@@ -138,7 +127,7 @@ Vector Vector::operator* (double scale) {
     return o;
 }
 
-void Vector::Associated_InPlace () {
+void Vector::GenerateOther_InPlace () {
     /*
      * Method finds the major component of a vector
      * and generates an "associated" unit vector.
@@ -152,24 +141,32 @@ void Vector::Associated_InPlace () {
     if (x_ > y_) {
         if (x_ > z_) {
             /* Major component is x. */
-            y = 1.0;
+            z = 1.0;
         }
         else {  /* if (x_ <= z_) */
             /* Major component is z. */
-            x = 1.0;
+            y = 1.0;
         }
     }
     else {  /* if (x_ <= y_) */
         if (y_ > z_) {
             /* Major component is y. */
-            z = 1.0;
+            x = 1.0;
         }
         else {  /* if (y_ <= z_) */
             /* Major component is z. */
-            x = 1.0;
+            y = 1.0;
         }
     }
     x_ = x;
     y_ = y;
     z_ = z;
+}
+
+void Vector::Print () {
+    cout << fixed << showpoint;
+    cout << setprecision (PRINT_PRECISION);
+    cout << "X: " << x_
+        << ", Y: " << y_
+        << ", Z: " << z_ << endl;
 }

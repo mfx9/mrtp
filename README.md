@@ -12,7 +12,7 @@ that I wrote back in 2005 in pure C. The "p" in the name indicates
 "plus" or "progress".
 
 Essentially, the purpose of writing Mrtp was to refresh my knowledge 
-of C++, raytracing and computer graphics. Also to experiment with 
+of C++, raytracing and 3D computer graphics. Also to experiment with 
 linking of a project to third-party libraries, for example png++.
 
 As of now, the program has only basic functionality and is under
@@ -53,23 +53,31 @@ The input file has the following structure:
 ```
 # Example comment.
 camera
-position   11.0   4.0   7.0
-target      0.0   0.0   0.0
-roll        0.0
+position  12.0    4.0    7.0
+target     0.0    0.0    0.0
+roll       0.0
 
 light
-position   -3.0   3.0   5.0
+position   5.0   -5.0    5.0
 
 plane
-center      0.0   0.0   0.0
-normal      0.0   0.0   1.0
-scale       0.2
-texture    "textures/04univ3.png"
+center     0.0    0.0    0.0
+normal     0.0    0.0    1.0
+scale      0.15
+texture   "textures/04univ2.png"
+
+cylinder
+center     0.0    0.0    0.0
+target     0.0    0.0    1.0
+radius     1.0
+scale      1.0
+texture   "textures/qubodup-light_wood.png"
 
 sphere
-position    7.0   0.0   0.6
-radius      0.6
-color       0.0   1.0   1.0
+position   5.0    5.0    1.2
+radius     1.2
+scale      1.0
+texture   "textures/02camino.png"
 
 <more actors or EOF>
 ```

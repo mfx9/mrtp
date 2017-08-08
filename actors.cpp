@@ -29,17 +29,13 @@ Plane::Plane () {
 Plane::~Plane () {
 }
 
-Plane::Plane (Vector *center, Vector *normal, Color *colora, 
-        Color *colorb, double scale, Texture *texture) {
+Plane::Plane (Vector *center, Vector *normal, double scale, 
+        Texture *texture) {
     next_ = NULL;
     center->CopyTo (&center_);
 
     normal->CopyTo (&normal_);
     normal_.Normalize_InPlace ();
-
-    colora->CopyTo (&colora_);
-    colorb->CopyTo (&colorb_);
-    scale_ = scale;
 
     /*
      * Prepare texturing.
@@ -48,18 +44,25 @@ Plane::Plane (Vector *center, Vector *normal, Color *colora,
     Vector T;
 
     normal_.CopyTo (&T);
-    T.Associated_InPlace ();
+    T.GenerateOther_InPlace ();
 
-    texturex_ = normal_ ^ T;
+    texturex_ = T ^ normal_;
     texturex_.Normalize_InPlace ();
 
     texturey_ = normal_ ^ texturex_;
     texturey_.Normalize_InPlace ();
 
+    /* DEBUG
+    cout << "Plane:" << endl;
+    normal_.Print ();
+    texturex_.Print ();
+    texturey_.Print (); */
+
     /*
-     * Assign a pointer to the texture (can be NULL).
+     * Assign a pointer to the texture.
      */
     texture_ = texture;
+    scale_ = scale;
 }
 
 void Plane::DetermineColor (Vector *hit, Color *color) {
@@ -74,38 +77,7 @@ void Plane::DetermineColor (Vector *hit, Color *color) {
      */
     vx = V * texturex_;
     vy = V * texturey_;
-
-    if (texture_ != NULL) {
-        /*
-         * Use actual textures in texture mapping.
-         */
-        cp = texture_->GetColor (vx, vy, scale_);
-    }
-    else {
-        /*
-         * Generate a checkerboard pattern 
-         * from two colors.
-         */
-        double  vx, vy, scale;
-        int     tx, ty;
-
-        scale = 1.0 / scale_;
-        tx    = (int) (vx * scale);
-        ty    = (int) (vy * scale);
-        if (vx > 0.0) {
-            tx--;
-        }
-        if (vy > 0.0) {
-            ty--;
-        }
-        
-        if (!(tx & 1)) {
-            cp = (!(ty & 1)) ? &colora_ : &colorb_;
-        }
-        else {
-            cp = (!(ty & 1)) ? &colorb_ : &colora_;
-        }
-    }
+    cp = texture_->GetColor (vx, vy, scale_);
 
     /*
      * Finalize.
@@ -151,11 +123,34 @@ Sphere::~Sphere () {
 }
 
 Sphere::Sphere (Vector *center, double radius,
-        Color *color) {
+        double scale, Texture *texture) {
     center->CopyTo (&center_);
-    color->CopyTo (&color_);
-    next_   = NULL;
-    radius_ = radius;
+    next_    = NULL;
+    radius_  = radius;
+
+    /*
+     * Prepare texturing.
+     *
+     */
+    Vector T;
+
+    /*
+     * Some arbitrary vector (for now).
+     */
+    texturey_.Set (0.0, 1.0, 0.5);
+    texturey_.Normalize_InPlace ();
+
+    texturey_.CopyTo (&T);
+    T.GenerateOther_InPlace ();
+
+    texturex_ = T ^ texturey_;
+    texturex_.Normalize_InPlace ();
+
+    /*
+     * Assign a pointer to the texture.
+     */
+    scale_   = scale;
+    texture_ = texture;
 }
 
 double Sphere::Solve (Vector *origin, Vector *direction, 
@@ -180,9 +175,21 @@ void Sphere::GetNormal (Vector *hit, Vector *normal) {
     T.CopyTo (normal);
 }
 
-void Sphere::DetermineColor (Vector *hit, 
-        Color *color) {
-    color_.CopyTo (color);
+void Sphere::DetermineColor (Vector *normal, Color *color) {
+    Color  *cp;
+    double  dot, fracx, fracy;
+
+    /*
+     * scale_ is currently ignored.
+     */
+    dot   = texturex_ * (*normal);
+    fracx = acos (dot) / M_PI;
+
+    dot   = texturey_ * (*normal);
+    fracy = acos (dot) / M_PI;
+
+    cp = texture_->GetColor (fracx, fracy, 1.0);
+    cp->CopyTo (color);
 }
 
 Sphere *Sphere::GetNext () {
@@ -204,25 +211,46 @@ Cylinder::Cylinder () {
 Cylinder::~Cylinder () {
 }
 
-Cylinder::Cylinder (Vector *a, Vector *b, double radius, 
-        Color *color) {
+Cylinder::Cylinder (Vector *origin, Vector *target, 
+        double radius, double scale, Texture *texture) {
     /*
      * Direction of the cylinder.
      */
-    B_ = (*b) - (*a);
+    B_ = (*target) - (*origin);
     B_.Normalize_InPlace ();
 
     /*
-     * Radius and origin.
+     * Radius, origin, etc.
      */
-    a->CopyTo (&A_);
+    origin->CopyTo (&A_);
     radius_ = radius;
+    next_ = NULL;
 
     /*
-     * Color, etc.
+     * Prepare texturing.
+     *
      */
-    color->CopyTo (&color_);
-    next_ = NULL;
+    Vector T;
+
+    B_.CopyTo (&T);
+    T.GenerateOther_InPlace ();
+
+    texturex_ = T ^ B_;
+    texturex_.Normalize_InPlace ();
+
+    B_.CopyTo (&texturey_);
+
+    /* DEBUG
+    cout << "Cylinder:" << endl;
+    B_.Print ();
+    texturex_.Print ();
+    texturey_.Print (); */
+
+    /*
+     * Assign a pointer to the texture.
+     */
+    texture_ = texture;
+    scale_   = scale;
 }
 
 double Cylinder::Solve (Vector *O, Vector *D,
@@ -266,7 +294,9 @@ double Cylinder::Solve (Vector *O, Vector *D,
     d  = T  * B_;
     f  = (radius_ * radius_) - (T * T);
 
-    /* Solving a quadratic equation for t. */
+    /* 
+     * Solving a quadratic equation for t. 
+     */
     double aa, bb, cc, t;
     aa = 1.0 - (b * b);
     bb = 2.0 * (a - b * d);
@@ -290,9 +320,24 @@ void Cylinder::GetNormal (Vector *hit, Vector *normal) {
     N.CopyTo (normal);
 }
 
-void Cylinder::DetermineColor (Vector *hit, 
+void Cylinder::DetermineColor (Vector *normal,
         Color *color) {
-    color_.CopyTo (color);
+    Color  *cp;
+    double  dot, fracx, fracy;
+
+    /* 
+     * Dot product is within a range of <-1, 1>.
+     *
+     * Angle is within a range of <0, pi>.
+     *
+     * scale_ is currently ignored.
+     */
+    dot   = texturex_ * (*normal);
+    fracx = acos (dot) / M_PI;
+    fracy = alpha_ / (2.0 * M_PI * radius_);
+
+    cp = texture_->GetColor (fracx, fracy, 1.0);
+    cp->CopyTo (color);
 }
 
 Cylinder *Cylinder::GetNext () {

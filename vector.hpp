@@ -21,6 +21,12 @@
 
 #include <cmath>
 
+#include <iomanip>
+#include <iostream>
+using namespace std;
+
+
+#define PRINT_PRECISION  4
 
 class Vector {
     double x_, y_, z_;
@@ -38,19 +44,15 @@ public:
         double z);
     void Set (double *coor);
 
-    /* Getters. */
-    void Get (double *x, double *y,
-        double *z);
-
     /* Copying. */
     void CopyTo (Vector *other);
 
     /* Other. */
     double Len ();
-    double DotSelf ();
     void Scale_InPlace (double scale);
     void Normalize_InPlace ();
-    void Associated_InPlace ();
+    void GenerateOther_InPlace ();
+    void Print ();
 
     /* Sum of two vectors. */
     Vector operator+ (Vector &other);

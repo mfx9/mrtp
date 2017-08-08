@@ -118,9 +118,8 @@ bool World::Initialize () {
          */
         else if (label == "plane") {
             Vector    center, normal;
-            Color     ca, cb;
             double    scale;
-            Texture  *tp = NULL;
+            Texture  *texture;
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
                 if (key == "center") {
@@ -133,19 +132,19 @@ bool World::Initialize () {
                     scale = reals[0];
                 }
                 else {  /* if (key == "texture") */
-                    tp = AddTexture (&texts[0]);
+                    texture = AddTexture (&texts[0]);
                 }
             }
-            AddPlane (&center, &normal, &ca, &cb, scale, tp);
+            AddPlane (&center, &normal, scale, texture);
         }
 
         /*
          * Add a sphere.
          */
         else if (label == "sphere") {
-            Vector  position;
-            double  radius;
-            Color   color;
+            Vector   position;
+            double   radius, scale;
+            Texture *texture;
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
                 if (key == "position") {
@@ -154,38 +153,43 @@ bool World::Initialize () {
                 else if (key == "radius") {
                     radius = reals[0];
                 }
-                else {  /* if (key == "color") */
-                    color.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);
+                else if (key == "scale") {
+                    scale = reals[0];
+                }
+                else {  /* if (key == "texture") */
+                    texture = AddTexture (&texts[0]);
                 }
             }
-            AddSphere (&position, radius, &color);
+            AddSphere (&position, radius, scale, texture);
         }
 
         /*
          * Add a cylinder.
          */
         else if (label == "cylinder") {
-            Vector  axisa, axisb;
-            double  radius;
-            Color   color;
+            Vector    origin, target;
+            double    radius, scale;
+            Texture  *texture;
 
             while (entry.GetData (&key, &type, reals, texts, &i)) {
-                if (key == "a") {
-                    axisa.Set (reals);
+                if (key == "center") {
+                    origin.Set (reals);
                 }
-                else if (key == "b") {
-                    axisb.Set (reals);
+                else if (key == "target") {
+                    target.Set (reals);
                 }
                 else if (key == "radius") {
                     radius = reals[0];
                 }
-                else {  /* if (key == "color") */
-                    color.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);
+                else if (key == "scale") {
+                    scale = reals[0];
+                }
+                else {  /* if (key == "texture") */
+                    texture = AddTexture (&texts[0]);
                 }
             }
-            AddCylinder (&axisa, &axisb, radius, &color);
+            AddCylinder (&origin, &target, radius, scale, 
+                texture);
         }
     } while (nentries > 0);
 
@@ -300,13 +304,12 @@ unsigned int World::PopTexture () {
     return ntextures_;
 }
 
-void World::AddPlane (Vector *center, Vector *normal,
-        Color *colora, Color *colorb, double texscale, 
-        Texture *texture) {
+void World::AddPlane (Vector *center, Vector *normal, 
+        double texscale, Texture *texture) {
     Plane *next, *last, *plane;
 
-    plane = new Plane (center, normal, colora, 
-        colorb, texscale, texture);
+    plane = new Plane (center, normal, texscale, 
+        texture);
     if (nplanes_ < 1) {
         planes_ = plane;
     }
@@ -322,10 +325,11 @@ void World::AddPlane (Vector *center, Vector *normal,
 }
 
 void World::AddSphere (Vector *center, double radius,
-        Color *color) {
+        double scale, Texture *texture) {
     Sphere *next, *last, *sphere;
 
-    sphere = new Sphere (center, radius, color);
+    sphere = new Sphere (center, radius, scale, 
+        texture);
     if (nspheres_ < 1) {
         spheres_ = sphere;
     }
@@ -340,11 +344,12 @@ void World::AddSphere (Vector *center, double radius,
     nspheres_++;
 }
 
-void World::AddCylinder (Vector *A, Vector *B, 
-        double radius, Color *color) {
+void World::AddCylinder (Vector *origin, Vector *target, 
+        double radius, double scale, Texture *texture) {
     Cylinder *next, *last, *cylinder;
 
-    cylinder = new Cylinder (A, B, radius, color);
+    cylinder = new Cylinder (origin, target, radius, scale, 
+        texture);
     if (ncylinders_ < 1) {
         cylinders_ = cylinder;
     }
@@ -479,11 +484,11 @@ void World::TraceRay (Vector *origin, Vector *direction,
                 break;
             case HIT_SPHERE:
                 hitsphere->GetNormal (&inter, &normal);
-                hitsphere->DetermineColor (&inter, &objcol);
+                hitsphere->DetermineColor (&normal, &objcol);
                 break;
             case HIT_CYLINDER:
                 hitcylinder->GetNormal (&inter, &normal);
-                hitcylinder->DetermineColor (&inter, &objcol);
+                hitcylinder->DetermineColor (&normal, &objcol);
                 break;
         }
         /*

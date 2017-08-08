@@ -103,12 +103,12 @@ public:
     /*
      * Manipulation of objects, adding, removing, etc.
      */
-    void AddPlane (Vector *center, Vector *normal,
-        Color *colora, Color *colorb, double texscale, Texture *texture);
-    void AddSphere (Vector *center, double radius,
-        Color *color);
-    void AddCylinder (Vector *A, Vector *B,
-        double radius, Color *color);
+    void AddPlane (Vector *center, Vector *normal, double texscale, 
+        Texture *texture);
+    void AddSphere (Vector *center, double radius, double scale, 
+        Texture *texture);
+    void AddCylinder (Vector *origin, Vector *target, double radius, 
+        double scale, Texture *texture);
     Texture *AddTexture (string *filename);
 
     unsigned int PopPlane ();

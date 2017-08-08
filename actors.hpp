@@ -19,8 +19,11 @@
 #ifndef _ACTORS_H
 #define _ACTORS_H
 
-#include <cstdio>
+
 #include <cmath>
+
+#include <iostream>
+using namespace std;
 
 #include "vector.hpp"
 #include "color.hpp"
@@ -28,6 +31,10 @@
 
 
 #define TOLERANCE  0.000001
+
+#ifndef M_PI
+#define M_PI  3.14159
+#endif
 
 /*
  * Macros.
@@ -66,21 +73,22 @@
     }
 
 class Sphere {
-    Vector   center_;
-    double   radius_;
-    Color    color_;
+    Vector   center_, texturex_, 
+        texturey_;
+    double   radius_, scale_;
+    Texture *texture_;
     Sphere  *next_;
 
 public:
     ~Sphere ();
     Sphere ();
-    Sphere (Vector *center, double radius,
-        Color *color);
+    Sphere (Vector *center, double radius, double scale, 
+        Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
     void GetNormal (Vector *hit, Vector *normal);
-    void DetermineColor (Vector *hit, Color *color);
+    void DetermineColor (Vector *normal, Color *color);
 
     Sphere *GetNext ();
     void SetNext (Sphere *sphere);
@@ -89,7 +97,6 @@ public:
 class Plane {
     Vector   center_, normal_,
         texturex_, texturey_;
-    Color    colora_, colorb_;
     double   scale_;
     Texture *texture_;
     Plane   *next_;
@@ -97,8 +104,8 @@ class Plane {
 public:
     ~Plane ();
     Plane ();
-    Plane (Vector *center, Vector *normal, Color *colora, 
-        Color *colorb, double scale, Texture *texture);
+    Plane (Vector *center, Vector *normal, double scale, 
+        Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
@@ -110,21 +117,23 @@ public:
 };
 
 class Cylinder {
-    Vector    A_, B_;
+    Vector    A_, B_,
+        texturex_, texturey_;
     double    radius_, alpha_;
-    Color     color_;
+    double    scale_;
+    Texture  *texture_;
     Cylinder *next_;
 
 public:
     ~Cylinder ();
     Cylinder ();
-    Cylinder (Vector *a, Vector *b, double radius, 
-        Color *color);
+    Cylinder (Vector *origin, Vector *target, double radius, 
+        double scale, Texture *texture);
 
     double Solve (Vector *O, Vector *D,
         double mind, double maxd);
     void GetNormal (Vector *hit, Vector *normal);
-    void DetermineColor (Vector *hit, Color *color);
+    void DetermineColor (Vector *normal, Color *color);
 
     Cylinder *GetNext ();
     void SetNext (Cylinder *cylinder);
@@ -136,8 +145,7 @@ class Light {
 public:
     Light (Vector *origin);
     ~Light ();
-    void GetToLight (Vector *hit, 
-        Vector *tolight);
+    void GetToLight (Vector *hit, Vector *tolight);
 };
 
 
