@@ -138,28 +138,16 @@ void Vector::GenerateUnitVector (Vector *other) {
      */
     double x = ABS (x_), y = ABS (y_), 
         z = ABS (z_);
-    other->x_ = 0.0;
-    other->y_ = 0.0;
-    other->z_ = 0.0;
+    other->Set (0.0, 0.0, 1.0);
 
     if (x < y) {
         if (x < z) {
-            /* Smallest component is x. */
-            other->x_ = 1.0;
-        }
-        else {  /* if (x >= z) */
-            /* Smallest component is z. */
-            other->z_ = 1.0;
+            other->Set (1.0, 0.0, 0.0);
         }
     }
     else {  /* if ( x >= y) */
         if (y < z) {
-            /* Smallest component is y. */
-            other->y_ = 1.0;
-        }
-        else {  /* if (y >= z) */
-            /* Smallest component is z. */
-            other->z_ = 1.0;
+            other->Set (0.0, 1.0, 0.0);
         }
     }
 }
