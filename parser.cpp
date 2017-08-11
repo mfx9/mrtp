@@ -251,6 +251,22 @@ char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
             if (!check) {
                 return CODE_WRONG_TYPE;
             }
+            /*
+             * Check for illegal zero vectors.
+             */
+            if ((label == "normal") || (label == "direction") 
+                    || (label == "axis")) {
+                check = true;
+                for (j = 0; j < (ntokens - 1); j++) {
+                    if (output[j] != 0.0) {
+                        check = false;
+                        break;
+                    }
+                }
+                if (check) {
+                    return CODE_ZERO_VECTOR;
+                }
+            }
             entry->AddReal (&label, output, (ntokens - 1));
         }
         else {
@@ -460,9 +476,13 @@ void Parser::Parse () {
                         cerr << "Line " << (start + errline + 1) 
                             << ": Invalid filename." << endl;
                     }
-                    else {  /* if (code == CODE_NOT_FOUND) */
+                    else if (code == CODE_NOT_FOUND) {
                         cerr << "Line " << (start + errline + 1) 
                             << ": Texture file \"" << msg << "\" not found." << endl;
+                    }
+                    else {  /* if (code == CODE_ZERO_VECTOR) */
+                        cerr << "Line " << (start + errline + 1) <<
+                            ": Illegal zero vector." << endl;
                     }
                     config.close ();
                     return;

@@ -20,53 +20,77 @@
 #define _VECTOR_H
 
 #include <cmath>
-
 #include <iomanip>
 #include <iostream>
+
 using namespace std;
 
+/*
+ * Macros.
+ */
+#define SIGN(x) ((x < 0.0) ? -1.0 : 1.0)
+#define ABS(x) (x * (SIGN (x)))
 
 #define PRINT_PRECISION  4
+
 
 class Vector {
     double x_, y_, z_;
 
 public:
-    /* Constructors, etc. */
+    /* 
+     * Constructors, etc. 
+     */
     Vector (double x, double y, 
         double z);
     Vector (double *coor);
     Vector ();
     ~Vector ();
 
-    /* Setters. */
+    /* 
+     * Setters. 
+     */
     void Set (double x, double y, 
         double z);
     void Set (double *coor);
 
-    /* Copying. */
+    /* 
+     * Copying. 
+     */
     void CopyTo (Vector *other);
 
-    /* Other. */
+    /* 
+     * Other. 
+     */
     double Len ();
     void Scale_InPlace (double scale);
     void Normalize_InPlace ();
-    void GenerateOther_InPlace ();
+    void GenerateUnitVector (Vector *other);
     void Print ();
 
-    /* Sum of two vectors. */
+    /* 
+     * Sum of two vectors. 
+     */
     Vector operator+ (Vector &other);
 
-    /* Difference of two vectors. */
+    /* 
+     * Difference of two vectors. 
+     */
     Vector operator- (Vector &other);
 
-    /* Cross product. */
+    /* 
+     * Cross product. 
+     */
     Vector operator^ (Vector &other);
 
-    /* Dot product. */
+    /* 
+     * Dot product. 
+     */
     double operator* (Vector &other);
 
-    /* Scaling. */
+    /* 
+     * Scaling. 
+     */
     Vector operator* (double scale);
 };
 

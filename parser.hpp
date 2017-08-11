@@ -45,14 +45,15 @@ using namespace std;
 #define STATUS_NEW   1
 #define STATUS_OK    2
 
-#define CODE_OK          0
-#define CODE_ALIEN       1
-#define CODE_WRONG_TYPE  2
-#define CODE_WRONG_SIZE  3
-#define CODE_MISSING     4
-#define CODE_REDUNDANT   5
-#define CODE_FILENAME    6
-#define CODE_NOT_FOUND   7
+#define CODE_OK           0
+#define CODE_ALIEN        1
+#define CODE_WRONG_TYPE   2
+#define CODE_WRONG_SIZE   3
+#define CODE_MISSING      4
+#define CODE_REDUNDANT    5
+#define CODE_FILENAME     6
+#define CODE_NOT_FOUND    7
+#define CODE_ZERO_VECTOR  8
 
 /*
  * Macros.

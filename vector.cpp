@@ -127,40 +127,41 @@ Vector Vector::operator* (double scale) {
     return o;
 }
 
-void Vector::GenerateOther_InPlace () {
+void Vector::GenerateUnitVector (Vector *other) {
     /*
-     * Method finds the major component of a vector
+     * Method finds the smallest component of a vector
      * and generates an "associated" unit vector.
      *
      * A cross product of the vector with its "associated" 
      * vector should give a non-zero vector.
      *
      */
-    double x = 0.0, y = 0.0, z = 0.0;
+    double x = ABS (x_), y = ABS (y_), 
+        z = ABS (z_);
+    other->x_ = 0.0;
+    other->y_ = 0.0;
+    other->z_ = 0.0;
 
-    if (x_ > y_) {
-        if (x_ > z_) {
-            /* Major component is x. */
-            z = 1.0;
+    if (x < y) {
+        if (x < z) {
+            /* Smallest component is x. */
+            other->x_ = 1.0;
         }
-        else {  /* if (x_ <= z_) */
-            /* Major component is z. */
-            y = 1.0;
-        }
-    }
-    else {  /* if (x_ <= y_) */
-        if (y_ > z_) {
-            /* Major component is y. */
-            x = 1.0;
-        }
-        else {  /* if (y_ <= z_) */
-            /* Major component is z. */
-            y = 1.0;
+        else {  /* if (x >= z) */
+            /* Smallest component is z. */
+            other->z_ = 1.0;
         }
     }
-    x_ = x;
-    y_ = y;
-    z_ = z;
+    else {  /* if ( x >= y) */
+        if (y < z) {
+            /* Smallest component is y. */
+            other->y_ = 1.0;
+        }
+        else {  /* if (y >= z) */
+            /* Smallest component is z. */
+            other->z_ = 1.0;
+        }
+    }
 }
 
 void Vector::Print () {

@@ -43,15 +43,19 @@ Plane::Plane (Vector *center, Vector *normal, double scale,
      *
      */
     Vector T;
-
-    normal_.CopyTo (&T);
-    T.GenerateOther_InPlace ();
+    normal_.GenerateUnitVector (&T);
 
     texturex_ = T ^ normal_;
     texturex_.Normalize_InPlace ();
 
     texturey_ = normal_ ^ texturex_;
     texturey_.Normalize_InPlace ();
+
+    /* DEBUG.
+    cout << "** PLANE **" << endl;
+    normal_.Print ();
+    texturex_.Print ();
+    texturey_.Print (); */
 }
 
 void Plane::DetermineColor (Vector *hit, Color *color) {
@@ -122,17 +126,11 @@ Sphere::Sphere (Vector *center, double radius, Vector *axis,
      * Prepare texturing.
      *
      */
-    Vector T;
-
-    /*
-     * Some arbitrary vector (for now).
-     */
     axis->CopyTo (&texturey_);
     texturey_.Normalize_InPlace ();
 
-    texturey_.CopyTo (&T);
-    T.GenerateOther_InPlace ();
-
+    Vector T;
+    texturey_.GenerateUnitVector (&T);
     texturex_ = T ^ texturey_;
     texturex_.Normalize_InPlace ();
 }
@@ -214,9 +212,7 @@ Cylinder::Cylinder (Vector *origin, Vector *direction,
      *
      */
     Vector T;
-
-    B_.CopyTo (&T);
-    T.GenerateOther_InPlace ();
+    B_.GenerateUnitVector (&T);
 
     texturex_ = T ^ B_;
     texturex_.Normalize_InPlace ();

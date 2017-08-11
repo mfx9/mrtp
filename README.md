@@ -51,10 +51,10 @@ definitions, one for a camera and one for a source of light.
 The input file has the following structure:
 
 ```
-# Example comment.
+# Example input.
 camera
 position  12.0    4.0    7.0
-target     0.0    0.0    0.0
+target     0.0    0.0    1.0
 roll       0.0
 
 light
@@ -68,15 +68,14 @@ texture   "textures/04univ2.png"
 
 cylinder
 center     0.0    0.0    0.0
-target     0.0    0.0    1.0
+direction  0.0    0.0    1.0
 radius     1.0
-scale      1.0
 texture   "textures/qubodup-light_wood.png"
 
 sphere
-position   5.0    5.0    1.2
+position   3.0    5.0    1.2
 radius     1.2
-scale      1.0
+axis       0.0    1.0    0.5
 texture   "textures/02camino.png"
 
 <more actors or EOF>
