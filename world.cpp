@@ -61,7 +61,6 @@ bool World::Initialize () {
         texts[MAX_COMPONENTS];
     double  reals[MAX_COMPONENTS];
     char    type;
-    unsigned int i;
 
     /*
      * Allocate a buffer.
@@ -75,7 +74,6 @@ bool World::Initialize () {
     do {
         nentries = parser_->PopEntry (&entry);
         entry.GetLabel (&label);
-        i = MAX_LINES;
 
         /* DEBUG
         entry.Print (); */
@@ -87,7 +85,7 @@ bool World::Initialize () {
             Vector position, target;
             double roll;
 
-            while (entry.GetData (&key, &type, reals, texts, &i)) {
+            while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "position") {
                     position.Set (reals);
                 }
@@ -108,7 +106,7 @@ bool World::Initialize () {
         else if (label == "light") {
             Vector position;
 
-            entry.GetData (&key, &type, reals, texts, &i);
+            entry.PopData (&key, &type, reals, texts);
             position.Set (reals);
             light_ = new Light (&position);
         }
@@ -121,7 +119,7 @@ bool World::Initialize () {
             double    scale;
             Texture  *texture;
 
-            while (entry.GetData (&key, &type, reals, texts, &i)) {
+            while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "center") {
                     center.Set (reals);
                 }
@@ -142,54 +140,50 @@ bool World::Initialize () {
          * Add a sphere.
          */
         else if (label == "sphere") {
-            Vector   position;
-            double   radius, scale;
+            Vector   position, axis;
+            double   radius;
             Texture *texture;
 
-            while (entry.GetData (&key, &type, reals, texts, &i)) {
+            while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "position") {
                     position.Set (reals);
                 }
                 else if (key == "radius") {
                     radius = reals[0];
                 }
-                else if (key == "scale") {
-                    scale = reals[0];
+                else if (key == "axis") {
+                    axis.Set (reals);
                 }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddSphere (&position, radius, scale, texture);
+            AddSphere (&position, radius, &axis, texture);
         }
 
         /*
          * Add a cylinder.
          */
         else if (label == "cylinder") {
-            Vector    origin, target;
-            double    radius, scale;
+            Vector    origin, direction;
+            double    radius;
             Texture  *texture;
 
-            while (entry.GetData (&key, &type, reals, texts, &i)) {
+            while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "center") {
                     origin.Set (reals);
                 }
-                else if (key == "target") {
-                    target.Set (reals);
+                else if (key == "direction") {
+                    direction.Set (reals);
                 }
                 else if (key == "radius") {
                     radius = reals[0];
-                }
-                else if (key == "scale") {
-                    scale = reals[0];
                 }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddCylinder (&origin, &target, radius, scale, 
-                texture);
+            AddCylinder (&origin, &direction, radius, texture);
         }
     } while (nentries > 0);
 
@@ -325,10 +319,10 @@ void World::AddPlane (Vector *center, Vector *normal,
 }
 
 void World::AddSphere (Vector *center, double radius,
-        double scale, Texture *texture) {
+        Vector *axis, Texture *texture) {
     Sphere *next, *last, *sphere;
 
-    sphere = new Sphere (center, radius, scale, 
+    sphere = new Sphere (center, radius, axis, 
         texture);
     if (nspheres_ < 1) {
         spheres_ = sphere;
@@ -344,11 +338,11 @@ void World::AddSphere (Vector *center, double radius,
     nspheres_++;
 }
 
-void World::AddCylinder (Vector *origin, Vector *target, 
-        double radius, double scale, Texture *texture) {
+void World::AddCylinder (Vector *origin, Vector *direction, 
+        double radius, Texture *texture) {
     Cylinder *next, *last, *cylinder;
 
-    cylinder = new Cylinder (origin, target, radius, scale, 
+    cylinder = new Cylinder (origin, direction, radius,
         texture);
     if (ncylinders_ < 1) {
         cylinders_ = cylinder;

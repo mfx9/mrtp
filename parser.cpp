@@ -170,9 +170,9 @@ char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
     const string *labels,
         camera[] = {"position", "target", "roll"},
         light[] = {"position"},
-        plane[] = {"center", "normal", "texture", "scale"},
-        sphere[] = {"position", "radius", "scale", "texture"},
-        cylinder[] = {"center", "target", "radius", "scale", "texture"};
+        plane[] = {"center", "normal", "scale", "texture"},
+        sphere[] = {"position", "radius", "axis", "texture"},
+        cylinder[] = {"center", "direction", "radius", "texture"};
 
     if ((*item) == "camera") {
         labels = camera;
@@ -614,14 +614,11 @@ bool Entry::AddReal (string *key, double *real,
     return true;
 }
 
-bool Entry::GetData (string *key, char *type, double *reals, 
-        string *texts, unsigned int *i) {
+bool Entry::PopData (string *key, char *type, double *reals, 
+        string *texts) {
     /*
      * Connect the parser with the actual initialization 
      * of actors.
-     *
-     * Before this method is called for the first time,
-     * i must be set to MAX_LINES.
      *
      * The method is supposed to be called iteratively
      * in a while type of loop, until false is returned.
@@ -629,13 +626,10 @@ bool Entry::GetData (string *key, char *type, double *reals,
      */
     unsigned int j, k;
 
-    if ((*i) < 1) {
+    if (npar_ < 1) {
         return false;
     }
-    if ((*i) > npar_) {
-        (*i) = npar_;
-    }
-    j = (*i) - 1;
+    j = (npar_ - 1);
 
     if (type_[j] == TYPE_REAL) {
         for (k = 0; k < MAX_COMPONENTS; k++) {
@@ -669,6 +663,6 @@ bool Entry::GetData (string *key, char *type, double *reals,
     cout << endl;
     DEBUG ENDS */
 
-    (*i)--;
+    npar_--;
     return true;
 }

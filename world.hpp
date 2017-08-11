@@ -105,10 +105,10 @@ public:
      */
     void AddPlane (Vector *center, Vector *normal, double texscale, 
         Texture *texture);
-    void AddSphere (Vector *center, double radius, double scale, 
+    void AddSphere (Vector *center, double radius, Vector *axis, 
         Texture *texture);
-    void AddCylinder (Vector *origin, Vector *target, double radius, 
-        double scale, Texture *texture);
+    void AddCylinder (Vector *origin, Vector *direction, double radius, 
+        Texture *texture);
     Texture *AddTexture (string *filename);
 
     unsigned int PopPlane ();

@@ -111,12 +111,11 @@ Sphere::Sphere () {
 Sphere::~Sphere () {
 }
 
-Sphere::Sphere (Vector *center, double radius,
-        double scale, Texture *texture) {
+Sphere::Sphere (Vector *center, double radius, Vector *axis, 
+        Texture *texture) {
     center->CopyTo (&center_);
     radius_  = radius;
     texture_ = texture;
-    scale_   = scale;
     next_    = NULL;
 
     /*
@@ -128,7 +127,7 @@ Sphere::Sphere (Vector *center, double radius,
     /*
      * Some arbitrary vector (for now).
      */
-    texturey_.Set (0.0, 1.0, 0.5);
+    axis->CopyTo (&texturey_);
     texturey_.Normalize_InPlace ();
 
     texturey_.CopyTo (&T);
@@ -164,7 +163,7 @@ void Sphere::DetermineColor (Vector *normal, Color *color) {
     Color  *cp;
     double  dot, fracx, fracy;
     /*
-     * scale_ is currently ignored.
+     * Texture mapping.
      */
     dot   = texturex_ * (*normal);
     fracx = acos (dot) / M_PI;
@@ -194,21 +193,20 @@ Cylinder::Cylinder () {
 Cylinder::~Cylinder () {
 }
 
-Cylinder::Cylinder (Vector *origin, Vector *target, 
-        double radius, double scale, Texture *texture) {
+Cylinder::Cylinder (Vector *origin, Vector *direction, 
+        double radius, Texture *texture) {
     /*
      * Radius, origin, etc.
      */
     origin->CopyTo (&A_);
     radius_  = radius;
     texture_ = texture;
-    scale_   = scale;
     next_    = NULL;
 
     /*
      * Direction of the cylinder.
      */
-    B_ = (*target) - (*origin);
+    direction->CopyTo (&B_);
     B_.Normalize_InPlace ();
 
     /*
@@ -298,7 +296,7 @@ void Cylinder::DetermineColor (Vector *normal,
     Color  *cp;
     double  dot, fracx, fracy;
     /* 
-     * scale_ is currently ignored.
+     * Texture mapping.
      */
     dot   = texturex_ * (*normal);
     fracx = acos (dot) / M_PI;

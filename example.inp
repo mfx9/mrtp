@@ -28,26 +28,25 @@ texture   "textures/trak_light2b.png"
 
 cylinder
 center     0.0    0.0    0.0
-target     0.0    0.0    1.0
+direction  0.0    0.0    1.0
 radius     1.0
-scale      1.0
 texture   "textures/qubodup-light_wood.png"
 
 sphere
 position   3.0    5.0    1.2
 radius     1.2
-scale      1.0
+axis       0.0    1.0    0.5
 texture   "textures/02camino.png"
 
 sphere
-position  -3.0   5.0    1.2
+position  -3.0    5.0    1.2
 radius     1.2
-scale      1.0
+axis       0.0    1.0    0.5
 texture   "textures/02camino.png"
 
 sphere
 position  -1.0   -5.0    1.2
 radius     1.2
-scale      1.0
+axis       0.0    1.0    0.5
 texture   "textures/02camino.png"
 

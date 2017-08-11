@@ -75,14 +75,14 @@ using namespace std;
 class Sphere {
     Vector   center_, texturex_, 
         texturey_;
-    double   radius_, scale_;
+    double   radius_;
     Texture *texture_;
     Sphere  *next_;
 
 public:
     ~Sphere ();
     Sphere ();
-    Sphere (Vector *center, double radius, double scale, 
+    Sphere (Vector *center, double radius, Vector *axis,
         Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, 
@@ -120,15 +120,14 @@ class Cylinder {
     Vector    A_, B_,
         texturex_, texturey_;
     double    radius_, alpha_;
-    double    scale_;
     Texture  *texture_;
     Cylinder *next_;
 
 public:
     ~Cylinder ();
     Cylinder ();
-    Cylinder (Vector *origin, Vector *target, double radius, 
-        double scale, Texture *texture);
+    Cylinder (Vector *origin, Vector *direction, 
+        double radius, Texture *texture);
 
     double Solve (Vector *O, Vector *D,
         double mind, double maxd);

@@ -99,8 +99,8 @@ public:
     Entry *GetNext ();
     void SetNext (Entry *next);
 
-    bool GetData (string *key, char *type, double *real, 
-        string *text, unsigned int *i);
+    bool PopData (string *key, char *type, double *real, 
+        string *text);
     void GetLabel (string *label);
 
     bool AddText (string *key, string *text, 
