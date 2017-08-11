@@ -50,12 +50,6 @@ Plane::Plane (Vector *center, Vector *normal, double scale,
 
     texturey_ = normal_ ^ texturex_;
     texturey_.Normalize_InPlace ();
-
-    /* DEBUG.
-    cout << "** PLANE **" << endl;
-    normal_.Print ();
-    texturex_.Print ();
-    texturey_.Print (); */
 }
 
 void Plane::DetermineColor (Vector *hit, Color *color) {
