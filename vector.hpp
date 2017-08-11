@@ -46,19 +46,16 @@ public:
     Vector (double *coor);
     Vector ();
     ~Vector ();
-
     /* 
      * Setters. 
      */
     void Set (double x, double y, 
         double z);
     void Set (double *coor);
-
     /* 
      * Copying. 
      */
     void CopyTo (Vector *other);
-
     /* 
      * Other. 
      */
@@ -67,27 +64,22 @@ public:
     void Normalize_InPlace ();
     void GenerateUnitVector (Vector *other);
     void Print ();
-
     /* 
      * Sum of two vectors. 
      */
     Vector operator+ (Vector &other);
-
     /* 
      * Difference of two vectors. 
      */
     Vector operator- (Vector &other);
-
     /* 
      * Cross product. 
      */
     Vector operator^ (Vector &other);
-
     /* 
      * Dot product. 
      */
     double operator* (Vector &other);
-
     /* 
      * Scaling. 
      */
