@@ -74,7 +74,7 @@ using namespace std;
 
 class Sphere {
     Vector   center_, texturex_, 
-        texturey_;
+        texturey_, texturez_;
     double   radius_;
     Texture *texture_;
     Sphere  *next_;

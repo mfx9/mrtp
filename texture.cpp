@@ -42,7 +42,6 @@ Texture::~Texture () {
 Color *Texture::GetColor (double fracx, double fracy, 
         double scale) {
     unsigned int u, v;
-
     /*
      * fracx, fracy are within a range of <0..1> and
      * define fractions of the x- and y-dimension 

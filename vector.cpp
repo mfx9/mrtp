@@ -88,30 +88,21 @@ void Vector::Normalize_InPlace () {
 }
 
 Vector Vector::operator+ (Vector &other) {
-    Vector o;
-
-    o.x_ = x_ + other.x_;
-    o.y_ = y_ + other.y_;
-    o.z_ = z_ + other.z_;
-    return o;
+    Vector T (x_ + other.x_, y_ + other.y_, z_ + other.z_);
+    return T;
 }
 
 Vector Vector::operator- (Vector &other) {
-    Vector o;
-
-    o.x_ = x_ - other.x_;
-    o.y_ = y_ - other.y_;
-    o.z_ = z_ - other.z_;
-    return o;
+    Vector T (x_ - other.x_, y_ - other.y_, z_ - other.z_);
+    return T;
 }
 
 Vector Vector::operator^ (Vector &other) {
-    Vector o;
-
-    o.x_ = y_ * other.z_ - z_ * other.y_;
-    o.y_ = z_ * other.x_ - x_ * other.z_;
-    o.z_ = x_ * other.y_ - y_ * other.x_;
-    return o;
+    Vector T (
+        y_ * other.z_ - z_ * other.y_,
+        z_ * other.x_ - x_ * other.z_,
+        x_ * other.y_ - y_ * other.x_ );
+    return T;
 }
 
 double Vector::operator* (Vector &other) {
@@ -119,12 +110,8 @@ double Vector::operator* (Vector &other) {
 }
 
 Vector Vector::operator* (double scale) {
-    Vector o;
-
-    o.x_ = x_ * scale;
-    o.y_ = y_ * scale;
-    o.z_ = z_ * scale;
-    return o;
+    Vector T (x_ * scale, y_ * scale, z_ * scale);
+    return T;
 }
 
 void Vector::GenerateUnitVector (Vector *other) {

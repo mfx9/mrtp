@@ -127,6 +127,9 @@ Sphere::Sphere (Vector *center, double radius, Vector *axis,
     texturey_.GenerateUnitVector (&T);
     texturex_ = T ^ texturey_;
     texturex_.Normalize_InPlace ();
+
+    texturez_ = texturey_ ^ texturex_;
+    texturez_.Normalize_InPlace ();
 }
 
 double Sphere::Solve (Vector *origin, Vector *direction, 
@@ -153,14 +156,24 @@ void Sphere::GetNormal (Vector *hit, Vector *normal) {
 
 void Sphere::DetermineColor (Vector *normal, Color *color) {
     Color  *cp;
-    double  dot, fracx, fracy;
+    double  phi, theta, dot, 
+        fracx, fracy;
     /*
-     * Texture mapping.
+     * Guidelines from:
+     * https://www.cs.unc.edu/~rademach/xroads-RT/RTarticle.html
+     *
+     * Calculate Y coordinate.
      */
-    dot   = texturex_ * (*normal);
-    fracx = acos (dot) / M_PI;
     dot   = texturey_ * (*normal);
-    fracy = acos (dot) / M_PI;
+    phi   = acos (-dot);
+    fracy = phi / M_PI;
+    /* 
+     * Calculate Y coordinate.
+     */
+    dot   = (*normal) * texturex_;
+    theta = acos (dot / sin (phi)) / (2.0 * M_PI);
+    dot   = texturez_ * (*normal);
+    fracx = (dot > 0.0) ? theta : (1.0 - theta);
 
     cp = texture_->GetColor (fracx, fracy, 1.0);
     cp->CopyTo (color);

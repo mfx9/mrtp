@@ -31,7 +31,7 @@ Camera::Camera (Vector *origin, Vector *target,
 
     width_       = (double) width;
     height_      = (double) height;
-    rotation_    = roll;
+    rotation_    = DEG_TO_RAD (roll);
     ratio_       = width / height;
     perspective_ = ratio_ / (2.0 * tan (DEG_TO_RAD (fov / 2.0)));
 }
@@ -78,11 +78,24 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
     k.Normalize_InPlace ();
 
     /*
-     * TODO
      * Apply camera rotation around
-     * the axis of i.
+     * the i axis.
+     *
+     * j' = cosa * j + sin * k
+     * k' = (-sina) * j + cosa * k
      */
+    double sina = sin (rotation_), 
+        cosa = cos (rotation_);
+    Vector T, Q, jp, kp;
 
+    T  = j * cosa;
+    Q  = k * sina;
+    jp = T + Q;
+    T  = j * (-sina);
+    Q  = k * cosa;
+    kp = T + Q;
+    jp.CopyTo (&j);
+    kp.CopyTo (&k);
     /*
      * Calculate the central point of the window.
      */
