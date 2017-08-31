@@ -20,15 +20,18 @@
 #define _PARSER_H
 
 #include <iostream>
-#include <fstream>
 #include <string>
-
-/* 
- * Converting strings to doubles. 
- */
-#include <sstream>
-
+#include <fstream>
 using namespace std;
+
+#include "utils.hpp"
+
+/*
+ * Macros for bit masks.
+ */
+#define MAKE_MASK(bit) (1 << bit)
+
+#define CHECK_BIT(flags, bit) ((flags >> bit) & 1)
 
 
 #define MAX_LINES       8
@@ -46,23 +49,29 @@ using namespace std;
 #define STATUS_OK    2
 
 #define CODE_OK           0
-#define CODE_ALIEN        1
+#define CODE_UNKNOWN      1
 #define CODE_WRONG_TYPE   2
 #define CODE_WRONG_SIZE   3
 #define CODE_MISSING      4
 #define CODE_REDUNDANT    5
 #define CODE_FILENAME     6
-#define CODE_NOT_FOUND    7
-#define CODE_ZERO_VECTOR  8
+#define CODE_VALUE        7
+#define CODE_CONFLICT     8
 
 /*
- * Macros.
+ * Bit masks.
  */
-#define IS_COMMENT(c) (c == '#')
+#define TP_TEXT            0
+#define TP_REAL            1
+#define TP_VECTOR          2
+#define TP_CHECK_ZERO      3
+#define TP_CHECK_POSITIVE  4
 
-#define IS_WHITE(c) ((c == ' ') || (c == '\t'))
-
-#define IS_NOT_WHITE(c) ((c != ' ') && (c != '\t'))
+#define BIT_TEXT            MAKE_MASK (TP_TEXT)
+#define BIT_REAL            MAKE_MASK (TP_REAL)
+#define BIT_VECTOR          MAKE_MASK (TP_VECTOR)
+#define BIT_CHECK_ZERO      MAKE_MASK (TP_CHECK_ZERO)
+#define BIT_CHECK_POSITIVE  MAKE_MASK (TP_CHECK_POSITIVE)
 
 
 class Entry {
@@ -119,19 +128,13 @@ class Parser {
     char     status_;
     Entry   *entries_;
     unsigned int nentries_;
-
     /*
      * Private methods.
      */
     unsigned int AddEntry (Entry *temp);
 
-    bool TokenizeLine (string *line, string *tokens,
-        unsigned int *ntokens);
-    bool ConvertTokens (string *tokens,
-        unsigned int ntokens, double *out);
-
-    char CheckItem (string *item, string collect[][MAX_TOKENS],
-        unsigned int sizes[], unsigned int npar,
+    char CreateEntry (string *id, string collect[][MAX_TOKENS],
+        unsigned int sizes[], unsigned int ncol,
             unsigned int *errline, string *errmsg,
                 Entry *entry);
 public:
@@ -142,5 +145,26 @@ public:
     unsigned int GetNumberEntries ();
     unsigned int PopEntry (Entry *entry);
 };
+
+/*
+ * Structures to store templates.
+ */
+struct TemplateParameter {
+    string label, replace;
+    unsigned char flags;
+};
+
+struct TemplateItem {
+    string id;
+    const TemplateParameter *templ;
+    unsigned int ntempl;
+};
+
+/*
+ * Global constants.
+ */
+extern const TemplateItem kItems[];
+extern const unsigned int kSizeItems;
+
 
 #endif /* _PARSER_H */

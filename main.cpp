@@ -315,8 +315,6 @@ int main (int argc, char **argv) {
     Parser parser (&input);
     parser.Parse ();
     if (parser.GetStatus () != STATUS_OK) {
-        cerr << "Error parsing file: \"" << input 
-            << "\"" << endl;
         return EXIT_FAIL;
     }
     if (!quiet) {

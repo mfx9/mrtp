@@ -129,6 +129,8 @@ bool World::Initialize () {
                 else if (key == "scale") {
                     scale = reals[0];
                 }
+                else if (key == "color") {
+                }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
@@ -154,6 +156,8 @@ bool World::Initialize () {
                 else if (key == "axis") {
                     axis.Set (reals);
                 }
+                else if (key == "color") {
+                }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
@@ -178,6 +182,8 @@ bool World::Initialize () {
                 }
                 else if (key == "radius") {
                     radius = reals[0];
+                }
+                else if (key == "color") {
                 }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);

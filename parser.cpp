@@ -87,239 +87,184 @@ unsigned int Parser::PopEntry (Entry *entry) {
     return nentries_;
 }
 
-bool Parser::TokenizeLine (string *line, string *tokens,
-        unsigned int *ntokens) {
-    /*
-     * Split a line to tokens.
-     *
-     * Remove redundant blank characters and comments.
-     */
-    char    c, pc;
-    string  accu;
-    unsigned int i, ti, len;
-
-    ti  = 0;
-    len = line->length ();
-
-    if (len > 0) {
-        accu = "";
-        pc   = line->at (0);
-
-        for (i = 0; i < len; i++) {
-            c = line->at (i);
-            if IS_COMMENT (c) {
-                break;
-            }
-            if IS_NOT_WHITE (c) {
-                accu += c;
-            }
-            if ((IS_WHITE (c) && IS_NOT_WHITE (pc))
-                    || (i == (len - 1))) {
-                if (ti == MAX_TOKENS) {
-                    return false;
-                }
-                tokens[ti++] = accu;
-                accu = "";
-            }
-            pc = c;
-        }
-        if (accu != "") {
-            tokens[ti++] = accu;
-        }
-    }
-    (*ntokens) = ti;
-    return true;
-}
-
-bool Parser::ConvertTokens (string *tokens, 
-        unsigned int ntokens, double *out) {
-    /*
-     * Try to convert tokens to real numbers.
-     */
-    double        test;
-    unsigned int  i;
-    stringstream  convert;
-
-    for (i = 0; i < ntokens; i++) {
-        convert.str (tokens[i]);
-        convert >> test;
-        if (!convert) {
-            return false;
-        }
-        out[i] = test;
-        convert.clear ();
-    }
-    return true;
-}
-
-char Parser::CheckItem (string *item, string collect[][MAX_TOKENS],
-        unsigned int sizes[], unsigned int npar, unsigned int *errline, 
+char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
+        unsigned int sizes[], unsigned int ncol, unsigned int *errline, 
         string *errmsg, Entry *entry) {
-    unsigned int  i, j, ntokens, 
-        nlabels, position;
+    bool          check, found;
+    string        label, filename, extension;
+    double        output[MAX_COMPONENTS];
+    unsigned int  i, j, k, ntokens, checklist;
 
-    unsigned char flags = 0,
-        pattern = 0;
-    bool    check, found;
-    string  label, filename, 
-        extension;
+    const TemplateParameter *templ, *othertempl;
+    const TemplateItem      *item;
 
-    double output[MAX_COMPONENTS];
+    /*
+     * Assign the label (camera, light, etc.)
+     */
+    entry->SetLabel (id);
 
-
-    const string *labels,
-        camera[] = {"position", "target", "roll"},
-        light[] = {"position"},
-        plane[] = {"center", "normal", "scale", "texture"},
-        sphere[] = {"position", "radius", "axis", "texture"},
-        cylinder[] = {"center", "direction", "radius", "texture"};
-
-    if ((*item) == "camera") {
-        labels = camera;
-        nlabels = sizeof (camera) / sizeof (camera[0]);
-    }
-    else if ((*item) == "light") {
-        labels = light;
-        nlabels = sizeof (light) / sizeof (light[0]);
-    }
-    else if ((*item) == "plane") {
-        labels = plane;
-        nlabels = sizeof (plane) / sizeof (plane[0]);
-    }
-    else if ((*item) == "sphere") {
-        labels = sphere;
-        nlabels = sizeof (sphere) / sizeof (sphere[0]);
-    }
-    else {  /* if ((*item) == "cylinder") */
-        labels = cylinder;
-        nlabels = sizeof (cylinder) / sizeof (cylinder[0]);
+    /*
+     * Find a template for the current item.
+     */
+    item = kItems;
+    for (i = 0; i < kSizeItems; i++, item++) {
+        if (item->id == (*id)) {
+            break;
+        }
     }
 
     /*
-     * Assign the label.
+     * Run over all collectibles.
      */
-    entry->SetLabel (item);
-
-    /*
-     * Build a pattern.
-     */
-    for (i = 0; i < nlabels; i++) {
-        pattern |= (unsigned char) (1 << i);
-    }
-
-    for (i = 0; i < npar; i++) {
+    checklist = 0;
+    for (i = 0; i < ncol; i++) {
         label = collect[i][0];
-        /* DEBUG
-        cout << (*item) << ": " << label << endl;  */
 
         (*errline) = i;
         /*
-         * Check if the label exists.
+         * Find a template for the current collectible.
          */
         found = false;
-        for (j = 0; j < nlabels; j++) {
-            if (labels[j] == label) {
+        templ = item->templ;
+        for (j = 0; j < item->ntempl; j++, templ++) {
+            if (templ->label == label) {
                 found = true;
+                break;
             }
         }
         if (!found) {
             (*errmsg) = label;
-            return CODE_ALIEN;
+            return CODE_UNKNOWN;
+        }
+        /*
+         * Check if the parameter has been processed.
+         *
+         * Otherwise, mark it as processed.
+         */
+        if (CHECK_BIT (checklist, j)) {
+            (*errmsg) = label;
+            return CODE_REDUNDANT;
+        }
+        checklist |= MAKE_MASK (j);
+
+        /*
+         * Check for conflicting parameters.
+         */
+        othertempl = item->templ;
+        for (k = 0; k < item->ntempl; k++, othertempl++) {
+            if (j != k) {
+                if (templ->replace == othertempl->label) {
+                    if (CHECK_BIT (checklist, k)) {
+                        return CODE_CONFLICT;
+                    }
+                }
+            }
         }
 
         /*
-         * Parameters are usually 3D vectors (including 
-         * colors).
+         * Parameters are usually 3D vectors (including colors).
          */
-        ntokens = 4;
-        /*
-         * Parameters that are not vectors.
-         */
-        if ((label == "roll") || (label == "scale")
-                || (label == "radius") || (label == "texture")) {
-            ntokens = 2;
+        ntokens = 2;
+        if (CHECK_BIT (templ->flags, TP_VECTOR)) {
+            ntokens = 4;
         }
-
         if (sizes[i] != ntokens) {
             return CODE_WRONG_SIZE;
         }
-        /*
-         * Parameters are real numbers, except textures.
-         */
-        if (label != "texture") {
+
+        if (!CHECK_BIT (templ->flags, TP_TEXT)) {
+            /*
+             * Parameter is a vector or real number.
+             */
             check = ConvertTokens (&collect[i][1], (ntokens - 1), output);
             if (!check) {
                 return CODE_WRONG_TYPE;
             }
             /*
-             * Check for illegal zero vectors.
+             * Check for invalid values.
              */
-            if ((label == "normal") || (label == "direction") 
-                    || (label == "axis")) {
-                check = true;
+            if (CHECK_BIT (templ->flags, TP_CHECK_ZERO)) {
+                check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if (output[j] != 0.0) {
-                        check = false;
+                        check = true;
                         break;
                     }
                 }
-                if (check) {
-                    return CODE_ZERO_VECTOR;
+                if (!check) {
+                    return CODE_VALUE;
+                }
+            }
+            else if (CHECK_BIT (templ->flags, TP_CHECK_POSITIVE)) {
+                check = false;
+                for (j = 0; j < (ntokens - 1); j++) {
+                    if (output[j] > 0.0) {
+                        check = true;
+                        break;
+                    }
+                }
+                if (!check) {
+                    return CODE_VALUE;
                 }
             }
             entry->AddReal (&label, output, (ntokens - 1));
         }
         else {
-            filename = collect[i][1];
             /*
-             * Check for a valid filename.
+             * Parameter is a texture.
              */
-            position = filename.length () - 1;
-            if ((filename.at (0) != '"') || (filename.at (position) != '"')) {
+            extension = "png";
+            check = CheckFilename (&collect[i][1], &filename, &extension);
+            if (!check) {
                 return CODE_FILENAME;
-            }
-            filename = filename.substr (1, position - 1);
-
-            /*
-             * Check for a valid extension.
-             */
-            extension = filename.substr (position - 4, 3);
-            if (extension != "png") {
-                return CODE_FILENAME;
-            }
-
-            /*
-             * Check if the file exists.
-             */
-            const char *fn = filename.c_str ();
-            ifstream file (fn);
-
-            if (!file.good ()) {
-                (*errmsg) = filename;
-                return CODE_NOT_FOUND;
             }
             entry->AddText (&label, &filename, 1);
         }
+    }
 
-        /*
-         * Check if all parameter lines are present.
-         */
-        for (j = 0; j < nlabels; j++) {
-            if (labels[j] == label) {
-                /*
-                 * Check for redundant parameters.
-                 */
-                if ((flags >> j) & 1) {
-                    (*errmsg) = label;
-                    return CODE_REDUNDANT;
-                }
-                flags |= (unsigned char) (1 << j);
+
+    /*
+     * Check if all parameters or their alternatives are present.
+     */
+    for (i = 0; i < ncol; i++) {
+        label = collect[i][0];
+
+        templ = item->templ;
+        for (j = 0; j < item->ntempl; j++, templ++) {
+            if (templ->label == label) {
                 break;
             }
         }
-    }
-    if (flags != pattern) {
-        return CODE_MISSING;
+
+        if (!CHECK_BIT (checklist, j)) {
+            /*
+             * Parameter is not present.
+             *
+             * Check if it is replaceable.
+             */
+            if (templ->replace == "") {
+                return CODE_MISSING;
+            }
+            /*
+             * Parameter is not present, but it is replaceable.
+             *
+             * Check if the alternative parameter is present.
+             */
+            othertempl = item->templ;
+            for (k = 0; k < item->ntempl; k++, othertempl++) {
+                if (j != k) {
+                    if (templ->replace == othertempl->label) {
+                        break;
+                    }
+                }
+            }
+            if (!CHECK_BIT (checklist, k)) {
+                /*
+                 * Alternative parameter is needed, but it is also missing.
+                 */
+                return CODE_MISSING;
+            }
+        }
     }
     return CODE_OK;
 }
@@ -365,7 +310,7 @@ void Parser::Parse () {
     while (getline (config, line)) {
         nlines++;
 
-        check = TokenizeLine (&line, tokens, &ntokens);
+        check = TokenizeLine (&line, tokens, &ntokens, MAX_TOKENS);
         if (!check) {
             cerr << "Line " << nlines << 
                 ": Too many tokens." << endl;
@@ -448,11 +393,11 @@ void Parser::Parse () {
             if (mode == MODE_READ) {
                 mode = MODE_OPEN;
 
-                code = CheckItem (&item, collect, sizes, npar, 
-                    &errline, &msg, &entry);
+                code = CreateEntry (&item, collect, sizes, npar, &errline, 
+                    &msg, &entry);
             
                 if (code != CODE_OK) {
-                    if (code == CODE_ALIEN) {
+                    if (code == CODE_UNKNOWN) {
                         cerr << "Line " << (start + errline + 1) 
                             << ": Unrecognized parameter \"" << msg << "\"." << endl;
                     }
@@ -474,15 +419,15 @@ void Parser::Parse () {
                     }
                     else if (code == CODE_FILENAME) {
                         cerr << "Line " << (start + errline + 1) 
-                            << ": Invalid filename." << endl;
+                            << ": File not found or invalid filename." << endl;
                     }
-                    else if (code == CODE_NOT_FOUND) {
-                        cerr << "Line " << (start + errline + 1) 
-                            << ": Texture file \"" << msg << "\" not found." << endl;
-                    }
-                    else {  /* if (code == CODE_ZERO_VECTOR) */
+                    else if (code == CODE_VALUE) {
                         cerr << "Line " << (start + errline + 1) <<
-                            ": Illegal zero vector." << endl;
+                            ": Invalid value(s)." << endl;
+                    }
+                    else {  /* if (code == CODE_CONFLICT) */
+                        cerr << "Line " << (start + errline + 1) <<
+                            ": Conflicting parameter." << endl;
                     }
                     config.close ();
                     return;
@@ -516,173 +461,4 @@ void Parser::Parse () {
             ep = ep->GetNext ();
         } while (ep != NULL);
     } */
-}
-
-
-/*****************************
- *          Entries          *
- *****************************/
-Entry::Entry (string *label) {
-    label_ = (*label);
-    next_  = NULL;
-    npar_  = 0;
-}
-
-Entry::Entry () {
-    label_ = "default";
-    next_  = NULL;
-    npar_  = 0;
-}
-
-Entry::~Entry () {
-}
-
-void Entry::Clear () {
-    npar_ = 0;
-}
-
-Entry *Entry::GetNext () {
-    return next_;
-}
-
-void Entry::SetNext (Entry *next) {
-    next_ = next;
-}
-
-void Entry::GetLabel (string *label) {
-    (*label) = label_;
-}
-
-void Entry::SetLabel (string *label) {
-    label_ = (*label);
-}
-
-void Entry::CopyTo (Entry *other) {
-    unsigned int i, j;
-
-    other->label_ = label_;
-    other->npar_ = npar_;
-
-    for (i = 0; i < npar_; i++) {
-        other->keys_[i] = keys_[i];
-        other->type_[i] = type_[i];
-
-        for (j = 0; j < MAX_COMPONENTS; j++) {
-            if (type_[i] == TYPE_REAL) {
-                other->real_[i][j] = real_[i][j];
-            }
-            else {  /* if (type[i] == TYPE_TEXT) */
-                other->text_[i][j] = text_[i][j];
-            }
-        }
-    }
-}
-
-void Entry::Print () {
-    unsigned int i, j;
-
-    cout << "** Entry: " << label_ << endl;
-    cout << "npar=" << npar_ << endl;
-
-    if (npar_ > 0) {
-        for (i = 0; i < npar_; i++) {
-            cout << "Key " << keys_[i] << ": ";
-        
-            for (j = 0; j < MAX_COMPONENTS; j++) {
-                if (type_[i] == TYPE_TEXT) {
-                    if (text_[i][j] != "") {
-                        cout << "\"" << text_[i][j] << "\" ";
-                    }
-                    else {
-                        cout << "\"\" ";
-                    }
-                }
-                else {  /* if (type[i] == TYPE_REAL) */
-                    cout << real_[i][j] << " ";
-                }
-            }
-            cout << endl;
-        }
-    }
-}
-
-bool Entry::AddText (string *key, string *text, 
-        unsigned int ntext) {
-    unsigned int i;
-
-    for (i = 0; i < ntext; i++) {
-        text_[npar_][i] = text[i];
-    }
-    type_[npar_] = TYPE_TEXT;
-    keys_[npar_] = (*key);
-    npar_++;
-
-    return true;
-}
-
-bool Entry::AddReal (string *key, double *real, 
-        unsigned int nreal) {
-    unsigned int i;
-
-    for (i = 0; i < nreal; i++) {
-        real_[npar_][i] = real[i];
-    }
-    type_[npar_] = TYPE_REAL;
-    keys_[npar_] = (*key);
-    npar_++;
-
-    return true;
-}
-
-bool Entry::PopData (string *key, char *type, double *reals, 
-        string *texts) {
-    /*
-     * Connect the parser with the actual initialization 
-     * of actors.
-     *
-     * The method is supposed to be called iteratively
-     * in a while type of loop, until false is returned.
-     *
-     */
-    unsigned int j, k;
-
-    if (npar_ < 1) {
-        return false;
-    }
-    j = (npar_ - 1);
-
-    if (type_[j] == TYPE_REAL) {
-        for (k = 0; k < MAX_COMPONENTS; k++) {
-            reals[k] = real_[j][k];
-        }
-    }
-    else {  /* (type_[j] == TYPE_TEXT) */
-        for (k = 0; k < MAX_COMPONENTS; k++) {
-            texts[k] = text_[j][k];
-        }
-    }
-    (*key)  = keys_[j];
-    (*type) = type_[j];
-
-    /* DEBUG
-    cout << "Key: " << (*key) << endl;
-    if ((*type) == TYPE_TEXT) {
-        cout << "Type: TEXT " << endl;
-    }
-    else {
-        cout << "Type: REAL " << endl;
-    }
-    for (j = 0; j < MAX_COMPONENTS; j++) {
-        if ((*type) == TYPE_TEXT) {
-            cout << texts[j] << " ";
-        }
-        else {
-            cout << reals[j] << " ";
-        }
-    }
-    cout << endl;
-    DEBUG ENDS */
-
-    npar_--;
-    return true;
 }
