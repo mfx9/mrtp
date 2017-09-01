@@ -36,7 +36,7 @@ using namespace std;
 #define DEFAULT_FOV        70.0
 #define DEFAULT_DISTANCE   60.0
 #define DEFAULT_SHADOW      0.25
-#define DEFAULT_MODEL     LIGHT_MODEL_QUADRATIC
+#define DEFAULT_MODEL     lightQuadratic
 
 /*
  * Program limits.
@@ -51,8 +51,7 @@ using namespace std;
 /*
  * Exit codes.
  */
-#define EXIT_OK    0
-#define EXIT_FAIL  1
+enum ExitCode_t {exitOK, exitFail};
 
 
 void HelpScreen (string program) {
@@ -96,20 +95,20 @@ int main (int argc, char **argv) {
     /* 
      * Modifiable parameters.
      */
-    bool    quiet      =  false;
-    string  input      =  "";
-    string  output     =  "";
-    double  fov        =  DEFAULT_FOV;
-    double  distance   =  DEFAULT_DISTANCE;
-    double  shadow     =  DEFAULT_SHADOW;
-    char    model      =  DEFAULT_MODEL;
-    unsigned int width   =  DEFAULT_WIDTH;
-    unsigned int height  =  DEFAULT_HEIGHT;
+    bool         quiet    =  false;
+    string       input    =  "";
+    string       output   =  "";
+    double       fov      =  DEFAULT_FOV;
+    double       distance =  DEFAULT_DISTANCE;
+    double       shadow   =  DEFAULT_SHADOW;
+    LightModel_t model    =  DEFAULT_MODEL;
+    unsigned int width    =  DEFAULT_WIDTH;
+    unsigned int height   =  DEFAULT_HEIGHT;
 
 
     if (argc < 2) {
         HelpScreen (argv[0]);
-        return EXIT_FAIL;
+        return exitFail;
     }
     for (i = 1; i < argc; i++) {
         text = argv[i]; 
@@ -118,7 +117,7 @@ int main (int argc, char **argv) {
          */
         if ((text == "-h") || (text == "--help")) {
             HelpScreen (argv[0]);
-            return EXIT_OK;
+            return exitOK;
         }
 
         /*
@@ -133,7 +132,7 @@ int main (int argc, char **argv) {
          */
         else if ((text == "-v") || (text == "--version")) {
             cout << "Version: XXX" << endl;
-            return EXIT_OK;
+            return exitOK;
         }
 
         /*
@@ -142,7 +141,7 @@ int main (int argc, char **argv) {
         else if ((text == "-r") || (text == "--resolution")) {
             if (i == (argc - 1)) {
                 cerr << "Resolution not given." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             next  = argv[++i];
             pos   = next.find ('x');
@@ -182,7 +181,7 @@ int main (int argc, char **argv) {
             }
             if (!resok) {
                 cerr << "Invalid resolution." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
         }
 
@@ -192,19 +191,19 @@ int main (int argc, char **argv) {
         else if ((text == "-f") || (text == "--fov")) {
             if (i == (argc - 1)) {
                 cerr << "Field of vision not given." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             next = argv[++i];
             convert.str (next);
             convert >> fov;
             if (!convert) {
                 cerr << "Unable to convert fov to double." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             convert.clear ();
             if ((fov < MIN_FOV) || (fov > MAX_FOV)) {
                 cerr << "Invalid fov." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
         }
 
@@ -214,7 +213,7 @@ int main (int argc, char **argv) {
         else if ((text == "-o") || (text == "--output")) {
             if (i == (argc - 1)) {
                 cerr << "Output file not given." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             output = argv[++i];
             /* Check for a valid filename. */
@@ -226,21 +225,21 @@ int main (int argc, char **argv) {
         else if ((text == "-m") || (text == "--model")) {
             if (i == (argc - 1)) {
                 cerr << "Light quenching model not given." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             next = argv[++i];
             if (next == "none") {
-                model = LIGHT_MODEL_NONE;
+                model = lightNone;
             }
             else if (next == "linear") {
-                model = LIGHT_MODEL_LINEAR;
+                model = lightLinear;
             }
             else if (next == "quadratic") {
-                model = LIGHT_MODEL_QUADRATIC;
+                model = lightQuadratic;
             }
             else {
                 cerr << "Unsupported light model." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
         }
 
@@ -250,14 +249,14 @@ int main (int argc, char **argv) {
         else if ((text == "-d") || (text == "--distance")) {
             if (i == (argc - 1)) {
                 cerr << "Distance to quench light not given." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             next = argv[++i];
             convert.str (next);
             convert >> distance;
             if (!convert) {
                 cerr << "Unable to convert distance to double." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
         }
 
@@ -267,18 +266,18 @@ int main (int argc, char **argv) {
         else if ((text == "-s") || (text == "--shadow")) {
             if (i == (argc - 1)) {
                 cerr << "Shadow factor not given." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             next = argv[++i];
             convert.str (next);
             convert >> shadow;
             if (!convert) {
                 cerr << "Unable to convert shadow to double." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             if ((shadow < 0.0) || (shadow > 1.0)) {
                 cerr << "Invalid shadow factor." << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
         }
 
@@ -288,7 +287,7 @@ int main (int argc, char **argv) {
         else {
             if (text.at (0) == '-') {
                 cerr << "Undefined option: \"" << text << "\"" << endl;
-                return EXIT_FAIL;
+                return exitFail;
             }
             input = text;
             /* Check for a valid filename. */
@@ -297,7 +296,7 @@ int main (int argc, char **argv) {
 
     if (input == "") {
         cerr << "No input file." << endl;
-        return EXIT_FAIL;
+        return exitFail;
     }
 
     if (output == "") {
@@ -314,8 +313,8 @@ int main (int argc, char **argv) {
      */
     Parser parser (&input);
     parser.Parse ();
-    if (parser.GetStatus () != STATUS_OK) {
-        return EXIT_FAIL;
+    if (parser.Status () != statusOK) {
+        return exitFail;
     }
     if (!quiet) {
         i = parser.GetNumberEntries ();
@@ -355,5 +354,5 @@ int main (int argc, char **argv) {
     }
     world.WritePNG (&output);
 
-    return EXIT_OK;
+    return exitOK;
 }

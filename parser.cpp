@@ -20,7 +20,6 @@
 
 
 Parser::Parser (string *filename) {
-    status_   = STATUS_NEW;
     filename_ = (*filename);
     nentries_ = 0;
 }
@@ -37,7 +36,7 @@ Parser::~Parser () {
     }
 }
 
-char Parser::GetStatus () {
+ParserStatus_t Parser::Status () {
     return status_;
 }
 
@@ -87,7 +86,7 @@ unsigned int Parser::PopEntry (Entry *entry) {
     return nentries_;
 }
 
-char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
+ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
         unsigned int sizes[], unsigned int ncol, unsigned int *errline, 
         string *errmsg, Entry *entry) {
     bool          check, found;
@@ -134,7 +133,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
         }
         if (!found) {
             (*errmsg) = label;
-            return CODE_UNKNOWN;
+            return codeUnknown;
         }
         /*
          * Check if the parameter has been processed.
@@ -143,7 +142,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
          */
         if (CHECK_BIT (checklist, j)) {
             (*errmsg) = label;
-            return CODE_REDUNDANT;
+            return codeRedundant;
         }
         checklist |= MAKE_MASK (j);
 
@@ -155,7 +154,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             if (j != k) {
                 if (templ->replace == othertempl->id) {
                     if (CHECK_BIT (checklist, k)) {
-                        return CODE_CONFLICT;
+                        return codeConflict;
                     }
                 }
             }
@@ -169,7 +168,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             ntokens = 4;
         }
         if (sizes[i] != ntokens) {
-            return CODE_WRONG_SIZE;
+            return codeSize;
         }
 
         if (!CHECK_BIT (templ->flags, TP_TEXT)) {
@@ -178,7 +177,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
              */
             check = ConvertTokens (&collect[i][1], (ntokens - 1), output);
             if (!check) {
-                return CODE_WRONG_TYPE;
+                return codeType;
             }
             /*
              * Check for invalid values.
@@ -192,7 +191,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     }
                 }
                 if (!check) {
-                    return CODE_VALUE;
+                    return codeValue;
                 }
             }
             else if (CHECK_BIT (templ->flags, TP_CHECK_POSITIVE)) {
@@ -204,7 +203,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     }
                 }
                 if (!check) {
-                    return CODE_VALUE;
+                    return codeValue;
                 }
             }
             entry->AddReal (&label, output, (ntokens - 1));
@@ -216,7 +215,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             extension = "png";
             check = CheckFilename (&collect[i][1], &filename, &extension);
             if (!check) {
-                return CODE_FILENAME;
+                return codeFilename;
             }
             entry->AddText (&label, &filename, 1);
         }
@@ -235,7 +234,6 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                 break;
             }
         }
-
         if (!CHECK_BIT (checklist, j)) {
             /*
              * Parameter is not present.
@@ -243,7 +241,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
              * Check if it is replaceable.
              */
             if (!templ->replace) {
-                return CODE_MISSING;
+                return codeMissing;
             }
             /*
              * Parameter is not present, but it is replaceable.
@@ -262,17 +260,14 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                 /*
                  * Alternative parameter is needed, but it is also missing.
                  */
-                return CODE_MISSING;
+                return codeMissing;
             }
         }
     }
-    return CODE_OK;
+    return codeOK;
 }
 
 void Parser::Parse () {
-    const char *fn = filename_.c_str ();
-    ifstream config (fn);
-
     string tokens[MAX_TOKENS];
     unsigned int ntokens;
 
@@ -284,27 +279,33 @@ void Parser::Parse () {
         ncam, nlig, nact;
 
     bool check;
-    char mode, code;
+    ParserMode_t mode;
+    ParserCode_t code;
 
     string line, item, msg;
     Entry  entry;
 
+    /*
+     * Initialize.
+     */
+    status_ = statusFail;
+    mode    = modeOpen;
+    nlines  = 0;
+    ncam    = 0;
+    nlig    = 0;
+    nact    = 0;
 
-    status_ = STATUS_FAIL;
+    /*
+     * Open the input file.
+     */
+    const char *fn = filename_.c_str ();
+    ifstream config (fn);
 
     if (!config.is_open ()) {
         cerr << "File \"" << filename_ 
             << "\" cannot be opened." << endl;
         return;
     }
-    /*
-     * Initialize.
-     */
-    mode   = MODE_OPEN;
-    nlines = 0;
-    ncam   = 0;
-    nlig   = 0;
-    nact   = 0;
 
 
     while (getline (config, line)) {
@@ -329,12 +330,12 @@ void Parser::Parse () {
              * Not a blank line.
              *
              */
-            if (mode == MODE_OPEN) {
+            if (mode == modeOpen) {
                 item = tokens[0];
                 if ((item == "camera") || (item == "light")
                         || (item == "plane") || (item == "sphere")
                         || (item == "cylinder")) {
-                    mode  = MODE_READ;
+                    mode  = modeRead;
                     npar  = 0;
                     start = nlines;
 
@@ -390,42 +391,42 @@ void Parser::Parse () {
                 continue;
             }
 
-            if (mode == MODE_READ) {
-                mode = MODE_OPEN;
+            if (mode == modeRead) {
+                mode = modeOpen;
 
                 code = CreateEntry (&item, collect, sizes, npar, &errline, 
                     &msg, &entry);
             
-                if (code != CODE_OK) {
-                    if (code == CODE_UNKNOWN) {
+                if (code != codeOK) {
+                    if (code == codeUnknown) {
                         cerr << "Line " << (start + errline + 1) 
                             << ": Unrecognized parameter \"" << msg << "\"." << endl;
                     }
-                    else if (code == CODE_WRONG_TYPE) {
+                    else if (code == codeType) {
                         cerr << "Line " << (start + errline + 1) 
                             << ": Wrong type of component(s)." << endl;
                     }
-                    else if (code == CODE_WRONG_SIZE) {
+                    else if (code == codeSize) {
                         cerr << "Line " << (start + errline + 1) 
                             << ": Wrong number of components." << endl;
                     }
-                    else if (code == CODE_MISSING) {
+                    else if (code == codeMissing) {
                         cerr << "Line " << start << ": Missing parameter in " 
                             << item << "." << endl;
                     }
-                    else if (code == CODE_REDUNDANT) {
+                    else if (code == codeRedundant) {
                         cerr << "Line " << (start + errline + 1) 
                             << ": Redundant parameter \"" << msg << "\"." << endl;
                     }
-                    else if (code == CODE_FILENAME) {
+                    else if (code == codeFilename) {
                         cerr << "Line " << (start + errline + 1) 
                             << ": File not found or invalid filename." << endl;
                     }
-                    else if (code == CODE_VALUE) {
+                    else if (code == codeValue) {
                         cerr << "Line " << (start + errline + 1) <<
                             ": Invalid value(s)." << endl;
                     }
-                    else {  /* if (code == CODE_CONFLICT) */
+                    else {  /* if (code == codeConflict) */
                         cerr << "Line " << (start + errline + 1) <<
                             ": Conflicting parameter." << endl;
                     }
@@ -451,7 +452,7 @@ void Parser::Parse () {
         cerr << "Scene contains no actors." << endl;
         return;
     }
-    status_ = STATUS_OK;
+    status_ = statusOK;
 
     /* DEBUG
     Entry *ep = entries_;

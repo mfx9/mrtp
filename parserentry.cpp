@@ -65,10 +65,10 @@ void Entry::CopyTo (Entry *other) {
         other->type_[i] = type_[i];
 
         for (j = 0; j < MAX_COMPONENTS; j++) {
-            if (type_[i] == TYPE_REAL) {
+            if (type_[i] == parameterReal) {
                 other->real_[i][j] = real_[i][j];
             }
-            else {  /* if (type[i] == TYPE_TEXT) */
+            else {  /* if (type[i] == parameterText) */
                 other->text_[i][j] = text_[i][j];
             }
         }
@@ -86,7 +86,7 @@ void Entry::Print () {
             cout << "Key " << keys_[i] << ": ";
         
             for (j = 0; j < MAX_COMPONENTS; j++) {
-                if (type_[i] == TYPE_TEXT) {
+                if (type_[i] == parameterText) {
                     if (text_[i][j] != "") {
                         cout << "\"" << text_[i][j] << "\" ";
                     }
@@ -94,7 +94,7 @@ void Entry::Print () {
                         cout << "\"\" ";
                     }
                 }
-                else {  /* if (type[i] == TYPE_REAL) */
+                else {  /* if (type[i] == parameterReal) */
                     cout << real_[i][j] << " ";
                 }
             }
@@ -110,7 +110,7 @@ bool Entry::AddText (string *key, string *text,
     for (i = 0; i < ntext; i++) {
         text_[npar_][i] = text[i];
     }
-    type_[npar_] = TYPE_TEXT;
+    type_[npar_] = parameterText;
     keys_[npar_] = (*key);
     npar_++;
 
@@ -124,7 +124,7 @@ bool Entry::AddReal (string *key, double *real,
     for (i = 0; i < nreal; i++) {
         real_[npar_][i] = real[i];
     }
-    type_[npar_] = TYPE_REAL;
+    type_[npar_] = parameterReal;
     keys_[npar_] = (*key);
     npar_++;
 
@@ -148,12 +148,12 @@ bool Entry::PopData (string *key, char *type, double *reals,
     }
     j = (npar_ - 1);
 
-    if (type_[j] == TYPE_REAL) {
+    if (type_[j] == parameterReal) {
         for (k = 0; k < MAX_COMPONENTS; k++) {
             reals[k] = real_[j][k];
         }
     }
-    else {  /* (type_[j] == TYPE_TEXT) */
+    else {  /* (type_[j] == parameterText) */
         for (k = 0; k < MAX_COMPONENTS; k++) {
             texts[k] = text_[j][k];
         }
@@ -163,14 +163,14 @@ bool Entry::PopData (string *key, char *type, double *reals,
 
     /* DEBUG
     cout << "Key: " << (*key) << endl;
-    if ((*type) == TYPE_TEXT) {
+    if ((*type) == parameterText) {
         cout << "Type: TEXT " << endl;
     }
     else {
         cout << "Type: REAL " << endl;
     }
     for (j = 0; j < MAX_COMPONENTS; j++) {
-        if ((*type) == TYPE_TEXT) {
+        if ((*type) == parameterText) {
             cout << texts[j] << " ";
         }
         else {

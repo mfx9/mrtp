@@ -38,26 +38,6 @@ using namespace std;
 #define MAX_TOKENS      4
 #define MAX_COMPONENTS  (MAX_TOKENS - 1)
 
-#define MODE_OPEN    1
-#define MODE_READ    2
-
-#define TYPE_REAL    1
-#define TYPE_TEXT    2
-
-#define STATUS_FAIL  0
-#define STATUS_NEW   1
-#define STATUS_OK    2
-
-#define CODE_OK           0
-#define CODE_UNKNOWN      1
-#define CODE_WRONG_TYPE   2
-#define CODE_WRONG_SIZE   3
-#define CODE_MISSING      4
-#define CODE_REDUNDANT    5
-#define CODE_FILENAME     6
-#define CODE_VALUE        7
-#define CODE_CONFLICT     8
-
 /*
  * Bit masks.
  */
@@ -74,6 +54,16 @@ using namespace std;
 #define BIT_CHECK_POSITIVE  MAKE_MASK (TP_CHECK_POSITIVE)
 
 
+enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
+    codeRedundant, codeFilename, codeValue, codeConflict};
+
+enum ParserStatus_t {statusOK, statusFail};
+
+enum ParserParameter_t {parameterReal, parameterText};
+
+enum ParserMode_t {modeOpen, modeRead};
+
+
 class Entry {
     string  label_;
     Entry  *next_;
@@ -88,7 +78,7 @@ class Entry {
     /*
      * Type of each parameter (real or text).
      */
-    char type_[MAX_LINES];
+    ParserParameter_t type_[MAX_LINES];
     /*
      * Real numbers (components of 3D vectors, 
      * etc.).
@@ -125,7 +115,8 @@ public:
 
 class Parser {
     string   filename_;
-    char     status_;
+    ParserStatus_t status_;
+    
     Entry   *entries_;
     unsigned int nentries_;
     /*
@@ -133,7 +124,7 @@ class Parser {
      */
     unsigned int AddEntry (Entry *temp);
 
-    char CreateEntry (string *id, string collect[][MAX_TOKENS],
+    ParserCode_t CreateEntry (string *id, string collect[][MAX_TOKENS],
         unsigned int sizes[], unsigned int ncol,
             unsigned int *errline, string *errmsg,
                 Entry *entry);
@@ -141,7 +132,7 @@ public:
     Parser (string *filename);
     ~Parser ();
     void Parse ();
-    char GetStatus ();
+    ParserStatus_t Status ();
     unsigned int GetNumberEntries ();
     unsigned int PopEntry (Entry *entry);
 };

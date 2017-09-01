@@ -35,14 +35,10 @@
 // #define DEBUG_WORLD     1
 #define sqr(x) (x * x)
 
-#define HIT_NULL        0
-#define HIT_PLANE       1
-#define HIT_SPHERE      2
-#define HIT_CYLINDER    3
+enum HitCode_t {hitNull, hitPlane, hitSphere, 
+    hitCylinder};
 
-#define LIGHT_MODEL_NONE       0
-#define LIGHT_MODEL_LINEAR     1
-#define LIGHT_MODEL_QUADRATIC  2
+enum LightModel_t {lightNone, lightLinear, lightQuadratic};
 
 
 class World {
@@ -58,7 +54,7 @@ class World {
      * At maxdist, the light is fully quenched,
      * unless the model is "none". 
      */
-    char    model_;
+    LightModel_t model_;
     double  maxdist_;
 
     /*
@@ -96,7 +92,7 @@ public:
     World (Parser *parser, unsigned int width,
         unsigned int height, double fov,
         double distance, double shadowfactor, 
-        char lightmodel);
+        LightModel_t lightmodel);
     ~World ();
     bool Initialize ();
 

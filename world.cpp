@@ -22,7 +22,7 @@
 World::World (Parser *parser, unsigned int width,
         unsigned int height, double fov,
         double distance, double shadowfactor, 
-        char lightmodel) {
+        LightModel_t lightmodel) {
     /* 
      * Initialize. 
      */
@@ -414,7 +414,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
     Sphere   *sphere, *hitsphere;
     Cylinder *cylinder, *hitcylinder;
     double    dist, currd, dot, raylen, fade;
-    char      hit;
+    HitCode_t hit;
     Vector    inter, tl, normal;
     Color     objcol;
     bool      isshadow;
@@ -424,7 +424,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
      */
     color->Zero ();
     currd  = maxdist_;
-    hit    = HIT_NULL;
+    hit    = hitNull;
 
     /*
      * Search for planes.
@@ -436,7 +436,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
         if ((dist > 0.) && (dist < currd)) {
             currd    = dist;
             hitplane = plane;
-            hit      = HIT_PLANE;
+            hit      = hitPlane;
         }
         plane = plane->GetNext ();
     }
@@ -451,7 +451,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
         if ((dist > 0.) && (dist < currd)) {
             currd     = dist;
             hitsphere = sphere;
-            hit       = HIT_SPHERE;
+            hit       = hitSphere;
         }
         sphere = sphere->GetNext ();
     }
@@ -466,30 +466,28 @@ void World::TraceRay (Vector *origin, Vector *direction,
         if ((dist > 0.) && (dist < currd)) {
             currd       = dist;
             hitcylinder = cylinder;
-            hit         = HIT_CYLINDER;
+            hit         = hitCylinder;
         }
         cylinder = cylinder->GetNext ();
     }
 
-    if (hit != HIT_NULL) {
+    if (hit != hitNull) {
         /*
          * Found a ray/object intersection.
          */
         inter = ((*direction) * currd) + (*origin);
 
-        switch (hit) {
-            case HIT_PLANE:
-                hitplane->GetNormal (&normal);
-                hitplane->DetermineColor (&inter, &objcol);
-                break;
-            case HIT_SPHERE:
-                hitsphere->GetNormal (&inter, &normal);
-                hitsphere->DetermineColor (&normal, &objcol);
-                break;
-            case HIT_CYLINDER:
-                hitcylinder->GetNormal (&inter, &normal);
-                hitcylinder->DetermineColor (&normal, &objcol);
-                break;
+        if (hit == hitPlane) {
+            hitplane->GetNormal (&normal);
+            hitplane->DetermineColor (&inter, &objcol);
+        }
+        else if (hit == hitSphere) {
+            hitsphere->GetNormal (&inter, &normal);
+            hitsphere->DetermineColor (&normal, &objcol);
+        }
+        else if (hit == hitCylinder) {
+            hitcylinder->GetNormal (&inter, &normal);
+            hitcylinder->DetermineColor (&normal, &objcol);
         }
         /*
          * Find a vector between the intersection
@@ -540,13 +538,13 @@ void World::TraceRay (Vector *origin, Vector *direction,
          * away from the light.
          *
          */
-        if (model_ == LIGHT_MODEL_LINEAR) {
+        if (model_ == lightLinear) {
             fade = 1.0 - (raylen / maxdist_);
         }
-        else if (model_ == LIGHT_MODEL_QUADRATIC) {
+        else if (model_ == lightQuadratic) {
             fade = 1.0 - sqr (raylen / maxdist_);
         }
-        else {  /* if (model_ == LIGHT_MODEL_NONE) */
+        else {  /* if (model_ == lightNone) */
             fade = 1.0;
         }
         dot *= fade;
