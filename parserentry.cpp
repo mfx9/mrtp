@@ -131,7 +131,7 @@ bool Entry::AddReal (string *key, double *real,
     return true;
 }
 
-bool Entry::PopData (string *key, char *type, double *reals, 
+bool Entry::PopData (string *key, ParserParameter_t *type, double *reals, 
         string *texts) {
     /*
      * Connect the parser with the actual initialization 

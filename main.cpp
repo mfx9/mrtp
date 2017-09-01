@@ -85,10 +85,9 @@ void HelpScreen (string program) {
 }
 
 int main (int argc, char **argv) {
-    unsigned int i;
+    int     i;
     size_t  pos;
     bool    resok;
-
     string  text, next, foo, bar;
     stringstream convert;
 

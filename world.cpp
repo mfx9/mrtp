@@ -60,7 +60,7 @@ bool World::Initialize () {
     string  key,
         texts[MAX_COMPONENTS];
     double  reals[MAX_COMPONENTS];
-    char    type;
+    ParserParameter_t  type;
 
     /*
      * Allocate a buffer.

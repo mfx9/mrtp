@@ -53,7 +53,9 @@ using namespace std;
 #define BIT_CHECK_ZERO      MAKE_MASK (TP_CHECK_ZERO)
 #define BIT_CHECK_POSITIVE  MAKE_MASK (TP_CHECK_POSITIVE)
 
-
+/*
+ * Custom data types.
+ */
 enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
     codeRedundant, codeFilename, codeValue, codeConflict};
 
@@ -62,6 +64,11 @@ enum ParserStatus_t {statusOK, statusFail};
 enum ParserParameter_t {parameterReal, parameterText};
 
 enum ParserMode_t {modeOpen, modeRead};
+
+enum EntryLabel_t {entryCamera, entryLight, entryPlane, 
+    entrySphere, entryCylinder};
+
+typedef unsigned int Flags_t;
 
 
 class Entry {
@@ -98,19 +105,17 @@ public:
 
     Entry *GetNext ();
     void SetNext (Entry *next);
-
-    bool PopData (string *key, char *type, double *real, 
-        string *text);
-    void GetLabel (string *label);
-
-    bool AddText (string *key, string *text, 
-        unsigned int ntext);
-    bool AddReal (string *key, double *real, 
-            unsigned int nreal);
-    void SetLabel (string *label);
     void CopyTo (Entry *other);
     void Print ();
     void Clear ();
+
+    bool AddText (string *key, string *text, unsigned int ntext);
+    bool AddReal (string *key, double *real, unsigned int nreal);
+    void SetLabel (string *label);
+
+    bool PopData (string *key, ParserParameter_t *type, 
+        double *real, string *text);
+    void GetLabel (string *label);
 };
 
 class Parser {
@@ -143,7 +148,7 @@ public:
 struct TemplateParameter {
     char id, replace;
     string label;
-    unsigned char flags;
+    Flags_t flags;
 };
 
 struct TemplateItem {

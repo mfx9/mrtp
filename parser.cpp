@@ -92,7 +92,8 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     bool          check, found;
     string        label, filename, extension;
     double        output[MAX_COMPONENTS];
-    unsigned int  i, j, k, ntokens, checklist;
+    unsigned int  i, j, k, ntokens;
+    Flags_t       checklist;
 
     const TemplateParameter *templ, *othertempl;
     const TemplateItem      *item;
