@@ -150,7 +150,8 @@ public:
  * Structures to store templates.
  */
 struct TemplateParameter {
-    string label, replace;
+    char id, replace;
+    string label;
     unsigned char flags;
 };
 

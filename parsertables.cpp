@@ -20,37 +20,37 @@
 
 
 const TemplateParameter kCamera[] = {
-    { "position" ,  ""       ,  BIT_VECTOR   },
-    { "target"   ,  ""       ,  BIT_VECTOR   },
-    { "roll"     ,  ""       ,  BIT_REAL     },
+    { 1,  0,  "position" ,   BIT_VECTOR   },
+    { 2,  0,  "target"   ,   BIT_VECTOR   },
+    { 3,  0,  "roll"     ,   BIT_REAL     },
     };
 
 const TemplateParameter kLight[] = {
-    { "position" ,  ""       ,  BIT_VECTOR   },
+    { 1,  0,  "position" ,   BIT_VECTOR   },
     };
 
 const TemplateParameter kPlane[] = {
-    { "center"   ,  ""       ,  BIT_VECTOR                   },
-    { "normal"   ,  ""       ,  BIT_VECTOR | BIT_CHECK_ZERO  },
-    { "scale"    ,  ""       ,  BIT_REAL | BIT_CHECK_POSITIVE},
-    { "color"    ,  "texture",  BIT_VECTOR                   },
-    { "texture"  ,  "color"  ,  BIT_TEXT                     },
+    { 1,  0,  "center"   ,   BIT_VECTOR                   },
+    { 2,  0,  "normal"   ,   BIT_VECTOR | BIT_CHECK_ZERO  },
+    { 3,  0,  "scale"    ,   BIT_REAL | BIT_CHECK_POSITIVE},
+    { 4,  5,  "color"    ,   BIT_VECTOR                   },
+    { 5,  4,  "texture"  ,   BIT_TEXT                     },
     };
 
 const TemplateParameter kSphere[] = {
-    { "position" ,  ""       ,  BIT_VECTOR                   },
-    { "radius"   ,  ""       ,  BIT_REAL | BIT_CHECK_POSITIVE},
-    { "axis"     ,  ""       ,  BIT_VECTOR | BIT_CHECK_ZERO  },
-    { "color"    ,  "texture",  BIT_VECTOR                   },
-    { "texture"  ,  "color"  ,  BIT_TEXT                     },
+    { 1,  0,  "position" ,   BIT_VECTOR                   },
+    { 2,  0,  "radius"   ,   BIT_REAL | BIT_CHECK_POSITIVE},
+    { 3,  0,  "axis"     ,   BIT_VECTOR | BIT_CHECK_ZERO  },
+    { 4,  5,  "color"    ,   BIT_VECTOR                   },
+    { 5,  4,  "texture"  ,   BIT_TEXT                     },
     };
 
 const TemplateParameter kCylinder[] = {
-    { "center"   ,  ""       ,  BIT_VECTOR                   },
-    { "direction",  ""       ,  BIT_VECTOR | BIT_CHECK_ZERO  },
-    { "radius"   ,  ""       ,  BIT_REAL | BIT_CHECK_POSITIVE},
-    { "color"    ,  "texture",  BIT_VECTOR                   },
-    { "texture"  ,  "color"  ,  BIT_TEXT                     },
+    { 1,  0,  "center"   ,   BIT_VECTOR                   },
+    { 2,  0,  "direction",   BIT_VECTOR | BIT_CHECK_ZERO  },
+    { 3,  0,  "radius"   ,   BIT_REAL | BIT_CHECK_POSITIVE},
+    { 4,  5,  "color"    ,   BIT_VECTOR                   },
+    { 5,  4,  "texture"  ,   BIT_TEXT                     },
     };
 
 

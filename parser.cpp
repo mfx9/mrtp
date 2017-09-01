@@ -153,7 +153,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
         othertempl = item->templ;
         for (k = 0; k < item->ntempl; k++, othertempl++) {
             if (j != k) {
-                if (templ->replace == othertempl->label) {
+                if (templ->replace == othertempl->id) {
                     if (CHECK_BIT (checklist, k)) {
                         return CODE_CONFLICT;
                     }
@@ -242,7 +242,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
              *
              * Check if it is replaceable.
              */
-            if (templ->replace == "") {
+            if (!templ->replace) {
                 return CODE_MISSING;
             }
             /*
@@ -253,7 +253,7 @@ char Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             othertempl = item->templ;
             for (k = 0; k < item->ntempl; k++, othertempl++) {
                 if (j != k) {
-                    if (templ->replace == othertempl->label) {
+                    if (templ->replace == othertempl->id) {
                         break;
                     }
                 }
