@@ -48,23 +48,27 @@ cylinder
 center     5.0    0.0    0.0
 direction  0.0    0.0    1.0
 radius     0.7
+span      -1.0
 texture   "textures/qubodup-light_wood.png"
 
 cylinder
 center     0.0    0.0    0.0
 direction  0.0    0.0    1.0
 radius     0.7
+span      -1.0
 texture   "textures/qubodup-light_wood.png"
 
 cylinder
 center    -5.0    0.0    0.0
 direction  0.0    0.0    1.0
 radius     0.7
+span      -1.0
 texture   "textures/qubodup-light_wood.png"
 
 cylinder
 center     0.0    0.0   15.0
 direction  1.0    0.0    0.0
 radius     0.7
+span      -1.0
 texture   "textures/qubodup-light_wood.png"
 

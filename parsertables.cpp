@@ -49,8 +49,9 @@ const TemplateParameter kCylinder[] = {
     { 1,  0,  "center"   ,   BIT_VECTOR                   },
     { 2,  0,  "direction",   BIT_VECTOR | BIT_CHECK_ZERO  },
     { 3,  0,  "radius"   ,   BIT_REAL | BIT_CHECK_POSITIVE},
-    { 4,  5,  "color"    ,   BIT_VECTOR                   },
-    { 5,  4,  "texture"  ,   BIT_TEXT                     },
+    { 4,  0,  "span"     ,   BIT_REAL | BIT_CHECK_ZERO    },
+    { 5,  6,  "color"    ,   BIT_VECTOR                   },
+    { 6,  5,  "texture"  ,   BIT_TEXT                     },
     };
 
 

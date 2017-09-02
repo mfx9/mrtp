@@ -72,6 +72,7 @@ using namespace std;
             t = -1.0; \
     }
 
+
 class Sphere {
     Vector   center_, texturex_, 
         texturey_, texturez_;
@@ -119,15 +120,15 @@ public:
 class Cylinder {
     Vector    A_, B_,
         texturex_, texturey_;
-    double    radius_, alpha_;
+    double    radius_, span_, alpha_;
     Texture  *texture_;
     Cylinder *next_;
 
 public:
     ~Cylinder ();
     Cylinder ();
-    Cylinder (Vector *origin, Vector *direction, 
-        double radius, Texture *texture);
+    Cylinder (Vector *center, Vector *direction, 
+        double radius, double span, Texture *texture);
 
     double Solve (Vector *O, Vector *D,
         double mind, double maxd);

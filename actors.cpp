@@ -198,13 +198,14 @@ Cylinder::Cylinder () {
 Cylinder::~Cylinder () {
 }
 
-Cylinder::Cylinder (Vector *origin, Vector *direction, 
-        double radius, Texture *texture) {
+Cylinder::Cylinder (Vector *center, Vector *direction, 
+        double radius, double span, Texture *texture) {
     /*
      * Radius, origin, etc.
      */
-    origin->CopyTo (&A_);
+    center->CopyTo (&A_);
     radius_  = radius;
+    span_    = span;
     texture_ = texture;
     next_    = NULL;
 
@@ -279,6 +280,14 @@ double Cylinder::Solve (Vector *O, Vector *D,
     SOLVE_QUADRATIC (aa, bb, cc, t, mind, maxd);
     if (t > 0.0) {
         alpha_ = d + t * b;
+        /*
+         * Check if the cylinder is finite.
+         */
+        if (span_ > 0.0) {
+            if ((alpha_ < -span_) || (alpha_ > span_)) {
+                return -1.0;
+            }
+        }
     }
     return t;
 }

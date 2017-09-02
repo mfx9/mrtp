@@ -222,20 +222,12 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
         }
     }
 
-
     /*
      * Check if all parameters or their alternatives are present.
      */
-    for (i = 0; i < ncol; i++) {
-        label = collect[i][0];
-
-        templ = item->templ;
-        for (j = 0; j < item->ntempl; j++, templ++) {
-            if (templ->label == label) {
-                break;
-            }
-        }
-        if (!CHECK_BIT (checklist, j)) {
+    templ = item->templ;
+    for (i = 0; i < ncol; i++, templ++) {
+        if (!CHECK_BIT (checklist, i)) {
             /*
              * Parameter is not present.
              *
@@ -250,14 +242,14 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
              * Check if the alternative parameter is present.
              */
             othertempl = item->templ;
-            for (k = 0; k < item->ntempl; k++, othertempl++) {
-                if (j != k) {
+            for (j = 0; j < item->ntempl; j++, othertempl++) {
+                if (i != j) {
                     if (templ->replace == othertempl->id) {
                         break;
                     }
                 }
             }
-            if (!CHECK_BIT (checklist, k)) {
+            if (!CHECK_BIT (checklist, j)) {
                 /*
                  * Alternative parameter is needed, but it is also missing.
                  */
@@ -391,13 +383,11 @@ void Parser::Parse () {
             if (line.length () != 0) {
                 continue;
             }
-
             if (mode == modeRead) {
                 mode = modeOpen;
 
                 code = CreateEntry (&item, collect, sizes, npar, &errline, 
                     &msg, &entry);
-            
                 if (code != codeOK) {
                     if (code == codeUnknown) {
                         cerr << "Line " << (start + errline + 1) 

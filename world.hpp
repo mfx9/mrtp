@@ -103,8 +103,8 @@ public:
         Texture *texture);
     void AddSphere (Vector *center, double radius, Vector *axis, 
         Texture *texture);
-    void AddCylinder (Vector *origin, Vector *direction, double radius, 
-        Texture *texture);
+    void AddCylinder (Vector *center, Vector *direction, double radius, 
+        double span, Texture *texture);
     Texture *AddTexture (string *filename);
 
     unsigned int PopPlane ();

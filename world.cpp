@@ -169,13 +169,13 @@ bool World::Initialize () {
          * Add a cylinder.
          */
         else if (label == "cylinder") {
-            Vector    origin, direction;
-            double    radius;
+            Vector    center, direction;
+            double    radius, span;
             Texture  *texture;
 
             while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "center") {
-                    origin.Set (reals);
+                    center.Set (reals);
                 }
                 else if (key == "direction") {
                     direction.Set (reals);
@@ -183,13 +183,16 @@ bool World::Initialize () {
                 else if (key == "radius") {
                     radius = reals[0];
                 }
+                else if (key == "span") {
+                    span = reals[0];
+                }
                 else if (key == "color") {
                 }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddCylinder (&origin, &direction, radius, texture);
+            AddCylinder (&center, &direction, radius, span, texture);
         }
     } while (nentries > 0);
 
@@ -344,12 +347,12 @@ void World::AddSphere (Vector *center, double radius,
     nspheres_++;
 }
 
-void World::AddCylinder (Vector *origin, Vector *direction, 
-        double radius, Texture *texture) {
+void World::AddCylinder (Vector *center, Vector *direction, 
+        double radius, double span, Texture *texture) {
     Cylinder *next, *last, *cylinder;
 
-    cylinder = new Cylinder (origin, direction, radius,
-        texture);
+    cylinder = new Cylinder (center, direction, radius,
+        span, texture);
     if (ncylinders_ < 1) {
         cylinders_ = cylinder;
     }
