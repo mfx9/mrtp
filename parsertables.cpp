@@ -20,40 +20,39 @@
 
 
 const TemplateParameter kCamera[] = {
-    { 1,  0,  "position" ,   BIT_VECTOR   },
-    { 2,  0,  "target"   ,   BIT_VECTOR   },
-    { 3,  0,  "roll"     ,   BIT_REAL     },
+    { 1,  0,  "position",  BIT_VECTOR },
+    { 2,  0,  "target",  BIT_VECTOR },
+    { 3,  0,  "roll",  BIT_REAL | BIT_OPTIONAL },
     };
 
 const TemplateParameter kLight[] = {
-    { 1,  0,  "position" ,   BIT_VECTOR   },
+    { 1,  0,  "position",  BIT_VECTOR},
     };
 
 const TemplateParameter kPlane[] = {
-    { 1,  0,  "center"   ,   BIT_VECTOR                   },
-    { 2,  0,  "normal"   ,   BIT_VECTOR | BIT_CHECK_ZERO  },
-    { 3,  0,  "scale"    ,   BIT_REAL | BIT_CHECK_POSITIVE},
-    { 4,  5,  "color"    ,   BIT_VECTOR                   },
-    { 5,  4,  "texture"  ,   BIT_TEXT                     },
+    { 1,  0,  "center",  BIT_VECTOR },
+    { 2,  0,  "normal",  BIT_VECTOR | BIT_CHECK_ZERO },
+    { 3,  0,  "scale",  BIT_REAL | BIT_CHECK_POSITIVE },
+    { 4,  5,  "color",  BIT_VECTOR },
+    { 5,  4,  "texture",  BIT_TEXT },
     };
 
 const TemplateParameter kSphere[] = {
-    { 1,  0,  "position" ,   BIT_VECTOR                   },
-    { 2,  0,  "radius"   ,   BIT_REAL | BIT_CHECK_POSITIVE},
-    { 3,  0,  "axis"     ,   BIT_VECTOR | BIT_CHECK_ZERO  },
-    { 4,  5,  "color"    ,   BIT_VECTOR                   },
-    { 5,  4,  "texture"  ,   BIT_TEXT                     },
+    { 1,  0, "position",  BIT_VECTOR },
+    { 2,  0, "radius",  BIT_REAL | BIT_CHECK_POSITIVE },
+    { 3,  0, "axis",  BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
+    { 4,  5, "color",  BIT_VECTOR },
+    { 5,  4, "texture",  BIT_TEXT },
     };
 
 const TemplateParameter kCylinder[] = {
-    { 1,  0,  "center"   ,   BIT_VECTOR                   },
-    { 2,  0,  "direction",   BIT_VECTOR | BIT_CHECK_ZERO  },
-    { 3,  0,  "radius"   ,   BIT_REAL | BIT_CHECK_POSITIVE},
-    { 4,  0,  "span"     ,   BIT_REAL | BIT_CHECK_ZERO    },
-    { 5,  6,  "color"    ,   BIT_VECTOR                   },
-    { 6,  5,  "texture"  ,   BIT_TEXT                     },
+    { 1,  0, "center",  BIT_VECTOR },
+    { 2,  0, "direction",  BIT_VECTOR | BIT_CHECK_ZERO },
+    { 3,  0, "radius",  BIT_REAL | BIT_CHECK_POSITIVE },
+    { 4,  0, "span",  BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
+    { 5,  6, "color",  BIT_VECTOR },
+    { 6,  5, "texture",  BIT_TEXT },
     };
-
 
 const TemplateItem kItems[] = {
     {"camera", kCamera,

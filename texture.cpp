@@ -56,7 +56,7 @@ Color *Texture::GetColor (double fracx, double fracy,
     return &data_[(size_t) (u + v * width_)];
 }
 
-Texture *Texture::GetNext () {
+Texture *Texture::Next () {
     return next_;
 }
 

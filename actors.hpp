@@ -77,6 +77,7 @@ class Sphere {
     Vector   center_, texturex_, 
         texturey_, texturez_;
     double   radius_;
+    Color    color_;
     Texture *texture_;
     Sphere  *next_;
 
@@ -84,14 +85,14 @@ public:
     ~Sphere ();
     Sphere ();
     Sphere (Vector *center, double radius, Vector *axis,
-        Texture *texture);
+        Color *color, Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
     void GetNormal (Vector *hit, Vector *normal);
     void DetermineColor (Vector *normal, Color *color);
 
-    Sphere *GetNext ();
+    Sphere *Next ();
     void SetNext (Sphere *sphere);
 };
 
@@ -99,6 +100,7 @@ class Plane {
     Vector   center_, normal_,
         texturex_, texturey_;
     double   scale_;
+    Color    color_;
     Texture *texture_;
     Plane   *next_;
 
@@ -106,14 +108,14 @@ public:
     ~Plane ();
     Plane ();
     Plane (Vector *center, Vector *normal, double scale, 
-        Texture *texture);
+        Color *color, Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, 
         double mind, double maxd);
     void GetNormal (Vector *normal);
     void DetermineColor (Vector *hit, Color *color);
 
-    Plane *GetNext ();
+    Plane *Next ();
     void SetNext (Plane *plane);
 };
 
@@ -121,6 +123,7 @@ class Cylinder {
     Vector    A_, B_,
         texturex_, texturey_;
     double    radius_, span_, alpha_;
+    Color     color_;
     Texture  *texture_;
     Cylinder *next_;
 
@@ -128,14 +131,14 @@ public:
     ~Cylinder ();
     Cylinder ();
     Cylinder (Vector *center, Vector *direction, 
-        double radius, double span, Texture *texture);
+        double radius, double span, Color *color, Texture *texture);
 
     double Solve (Vector *O, Vector *D,
         double mind, double maxd);
     void GetNormal (Vector *hit, Vector *normal);
     void DetermineColor (Vector *normal, Color *color);
 
-    Cylinder *GetNext ();
+    Cylinder *Next ();
     void SetNext (Cylinder *cylinder);
 };
 

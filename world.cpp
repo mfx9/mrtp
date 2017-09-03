@@ -74,10 +74,6 @@ bool World::Initialize () {
     do {
         nentries = parser_->PopEntry (&entry);
         entry.GetLabel (&label);
-
-        /* DEBUG
-        entry.Print (); */
-
         /*
          * Add a camera.
          */
@@ -117,7 +113,8 @@ bool World::Initialize () {
         else if (label == "plane") {
             Vector    center, normal;
             double    scale;
-            Texture  *texture;
+            Color     color;
+            Texture  *texture = NULL;
 
             while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "center") {
@@ -130,12 +127,14 @@ bool World::Initialize () {
                     scale = reals[0];
                 }
                 else if (key == "color") {
+                    color.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);
                 }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddPlane (&center, &normal, scale, texture);
+            AddPlane (&center, &normal, scale, &color, texture);
         }
 
         /*
@@ -144,7 +143,8 @@ bool World::Initialize () {
         else if (label == "sphere") {
             Vector   position, axis;
             double   radius;
-            Texture *texture;
+            Color    color;
+            Texture *texture = NULL;
 
             while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "position") {
@@ -157,12 +157,14 @@ bool World::Initialize () {
                     axis.Set (reals);
                 }
                 else if (key == "color") {
+                    color.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);
                 }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddSphere (&position, radius, &axis, texture);
+            AddSphere (&position, radius, &axis, &color, texture);
         }
 
         /*
@@ -171,7 +173,8 @@ bool World::Initialize () {
         else if (label == "cylinder") {
             Vector    center, direction;
             double    radius, span;
-            Texture  *texture;
+            Color     color;
+            Texture  *texture = NULL;
 
             while (entry.PopData (&key, &type, reals, texts)) {
                 if (key == "center") {
@@ -187,12 +190,15 @@ bool World::Initialize () {
                     span = reals[0];
                 }
                 else if (key == "color") {
+                    color.Set ((float) reals[0], (float) reals[1], 
+                        (float) reals[2]);
                 }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddCylinder (&center, &direction, radius, span, texture);
+            AddCylinder (&center, &direction, radius, span, 
+                &color, texture);
         }
     } while (nentries > 0);
 
@@ -237,7 +243,7 @@ unsigned int World::PopPlane () {
     if (nplanes_ > 0) {
         last = planes_;
         prev = NULL;
-        while ((next = last->GetNext ()) != NULL) {
+        while ((next = last->Next ()) != NULL) {
             prev = last;
             last = next;
         }
@@ -256,7 +262,7 @@ unsigned int World::PopSphere () {
     if (nspheres_ > 0) {
         last = spheres_;
         prev = NULL;
-        while ((next = last->GetNext ()) != NULL) {
+        while ((next = last->Next ()) != NULL) {
             prev = last;
             last = next;
         }
@@ -275,7 +281,7 @@ unsigned int World::PopCylinder () {
     if (ncylinders_ > 0) {
         last = cylinders_;
         prev = NULL;
-        while ((next = last->GetNext ()) != NULL) {
+        while ((next = last->Next ()) != NULL) {
             prev = last;
             last = next;
         }
@@ -294,7 +300,7 @@ unsigned int World::PopTexture () {
     if (ntextures_ > 0) {
         last = textures_;
         prev = NULL;
-        while ((next = last->GetNext ()) != NULL) {
+        while ((next = last->Next ()) != NULL) {
             prev = last;
             last = next;
         }
@@ -308,11 +314,11 @@ unsigned int World::PopTexture () {
 }
 
 void World::AddPlane (Vector *center, Vector *normal, 
-        double texscale, Texture *texture) {
+        double texscale, Color *color, Texture *texture) {
     Plane *next, *last, *plane;
 
     plane = new Plane (center, normal, texscale, 
-        texture);
+        color, texture);
     if (nplanes_ < 1) {
         planes_ = plane;
     }
@@ -320,7 +326,7 @@ void World::AddPlane (Vector *center, Vector *normal,
         next = planes_;
         do {
             last = next;
-            next = last->GetNext ();
+            next = last->Next ();
         } while (next != NULL);
         last->SetNext (plane);
     }
@@ -328,11 +334,11 @@ void World::AddPlane (Vector *center, Vector *normal,
 }
 
 void World::AddSphere (Vector *center, double radius,
-        Vector *axis, Texture *texture) {
+        Vector *axis, Color *color, Texture *texture) {
     Sphere *next, *last, *sphere;
 
     sphere = new Sphere (center, radius, axis, 
-        texture);
+        color, texture);
     if (nspheres_ < 1) {
         spheres_ = sphere;
     }
@@ -340,7 +346,7 @@ void World::AddSphere (Vector *center, double radius,
         next = spheres_;
         do {
             last = next;
-            next = last->GetNext ();
+            next = last->Next ();
         } while (next != NULL);
         last->SetNext (sphere);
     }
@@ -348,11 +354,11 @@ void World::AddSphere (Vector *center, double radius,
 }
 
 void World::AddCylinder (Vector *center, Vector *direction, 
-        double radius, double span, Texture *texture) {
+        double radius, double span, Color *color, Texture *texture) {
     Cylinder *next, *last, *cylinder;
 
     cylinder = new Cylinder (center, direction, radius,
-        span, texture);
+        span, color, texture);
     if (ncylinders_ < 1) {
         cylinders_ = cylinder;
     }
@@ -360,7 +366,7 @@ void World::AddCylinder (Vector *center, Vector *direction,
         next = cylinders_;
         do {
             last = next;
-            next = last->GetNext ();
+            next = last->Next ();
         } while (next != NULL);
         last->SetNext (cylinder);
     }
@@ -383,13 +389,12 @@ Texture *World::AddTexture (string *filename) {
                 found = true;
                 break;
             }
-            next = last->GetNext ();
+            next = last->Next ();
         } while (next != NULL);
         if (found) {
             return last;
         }
     }
-
     /*
      * Create a new texture.
      */
@@ -403,7 +408,7 @@ Texture *World::AddTexture (string *filename) {
         next = textures_;
         do {
             last = next;
-            next = last->GetNext ();
+            next = last->Next ();
         } while (next != NULL);
         last->SetNext (texture);
     }
@@ -441,7 +446,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
             hitplane = plane;
             hit      = hitPlane;
         }
-        plane = plane->GetNext ();
+        plane = plane->Next ();
     }
 
     /*
@@ -456,7 +461,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
             hitsphere = sphere;
             hit       = hitSphere;
         }
-        sphere = sphere->GetNext ();
+        sphere = sphere->Next ();
     }
 
     /*
@@ -471,7 +476,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
             hitcylinder = cylinder;
             hit         = hitCylinder;
         }
-        cylinder = cylinder->GetNext ();
+        cylinder = cylinder->Next ();
     }
 
     if (hit != hitNull) {
@@ -517,7 +522,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
                     break;
                 }
             }
-            sphere = sphere->GetNext ();
+            sphere = sphere->Next ();
         }
         if (!isshadow) {
             cylinder   = cylinders_;
@@ -529,7 +534,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
                         break;
                     }
                 }
-                cylinder = cylinder->GetNext ();
+                cylinder = cylinder->Next ();
             }
         }
 

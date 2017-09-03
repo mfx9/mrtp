@@ -30,7 +30,7 @@ Plane::~Plane () {
 }
 
 Plane::Plane (Vector *center, Vector *normal, double scale, 
-        Texture *texture) {
+        Color *color, Texture *texture) {
     center->CopyTo (&center_);
     texture_ = texture;
     scale_   = scale;
@@ -42,14 +42,19 @@ Plane::Plane (Vector *center, Vector *normal, double scale,
      * Prepare texturing.
      *
      */
-    Vector T;
-    normal_.GenerateUnitVector (&T);
-
-    texturex_ = T ^ normal_;
-    texturex_.Normalize_InPlace ();
-
-    texturey_ = normal_ ^ texturex_;
-    texturey_.Normalize_InPlace ();
+    if (texture_ == NULL) {
+        color->CopyTo (&color_);
+    }
+    else {
+        Vector T;
+        normal_.GenerateUnitVector (&T);
+        
+        texturex_ = T ^ normal_;
+        texturex_.Normalize_InPlace ();
+        
+        texturey_ = normal_ ^ texturex_;
+        texturey_.Normalize_InPlace ();
+    }
 }
 
 void Plane::DetermineColor (Vector *hit, Color *color) {
@@ -57,18 +62,19 @@ void Plane::DetermineColor (Vector *hit, Color *color) {
     double  vx, vy;
     Color  *cp;
 
-    V = (*hit) - center_;
-    /*
-     * Calculate components of V (dot products).
-     * 
-     */
-    vx = V * texturex_;
-    vy = V * texturey_;
-    cp = texture_->GetColor (vx, vy, scale_);
-
-    /*
-     * Finalize.
-     */
+    if (texture_ == NULL) {
+        cp = &color_;
+    }
+    else {
+        V = (*hit) - center_;
+        /*
+         * Calculate components of V (dot products).
+         * 
+         */
+        vx = V * texturex_;
+        vy = V * texturey_;
+        cp = texture_->GetColor (vx, vy, scale_);
+    }
     cp->CopyTo (color);
 }
 
@@ -90,7 +96,7 @@ void Plane::GetNormal (Vector *normal) {
     normal_.CopyTo (normal);
 }
 
-Plane *Plane::GetNext () {
+Plane *Plane::Next () {
     return next_;
 }
 
@@ -110,26 +116,30 @@ Sphere::~Sphere () {
 }
 
 Sphere::Sphere (Vector *center, double radius, Vector *axis, 
-        Texture *texture) {
+        Color *color, Texture *texture) {
     center->CopyTo (&center_);
     radius_  = radius;
     texture_ = texture;
     next_    = NULL;
-
     /*
      * Prepare texturing.
      *
      */
-    axis->CopyTo (&texturey_);
-    texturey_.Normalize_InPlace ();
-
-    Vector T;
-    texturey_.GenerateUnitVector (&T);
-    texturex_ = T ^ texturey_;
-    texturex_.Normalize_InPlace ();
-
-    texturez_ = texturey_ ^ texturex_;
-    texturez_.Normalize_InPlace ();
+    if (texture_ == NULL) {
+        color->CopyTo (&color_);
+    }
+    else {
+        axis->CopyTo (&texturey_);
+        texturey_.Normalize_InPlace ();
+    
+        Vector T;
+        texturey_.GenerateUnitVector (&T);
+        texturex_ = T ^ texturey_;
+        texturex_.Normalize_InPlace ();
+    
+        texturez_ = texturey_ ^ texturex_;
+        texturez_.Normalize_InPlace ();
+    }
 }
 
 double Sphere::Solve (Vector *origin, Vector *direction, 
@@ -158,28 +168,35 @@ void Sphere::DetermineColor (Vector *normal, Color *color) {
     Color  *cp;
     double  phi, theta, dot, 
         fracx, fracy;
-    /*
-     * Guidelines from:
-     * https://www.cs.unc.edu/~rademach/xroads-RT/RTarticle.html
-     *
-     * Calculate Y coordinate.
-     */
-    dot   = texturey_ * (*normal);
-    phi   = acos (-dot);
-    fracy = phi / M_PI;
-    /* 
-     * Calculate Y coordinate.
-     */
-    dot   = (*normal) * texturex_;
-    theta = acos (dot / sin (phi)) / (2.0 * M_PI);
-    dot   = texturez_ * (*normal);
-    fracx = (dot > 0.0) ? theta : (1.0 - theta);
 
-    cp = texture_->GetColor (fracx, fracy, 1.0);
+    if (texture_ == NULL) {
+        cp = &color_;
+    }
+    else {
+        /*
+         * Guidelines from:
+         * https://www.cs.unc.edu/~rademach/xroads-RT/RTarticle.html
+         *
+         */
+        dot   = texturey_ * (*normal);
+        phi   = acos (-dot);
+        fracy = phi / M_PI;
+        
+        dot   = (*normal) * texturex_;
+        theta = acos (dot / sin (phi)) / (2.0 * M_PI);
+        dot   = texturez_ * (*normal);
+        if (dot > 0.0) {
+            fracx = theta;
+        }
+        else {
+            fracx = 1.0 - theta;
+        }
+        cp = texture_->GetColor (fracx, fracy, 1.0);
+    }
     cp->CopyTo (color);
 }
 
-Sphere *Sphere::GetNext () {
+Sphere *Sphere::Next () {
     return next_;
 }
 
@@ -199,7 +216,7 @@ Cylinder::~Cylinder () {
 }
 
 Cylinder::Cylinder (Vector *center, Vector *direction, 
-        double radius, double span, Texture *texture) {
+        double radius, double span, Color *color, Texture *texture) {
     /*
      * Radius, origin, etc.
      */
@@ -219,13 +236,17 @@ Cylinder::Cylinder (Vector *center, Vector *direction,
      * Prepare texturing.
      *
      */
-    Vector T;
-    B_.GenerateUnitVector (&T);
+    if (texture_ == NULL) {
+        color->CopyTo (&color_);
+    }
+    else {
+        Vector T;
+        B_.GenerateUnitVector (&T);
+        B_.CopyTo (&texturey_);
 
-    texturex_ = T ^ B_;
-    texturex_.Normalize_InPlace ();
-
-    B_.CopyTo (&texturey_);
+        texturex_ = T ^ B_;
+        texturex_.Normalize_InPlace ();
+    }
 }
 
 double Cylinder::Solve (Vector *O, Vector *D,
@@ -303,22 +324,23 @@ void Cylinder::GetNormal (Vector *hit, Vector *normal) {
     N.CopyTo (normal);
 }
 
-void Cylinder::DetermineColor (Vector *normal,
-        Color *color) {
+void Cylinder::DetermineColor (Vector *normal, Color *color) {
     Color  *cp;
     double  dot, fracx, fracy;
-    /* 
-     * Texture mapping.
-     */
-    dot   = texturex_ * (*normal);
-    fracx = acos (dot) / M_PI;
-    fracy = alpha_ / (2.0 * M_PI * radius_);
 
-    cp = texture_->GetColor (fracx, fracy, 1.0);
+    if (texture_ == NULL) {
+        cp = &color_;
+    }
+    else {
+        dot   = texturex_ * (*normal);
+        fracx = acos (dot) / M_PI;
+        fracy = alpha_ / (2.0 * M_PI * radius_);
+        cp    = texture_->GetColor (fracx, fracy, 1.0);
+    }
     cp->CopyTo (color);
 }
 
-Cylinder *Cylinder::GetNext () {
+Cylinder *Cylinder::Next () {
     return next_;
 }
 

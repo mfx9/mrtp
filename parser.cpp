@@ -57,7 +57,7 @@ unsigned int Parser::AddEntry (Entry *temp) {
         next = entries_;
         do {
             last = next;
-            next = last->GetNext ();
+            next = last->Next ();
         } while (next != NULL);
         last->SetNext (entry);
     }
@@ -70,7 +70,7 @@ unsigned int Parser::PopEntry (Entry *entry) {
     if (nentries_ > 0) {
         last = entries_;
         prev = NULL;
-        while ((next = last->GetNext ()) != NULL) {
+        while ((next = last->Next ()) != NULL) {
             prev = last;
             last = next;
         }
@@ -226,7 +226,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
      * Check if all parameters or their alternatives are present.
      */
     templ = item->templ;
-    for (i = 0; i < ncol; i++, templ++) {
+    for (i = 0; i < item->ntempl; i++, templ++) {
         if (!CHECK_BIT (checklist, i)) {
             /*
              * Parameter is not present.
@@ -450,7 +450,7 @@ void Parser::Parse () {
     if (nentries_ > 0) {
         do {
             ep->Print ();
-            ep = ep->GetNext ();
+            ep = ep->Next ();
         } while (ep != NULL);
     } */
 }

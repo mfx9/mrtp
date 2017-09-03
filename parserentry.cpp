@@ -38,7 +38,7 @@ void Entry::Clear () {
     npar_ = 0;
 }
 
-Entry *Entry::GetNext () {
+Entry *Entry::Next () {
     return next_;
 }
 

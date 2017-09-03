@@ -46,12 +46,14 @@ using namespace std;
 #define TP_VECTOR          2
 #define TP_CHECK_ZERO      3
 #define TP_CHECK_POSITIVE  4
+#define TP_OPTIONAL        5
 
 #define BIT_TEXT            MAKE_MASK (TP_TEXT)
 #define BIT_REAL            MAKE_MASK (TP_REAL)
 #define BIT_VECTOR          MAKE_MASK (TP_VECTOR)
 #define BIT_CHECK_ZERO      MAKE_MASK (TP_CHECK_ZERO)
 #define BIT_CHECK_POSITIVE  MAKE_MASK (TP_CHECK_POSITIVE)
+#define BIT_OPTIONAL        MAKE_MASK (TP_OPTIONAL)
 
 /*
  * Custom data types.
@@ -60,13 +62,8 @@ enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing,
     codeRedundant, codeFilename, codeValue, codeConflict};
 
 enum ParserStatus_t {statusOK, statusFail};
-
 enum ParserParameter_t {parameterReal, parameterText};
-
 enum ParserMode_t {modeOpen, modeRead};
-
-enum EntryLabel_t {entryCamera, entryLight, entryPlane, 
-    entrySphere, entryCylinder};
 
 typedef unsigned int Flags_t;
 
@@ -103,7 +100,7 @@ public:
     Entry ();
     ~Entry ();
 
-    Entry *GetNext ();
+    Entry *Next ();
     void SetNext (Entry *next);
     void CopyTo (Entry *other);
     void Print ();

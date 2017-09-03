@@ -70,6 +70,7 @@ cylinder
 center     0.0    0.0    0.0
 direction  0.0    0.0    1.0
 radius     1.0
+span      -1.0
 texture   "textures/qubodup-light_wood.png"
 
 sphere

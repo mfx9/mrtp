@@ -43,7 +43,7 @@ public:
     Color *GetColor (double fracx, double fracy, 
         double scale);
 
-    Texture *GetNext ();
+    Texture *Next ();
     void SetNext (Texture *next);
 };
 
