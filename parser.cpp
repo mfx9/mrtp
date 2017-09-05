@@ -92,7 +92,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     string        label, filename, extension;
     double        output[MAX_COMPONENTS];
     unsigned int  i, j, k, ntokens;
-    Flags_t       checklist;
+    Bitmask_t     checklist;
 
     const TemplateParameter *templ, *othertempl;
     const TemplateItem      *item;
@@ -160,14 +160,14 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
          * Parameters are usually 3D vectors (including colors).
          */
         ntokens = 2;
-        if (CHECK_BIT (templ->flags, TP_VECTOR)) {
+        if (CHECK_BIT (templ->flags, flagVector)) {
             ntokens = 4;
         }
         if (sizes[i] != ntokens) {
             return codeSize;
         }
 
-        if (!CHECK_BIT (templ->flags, TP_TEXT)) {
+        if (!CHECK_BIT (templ->flags, flagText)) {
             /*
              * Parameter is a vector or real number.
              */
@@ -178,7 +178,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             /*
              * Check for invalid values.
              */
-            if (CHECK_BIT (templ->flags, TP_CHECK_ZERO)) {
+            if (CHECK_BIT (templ->flags, flagCheckZero)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if (output[j] != 0.0) {
@@ -190,7 +190,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     return codeValue;
                 }
             }
-            else if (CHECK_BIT (templ->flags, TP_CHECK_POSITIVE)) {
+            else if (CHECK_BIT (templ->flags, flagCheckPositive)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if (output[j] > 0.0) {
@@ -226,15 +226,15 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             /*
              * Parameter is not present.
              */
-            if (CHECK_BIT (templ->flags, TP_OPTIONAL)) {
+            if (CHECK_BIT (templ->flags, flagOptional)) {
                 /*
                  * Parameter is optional, load defaults.
                  */
                 ntokens = 1;
-                if (CHECK_BIT (templ->flags, TP_VECTOR)) {
+                if (CHECK_BIT (templ->flags, flagVector)) {
                     ntokens = 3;
                 }
-                if (!CHECK_BIT (templ->flags, TP_TEXT)) {
+                if (!CHECK_BIT (templ->flags, flagText)) {
                     ConvertTokens (&templ->defaults, ntokens, output);
                     entry->AddReal (&templ->label, output, ntokens);
                 }

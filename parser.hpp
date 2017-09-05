@@ -27,7 +27,7 @@ using namespace std;
 #include "utils.hpp"
 
 /*
- * Macros for bit masks.
+ * Macros.
  */
 #define MAKE_MASK(bit) (1 << bit)
 
@@ -39,25 +39,11 @@ using namespace std;
 #define MAX_COMPONENTS  (MAX_TOKENS - 1)
 
 /*
- * Bit masks.
- */
-#define TP_TEXT            0
-#define TP_REAL            1
-#define TP_VECTOR          2
-#define TP_OPTIONAL        3
-#define TP_CHECK_ZERO      4
-#define TP_CHECK_POSITIVE  5
-
-#define BIT_TEXT            MAKE_MASK (TP_TEXT)
-#define BIT_REAL            MAKE_MASK (TP_REAL)
-#define BIT_VECTOR          MAKE_MASK (TP_VECTOR)
-#define BIT_OPTIONAL        MAKE_MASK (TP_OPTIONAL)
-#define BIT_CHECK_ZERO      MAKE_MASK (TP_CHECK_ZERO)
-#define BIT_CHECK_POSITIVE  MAKE_MASK (TP_CHECK_POSITIVE)
-
-/*
  * Custom data types.
  */
+enum ParserFlag_t {flagText, flagReal, flagVector, flagOptional,
+    flagCheckZero, flagCheckPositive};
+
 enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
     codeRepeated, codeFilename, codeValue, codeConflict};
 
@@ -65,7 +51,17 @@ enum ParserStatus_t {statusOK, statusFail};
 enum ParserParameter_t {parameterReal, parameterText};
 enum ParserMode_t {modeOpen, modeRead};
 
-typedef unsigned int Flags_t;
+typedef unsigned int Bitmask_t;
+
+/*
+ * Bit masks.
+ */
+#define BIT_TEXT            MAKE_MASK (flagText)
+#define BIT_REAL            MAKE_MASK (flagReal)
+#define BIT_VECTOR          MAKE_MASK (flagVector)
+#define BIT_OPTIONAL        MAKE_MASK (flagOptional)
+#define BIT_CHECK_ZERO      MAKE_MASK (flagCheckZero)
+#define BIT_CHECK_POSITIVE  MAKE_MASK (flagCheckPositive)
 
 
 class Entry {
@@ -143,9 +139,9 @@ public:
  * Structures to store templates.
  */
 struct TemplateParameter {
-    char    id, replace;
-    string  label, defaults;
-    Flags_t flags;
+    char      id, replace;
+    string    label, defaults;
+    Bitmask_t flags;
 };
 
 struct TemplateItem {
