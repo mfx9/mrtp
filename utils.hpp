@@ -37,8 +37,8 @@ using namespace std;
 
 extern bool TokenizeLine (string *line, string *tokens,
     unsigned int *ntokens, unsigned int maxtokens);
-extern bool ConvertTokens (string *tokens, unsigned int ntokens, 
+extern bool ConvertTokens (const string *tokens, unsigned int ntokens, 
     double *out);
-extern bool CheckFilename (string *in, string *out, string *ext);
+extern bool CheckFilename (string *in, string *ext, string *out);
 
 #endif /* _UTILS_H */

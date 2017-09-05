@@ -62,7 +62,7 @@ bool TokenizeLine (string *line, string *tokens,
     return true;
 }
 
-bool ConvertTokens (string *tokens, unsigned int ntokens, 
+bool ConvertTokens (const string *tokens, unsigned int ntokens, 
         double *out) {
     /*
      * Convert tokens to real numbers.

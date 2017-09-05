@@ -240,11 +240,9 @@ Cylinder::Cylinder (Vector *center, Vector *direction,
         color->CopyTo (&color_);
     }
     else {
-        Vector T;
-        B_.GenerateUnitVector (&T);
-        B_.CopyTo (&texturey_);
+        B_.GenerateUnitVector (&texturey_);
 
-        texturex_ = T ^ B_;
+        texturex_ = texturey_ ^ B_;
         texturex_.Normalize_InPlace ();
     }
 }

@@ -87,8 +87,7 @@ unsigned int Parser::PopEntry (Entry *entry) {
 }
 
 ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
-        unsigned int sizes[], unsigned int ncol, unsigned int *errline, 
-        string *errmsg, Entry *entry) {
+        unsigned int sizes[], unsigned int ncol, Entry *entry) {
     bool          check, found;
     string        label, filename, extension;
     double        output[MAX_COMPONENTS];
@@ -119,8 +118,6 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     checklist = 0;
     for (i = 0; i < ncol; i++) {
         label = collect[i][0];
-
-        (*errline) = i;
         /*
          * Find a template for the current collectible.
          */
@@ -133,7 +130,6 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             }
         }
         if (!found) {
-            (*errmsg) = label;
             return codeUnknown;
         }
         /*
@@ -142,8 +138,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
          * Otherwise, mark it as processed.
          */
         if (CHECK_BIT (checklist, j)) {
-            (*errmsg) = label;
-            return codeRedundant;
+            return codeRepeated;
         }
         checklist |= MAKE_MASK (j);
 
@@ -230,30 +225,52 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
         if (!CHECK_BIT (checklist, i)) {
             /*
              * Parameter is not present.
-             *
-             * Check if it is replaceable.
              */
-            if (!templ->replace) {
-                return codeMissing;
-            }
-            /*
-             * Parameter is not present, but it is replaceable.
-             *
-             * Check if the alternative parameter is present.
-             */
-            othertempl = item->templ;
-            for (j = 0; j < item->ntempl; j++, othertempl++) {
-                if (i != j) {
-                    if (templ->replace == othertempl->id) {
-                        break;
-                    }
+            if (CHECK_BIT (templ->flags, TP_OPTIONAL)) {
+                /*
+                 * Parameter is optional, load defaults.
+                 */
+                ntokens = 1;
+                if (CHECK_BIT (templ->flags, TP_VECTOR)) {
+                    ntokens = 3;
+                }
+                if (!CHECK_BIT (templ->flags, TP_TEXT)) {
+                    ConvertTokens (&templ->defaults, ntokens, output);
+                    entry->AddReal (&templ->label, output, ntokens);
+                }
+                else {
+                    entry->AddText (&templ->label, &templ->defaults, 1);
                 }
             }
-            if (!CHECK_BIT (checklist, j)) {
+            else {
                 /*
-                 * Alternative parameter is needed, but it is also missing.
+                 * Parameter is not optional, check if it is replaceable.
                  */
-                return codeMissing;
+                if (templ->replace) {
+                    /*
+                     * Check if the alternative parameter is present.
+                     */
+                    othertempl = item->templ;
+                    for (j = 0; j < item->ntempl; j++, othertempl++) {
+                        if (i != j) {
+                            if (templ->replace == othertempl->id) {
+                                break;
+                            }
+                        }
+                    }
+                    if (!CHECK_BIT (checklist, j)) {
+                        /*
+                         * Alternative parameter is needed, but it is also missing.
+                         */
+                        return codeMissing;
+                    }
+                }
+                else {
+                    /*
+                     * Parameter is not present, not optional and not replaceable.
+                     */
+                    return codeMissing;
+                }
             }
         }
     }
@@ -268,14 +285,13 @@ void Parser::Parse () {
     unsigned int npar, sizes[MAX_LINES];
 
     unsigned int i, nlines,
-        errline, start,
-        ncam, nlig, nact;
+        start, ncam, nlig, nact;
 
     bool check;
     ParserMode_t mode;
     ParserCode_t code;
 
-    string line, item, msg;
+    string line, item;
     Entry  entry;
 
     /*
@@ -386,40 +402,32 @@ void Parser::Parse () {
             if (mode == modeRead) {
                 mode = modeOpen;
 
-                code = CreateEntry (&item, collect, sizes, npar, &errline, 
-                    &msg, &entry);
+                code = CreateEntry (&item, collect, sizes, npar, &entry);
                 if (code != codeOK) {
+                    cerr << "In entry at line " << start << ": ";
                     if (code == codeUnknown) {
-                        cerr << "Line " << (start + errline + 1) 
-                            << ": Unrecognized parameter \"" << msg << "\"." << endl;
+                        cerr << "Unrecognized parameter." << endl;
                     }
                     else if (code == codeType) {
-                        cerr << "Line " << (start + errline + 1) 
-                            << ": Wrong type of component(s)." << endl;
+                        cerr << "Wrong type of component(s)." << endl;
                     }
                     else if (code == codeSize) {
-                        cerr << "Line " << (start + errline + 1) 
-                            << ": Wrong number of components." << endl;
+                        cerr << "Wrong number of components." << endl;
                     }
                     else if (code == codeMissing) {
-                        cerr << "Line " << start << ": Missing parameter in " 
-                            << item << "." << endl;
+                        cerr << "Missing parameter." << endl;
                     }
-                    else if (code == codeRedundant) {
-                        cerr << "Line " << (start + errline + 1) 
-                            << ": Redundant parameter \"" << msg << "\"." << endl;
+                    else if (code == codeRepeated) {
+                        cerr << "Repeated parameter." << endl;
                     }
                     else if (code == codeFilename) {
-                        cerr << "Line " << (start + errline + 1) 
-                            << ": File not found or invalid filename." << endl;
+                        cerr << "File not found or invalid filename." << endl;
                     }
                     else if (code == codeValue) {
-                        cerr << "Line " << (start + errline + 1) <<
-                            ": Invalid value(s)." << endl;
+                        cerr << "Invalid value(s)." << endl;
                     }
                     else {  /* if (code == codeConflict) */
-                        cerr << "Line " << (start + errline + 1) <<
-                            ": Conflicting parameter." << endl;
+                        cerr << "Conflicting parameters." << endl;
                     }
                     config.close ();
                     return;

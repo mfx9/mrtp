@@ -103,7 +103,7 @@ void Entry::Print () {
     }
 }
 
-bool Entry::AddText (string *key, string *text, 
+bool Entry::AddText (const string *key, const string *text, 
         unsigned int ntext) {
     unsigned int i;
 
@@ -117,7 +117,7 @@ bool Entry::AddText (string *key, string *text,
     return true;
 }
 
-bool Entry::AddReal (string *key, double *real, 
+bool Entry::AddReal (const string *key, double *real, 
         unsigned int nreal) {
     unsigned int i;
 

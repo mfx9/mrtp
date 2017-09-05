@@ -418,14 +418,14 @@ Texture *World::AddTexture (string *filename) {
 
 void World::TraceRay (Vector *origin, Vector *direction,
         Color *color) {
-    Plane    *plane, *hitplane;
-    Sphere   *sphere, *hitsphere;
-    Cylinder *cylinder, *hitcylinder;
-    double    dist, currd, dot, raylen, fade;
-    HitCode_t hit;
-    Vector    inter, tl, normal;
-    Color     objcol;
-    bool      isshadow;
+    Plane     *plane, *hitplane;
+    Sphere    *sphere, *hitsphere;
+    Cylinder  *cylinder, *hitcylinder;
+    double     dist, currd, dot, raylen, fade;
+    HitCode_t  hit;
+    Vector     inter, tl, normal;
+    Color      objcol;
+    bool       isshadow;
 
     /*
      * Initialize.

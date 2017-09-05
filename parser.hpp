@@ -44,22 +44,22 @@ using namespace std;
 #define TP_TEXT            0
 #define TP_REAL            1
 #define TP_VECTOR          2
-#define TP_CHECK_ZERO      3
-#define TP_CHECK_POSITIVE  4
-#define TP_OPTIONAL        5
+#define TP_OPTIONAL        3
+#define TP_CHECK_ZERO      4
+#define TP_CHECK_POSITIVE  5
 
 #define BIT_TEXT            MAKE_MASK (TP_TEXT)
 #define BIT_REAL            MAKE_MASK (TP_REAL)
 #define BIT_VECTOR          MAKE_MASK (TP_VECTOR)
+#define BIT_OPTIONAL        MAKE_MASK (TP_OPTIONAL)
 #define BIT_CHECK_ZERO      MAKE_MASK (TP_CHECK_ZERO)
 #define BIT_CHECK_POSITIVE  MAKE_MASK (TP_CHECK_POSITIVE)
-#define BIT_OPTIONAL        MAKE_MASK (TP_OPTIONAL)
 
 /*
  * Custom data types.
  */
 enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
-    codeRedundant, codeFilename, codeValue, codeConflict};
+    codeRepeated, codeFilename, codeValue, codeConflict};
 
 enum ParserStatus_t {statusOK, statusFail};
 enum ParserParameter_t {parameterReal, parameterText};
@@ -106,8 +106,10 @@ public:
     void Print ();
     void Clear ();
 
-    bool AddText (string *key, string *text, unsigned int ntext);
-    bool AddReal (string *key, double *real, unsigned int nreal);
+    bool AddText (const string *key, const string *text, 
+        unsigned int ntext);
+    bool AddReal (const string *key, double *real, 
+        unsigned int nreal);
     void SetLabel (string *label);
 
     bool PopData (string *key, ParserParameter_t *type, 
@@ -127,9 +129,7 @@ class Parser {
     unsigned int AddEntry (Entry *temp);
 
     ParserCode_t CreateEntry (string *id, string collect[][MAX_TOKENS],
-        unsigned int sizes[], unsigned int ncol,
-            unsigned int *errline, string *errmsg,
-                Entry *entry);
+        unsigned int sizes[], unsigned int ncol, Entry *entry);
 public:
     Parser (string *filename);
     ~Parser ();
@@ -143,8 +143,8 @@ public:
  * Structures to store templates.
  */
 struct TemplateParameter {
-    char id, replace;
-    string label;
+    char    id, replace;
+    string  label, defaults;
     Flags_t flags;
 };
 
