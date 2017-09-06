@@ -19,7 +19,7 @@
 #include "utils.hpp"
 
 
-bool TokenizeLine (string *line, string *tokens,
+bool TokenizeLine (const string *line, string *tokens,
         unsigned int *ntokens, unsigned int maxtokens) {
     /*
      * Split a line to tokens.

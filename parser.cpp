@@ -97,6 +97,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     const TemplateParameter *templ, *othertempl;
     const TemplateItem      *item;
 
+    string  tokens[MAX_COMPONENTS];
     /*
      * Assign the label (camera, light, etc.)
      */
@@ -230,16 +231,14 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                 /*
                  * Parameter is optional, load defaults.
                  */
-                ntokens = 1;
-                if (CHECK_BIT (templ->flags, flagVector)) {
-                    ntokens = 3;
-                }
+                TokenizeLine (&templ->defaults, tokens, &ntokens, MAX_COMPONENTS);
+
                 if (!CHECK_BIT (templ->flags, flagText)) {
-                    ConvertTokens (&templ->defaults, ntokens, output);
+                    ConvertTokens (tokens, ntokens, output);
                     entry->AddReal (&templ->label, output, ntokens);
                 }
                 else {
-                    entry->AddText (&templ->label, &templ->defaults, 1);
+                    entry->AddText (&templ->label, tokens, ntokens);
                 }
             }
             else {

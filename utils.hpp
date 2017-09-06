@@ -35,7 +35,7 @@ using namespace std;
 #define IS_NOT_WHITE(c) ((c != ' ') && (c != '\t'))
 
 
-extern bool TokenizeLine (string *line, string *tokens,
+extern bool TokenizeLine (const string *line, string *tokens,
     unsigned int *ntokens, unsigned int maxtokens);
 extern bool ConvertTokens (const string *tokens, unsigned int ntokens, 
     double *out);
