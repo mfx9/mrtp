@@ -55,7 +55,7 @@ World::World (Parser *parser, unsigned int width,
 bool World::Initialize () {
     Entry   entry;
     string  label;
-    unsigned int nentries;
+    bool    keep;
 
     string  key,
         texts[MAX_COMPONENTS];
@@ -71,9 +71,12 @@ bool World::Initialize () {
     /*
      * Allocate camera, light, actors, etc.
      */
+    parser_->StartQuery ();
     do {
-        nentries = parser_->PopEntry (&entry);
+        keep = parser_->Query (&entry);
         entry.GetLabel (&label);
+        entry.StartQuery ();
+
         /*
          * Add a camera.
          */
@@ -81,7 +84,7 @@ bool World::Initialize () {
             Vector position, target;
             double roll;
 
-            while (entry.PopData (&key, &type, reals, texts)) {
+            while (entry.Query (&key, &type, reals, texts)) {
                 if (key == "position") {
                     position.Set (reals);
                 }
@@ -102,7 +105,7 @@ bool World::Initialize () {
         else if (label == "light") {
             Vector position;
 
-            entry.PopData (&key, &type, reals, texts);
+            entry.Query (&key, &type, reals, texts);
             position.Set (reals);
             light_ = new Light (&position);
         }
@@ -116,7 +119,7 @@ bool World::Initialize () {
             Color     color;
             Texture  *texture = NULL;
 
-            while (entry.PopData (&key, &type, reals, texts)) {
+            while (entry.Query (&key, &type, reals, texts)) {
                 if (key == "center") {
                     center.Set (reals);
                 }
@@ -146,7 +149,7 @@ bool World::Initialize () {
             Color    color;
             Texture *texture = NULL;
 
-            while (entry.PopData (&key, &type, reals, texts)) {
+            while (entry.Query (&key, &type, reals, texts)) {
                 if (key == "position") {
                     position.Set (reals);
                 }
@@ -176,7 +179,7 @@ bool World::Initialize () {
             Color     color;
             Texture  *texture = NULL;
 
-            while (entry.PopData (&key, &type, reals, texts)) {
+            while (entry.Query (&key, &type, reals, texts)) {
                 if (key == "center") {
                     center.Set (reals);
                 }
@@ -200,7 +203,7 @@ bool World::Initialize () {
             AddCylinder (&center, &direction, radius, span, 
                 &color, texture);
         }
-    } while (nentries > 0);
+    } while (keep);
 
     return true;
 }

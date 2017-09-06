@@ -73,7 +73,7 @@ class Entry {
      * and the number of parameters.
      */
     string keys_[MAX_LINES];
-    unsigned int npar_;
+    unsigned int npar_, current_;
 
     /*
      * Type of each parameter (real or text).
@@ -108,8 +108,9 @@ public:
         unsigned int nreal);
     void SetLabel (string *label);
 
-    bool PopData (string *key, ParserParameter_t *type, 
-        double *real, string *text);
+    void StartQuery ();
+    bool Query (string *key, ParserParameter_t *type, double *real, 
+        string *text);
     void GetLabel (string *label);
 };
 
@@ -118,7 +119,7 @@ class Parser {
     ParserStatus_t status_;
     
     Entry   *entries_;
-    unsigned int nentries_;
+    unsigned int nentries_, current_;
     /*
      * Private methods.
      */
@@ -133,6 +134,8 @@ public:
     ParserStatus_t Status ();
     unsigned int GetNumberEntries ();
     unsigned int PopEntry (Entry *entry);
+    void StartQuery ();
+    bool Query (Entry *entry);
 };
 
 /*

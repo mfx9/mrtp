@@ -131,7 +131,15 @@ bool Entry::AddReal (const string *key, double *real,
     return true;
 }
 
-bool Entry::PopData (string *key, ParserParameter_t *type, double *reals, 
+void Entry::StartQuery () {
+    /*
+     * Method must be called before calling a series 
+     * of Query().
+     */
+    current_ = npar_;
+}
+
+bool Entry::Query (string *key, ParserParameter_t *type, double *reals, 
         string *texts) {
     /*
      * Connect the parser with the actual initialization 
@@ -143,10 +151,10 @@ bool Entry::PopData (string *key, ParserParameter_t *type, double *reals,
      */
     unsigned int j, k;
 
-    if (npar_ < 1) {
+    if (current_ < 1) {
         return false;
     }
-    j = (npar_ - 1);
+    j = (current_ - 1);
 
     if (type_[j] == parameterReal) {
         for (k = 0; k < MAX_COMPONENTS; k++) {
@@ -161,25 +169,6 @@ bool Entry::PopData (string *key, ParserParameter_t *type, double *reals,
     (*key)  = keys_[j];
     (*type) = type_[j];
 
-    /* DEBUG
-    cout << "Key: " << (*key) << endl;
-    if ((*type) == parameterText) {
-        cout << "Type: TEXT " << endl;
-    }
-    else {
-        cout << "Type: REAL " << endl;
-    }
-    for (j = 0; j < MAX_COMPONENTS; j++) {
-        if ((*type) == parameterText) {
-            cout << texts[j] << " ";
-        }
-        else {
-            cout << reals[j] << " ";
-        }
-    }
-    cout << endl;
-    DEBUG ENDS */
-
-    npar_--;
+    current_--;
     return true;
 }

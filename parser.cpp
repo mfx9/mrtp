@@ -26,10 +26,6 @@ Parser::Parser (string *filename) {
 
 Parser::~Parser () {
     if (nentries_ > 0) {
-        /*
-         * Remove all entries.
-         *
-         */
         do {
             PopEntry (NULL);
         } while (nentries_ > 0);
@@ -84,6 +80,26 @@ unsigned int Parser::PopEntry (Entry *entry) {
         nentries_--;
     }
     return nentries_;
+}
+
+void Parser::StartQuery () {
+    current_ = nentries_;
+}
+
+bool Parser::Query (Entry *entry) {
+    Entry  *next;
+    unsigned int i;
+
+    if (current_ > 0) {
+        next = entries_;
+        for (i = 0; i < (current_ - 1); i++) {
+            next = next->Next ();
+        }
+        next->CopyTo (entry);
+        current_--;
+        return true;
+    }
+    return false;
 }
 
 ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
