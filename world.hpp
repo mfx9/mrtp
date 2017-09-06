@@ -94,7 +94,7 @@ public:
         double distance, double shadowfactor, 
         LightModel_t lightmodel);
     ~World ();
-    bool Initialize ();
+    void Initialize ();
 
     /*
      * Manipulation of objects, adding, removing, etc.

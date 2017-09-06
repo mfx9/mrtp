@@ -52,10 +52,9 @@ World::World (Parser *parser, unsigned int width,
     fov_      = fov;
 }
 
-bool World::Initialize () {
+void World::Initialize () {
     Entry   entry;
     string  label;
-    bool    keep;
 
     string  key,
         texts[MAX_COMPONENTS];
@@ -72,8 +71,8 @@ bool World::Initialize () {
      * Allocate camera, light, actors, etc.
      */
     parser_->StartQuery ();
-    do {
-        keep = parser_->Query (&entry);
+    while (parser_->Query (&entry)) {
+
         entry.GetLabel (&label);
         entry.StartQuery ();
 
@@ -203,9 +202,7 @@ bool World::Initialize () {
             AddCylinder (&center, &direction, radius, span, 
                 &color, texture);
         }
-    } while (keep);
-
-    return true;
+    }
 }
 
 World::~World () {
