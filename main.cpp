@@ -316,7 +316,7 @@ int main (int argc, char **argv) {
         return exitFail;
     }
     if (!quiet) {
-        i = parser.GetNumberEntries ();
+        i = parser.NumberEntries ();
         cout << "Parsing complete, created " << i << 
             " entries." << endl;
     }

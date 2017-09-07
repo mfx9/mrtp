@@ -68,8 +68,9 @@ using namespace std;
             tb = (-b + sqdelta) * t; \
             t  = (ta < tb) ? ta : tb; \
         } \
-        if ((t < mint) || (t > maxt)) \
+        if ((t < mint) || (t > maxt)) { \
             t = -1.0; \
+        } \
     }
 
 

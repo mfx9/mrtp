@@ -36,7 +36,7 @@ ParserStatus_t Parser::Status () {
     return status_;
 }
 
-unsigned int Parser::GetNumberEntries () {
+unsigned int Parser::NumberEntries () {
     return nentries_;
 }
 
@@ -477,3 +477,219 @@ void Parser::Parse () {
         } while (ep != NULL);
     } */
 }
+
+
+/*****************************
+ *          Entries          *
+ *****************************/
+Entry::Entry (string *label) {
+    label_ = (*label);
+    next_  = NULL;
+    npar_  = 0;
+}
+
+Entry::Entry () {
+    label_ = "default";
+    next_  = NULL;
+    npar_  = 0;
+}
+
+Entry::~Entry () {
+}
+
+void Entry::Clear () {
+    npar_ = 0;
+}
+
+Entry *Entry::Next () {
+    return next_;
+}
+
+void Entry::SetNext (Entry *next) {
+    next_ = next;
+}
+
+void Entry::GetLabel (string *label) {
+    (*label) = label_;
+}
+
+void Entry::SetLabel (string *label) {
+    label_ = (*label);
+}
+
+void Entry::CopyTo (Entry *other) {
+    unsigned int i, j;
+
+    other->label_ = label_;
+    other->npar_ = npar_;
+
+    for (i = 0; i < npar_; i++) {
+        other->keys_[i] = keys_[i];
+        other->type_[i] = type_[i];
+
+        for (j = 0; j < MAX_COMPONENTS; j++) {
+            if (type_[i] == parameterReal) {
+                other->real_[i][j] = real_[i][j];
+            }
+            else {  /* if (type[i] == parameterText) */
+                other->text_[i][j] = text_[i][j];
+            }
+        }
+    }
+}
+
+void Entry::Print () {
+    unsigned int i, j;
+
+    cout << "** Entry: " << label_ << endl;
+    cout << "npar=" << npar_ << endl;
+
+    if (npar_ > 0) {
+        for (i = 0; i < npar_; i++) {
+            cout << "Key " << keys_[i] << ": ";
+        
+            for (j = 0; j < MAX_COMPONENTS; j++) {
+                if (type_[i] == parameterText) {
+                    if (text_[i][j] != "") {
+                        cout << "\"" << text_[i][j] << "\" ";
+                    }
+                    else {
+                        cout << "\"\" ";
+                    }
+                }
+                else {  /* if (type[i] == parameterReal) */
+                    cout << real_[i][j] << " ";
+                }
+            }
+            cout << endl;
+        }
+    }
+}
+
+bool Entry::AddText (const string *key, const string *text, 
+        unsigned int ntext) {
+    unsigned int i;
+
+    for (i = 0; i < ntext; i++) {
+        text_[npar_][i] = text[i];
+    }
+    type_[npar_] = parameterText;
+    keys_[npar_] = (*key);
+    npar_++;
+
+    return true;
+}
+
+bool Entry::AddReal (const string *key, double *real, 
+        unsigned int nreal) {
+    unsigned int i;
+
+    for (i = 0; i < nreal; i++) {
+        real_[npar_][i] = real[i];
+    }
+    type_[npar_] = parameterReal;
+    keys_[npar_] = (*key);
+    npar_++;
+
+    return true;
+}
+
+void Entry::StartQuery () {
+    /*
+     * Method must be called before calling Query().
+     */
+    current_ = npar_;
+}
+
+bool Entry::Query (string *key, ParserParameter_t *type, double *reals, 
+        string *texts) {
+    /*
+     * Connect the parser with the actual initialization 
+     * of actors.
+     *
+     * The method is supposed to be called iteratively
+     * in a while type of loop, until false is returned.
+     *
+     */
+    unsigned int j, k;
+
+    if (current_ < 1) {
+        return false;
+    }
+    j = (current_ - 1);
+
+    if (type_[j] == parameterReal) {
+        for (k = 0; k < MAX_COMPONENTS; k++) {
+            reals[k] = real_[j][k];
+        }
+    }
+    else {  /* (type_[j] == parameterText) */
+        for (k = 0; k < MAX_COMPONENTS; k++) {
+            texts[k] = text_[j][k];
+        }
+    }
+    (*key)  = keys_[j];
+    (*type) = type_[j];
+
+    current_--;
+    return true;
+}
+
+
+/*****************************
+ *           Tables          *
+ *****************************/
+const TemplateParameter kCamera[] = {
+    { 1,  0,  "position",  "", BIT_VECTOR },
+    { 2,  0,  "target",  "", BIT_VECTOR },
+    { 3,  0,  "roll",  "0.0", BIT_REAL | BIT_OPTIONAL },
+    };
+
+const TemplateParameter kLight[] = {
+    { 1,  0,  "position",  "", BIT_VECTOR},
+    };
+
+const TemplateParameter kPlane[] = {
+    { 1,  0,  "center",  "", BIT_VECTOR },
+    { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
+    { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
+    { 4,  5,  "color",  "", BIT_VECTOR },
+    { 5,  4,  "texture",  "", BIT_TEXT },
+    };
+
+const TemplateParameter kSphere[] = {
+    { 1,  0, "position",  "", BIT_VECTOR },
+    { 2,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
+    { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
+    { 4,  5, "color",  "", BIT_VECTOR },
+    { 5,  4, "texture",  "", BIT_TEXT },
+    };
+
+const TemplateParameter kCylinder[] = {
+    { 1,  0, "center",  "", BIT_VECTOR },
+    { 2,  0, "direction",  "", BIT_VECTOR | BIT_CHECK_ZERO },
+    { 3,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
+    { 4,  0, "span",  "-1.0", BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
+    { 5,  6, "color",  "", BIT_VECTOR },
+    { 6,  5, "texture",  "", BIT_TEXT },
+    };
+
+const TemplateItem kItems[] = {
+    {"camera", kCamera,
+        (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])) },
+
+    {"light", kLight,
+        (unsigned int) (sizeof (kLight) / sizeof (kLight[0])) },
+
+    {"plane", kPlane,
+        (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])) },
+
+    {"sphere", kSphere,
+        (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])) },
+
+    {"cylinder", kCylinder,
+        (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])) },
+    };
+
+const unsigned int kSizeItems =
+        (unsigned int) sizeof (kItems) / sizeof (kItems[0]);

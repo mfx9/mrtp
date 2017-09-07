@@ -67,27 +67,25 @@ typedef unsigned int Bitmask_t;
 class Entry {
     string  label_;
     Entry  *next_;
+    unsigned int npar_, current_;
 
     /*
-     * Parameter keys (position, center, etc.)
-     * and the number of parameters.
+     * Parameter keys (position, center, etc).
      */
     string keys_[MAX_LINES];
-    unsigned int npar_, current_;
 
     /*
      * Type of each parameter (real or text).
      */
     ParserParameter_t type_[MAX_LINES];
+
     /*
-     * Real numbers (components of 3D vectors, 
-     * etc.).
+     * Real numbers (components of 3D vectors, etc).
      */
     double real_[MAX_LINES][MAX_COMPONENTS];
 
     /*
-     * Strings (usually filenames of texture
-     * files).
+     * Strings (usually filenames of texture files).
      */
     string text_[MAX_LINES][MAX_COMPONENTS];
 
@@ -116,24 +114,23 @@ public:
 
 class Parser {
     string   filename_;
-    ParserStatus_t status_;
-    
     Entry   *entries_;
-    unsigned int nentries_, current_;
-    /*
-     * Private methods.
-     */
-    unsigned int AddEntry (Entry *temp);
+    unsigned int  nentries_, current_;
+    ParserStatus_t  status_;
 
-    ParserCode_t CreateEntry (string *id, string collect[][MAX_TOKENS],
-        unsigned int sizes[], unsigned int ncol, Entry *entry);
 public:
     Parser (string *filename);
     ~Parser ();
+
     void Parse ();
     ParserStatus_t Status ();
-    unsigned int GetNumberEntries ();
+
+    ParserCode_t CreateEntry (string *id, string collect[][MAX_TOKENS],
+        unsigned int sizes[], unsigned int ncol, Entry *entry);
+    unsigned int AddEntry (Entry *temp);
     unsigned int PopEntry (Entry *entry);
+    unsigned int NumberEntries ();
+
     void StartQuery ();
     bool Query (Entry *entry);
 };
