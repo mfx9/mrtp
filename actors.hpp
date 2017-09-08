@@ -88,13 +88,11 @@ public:
     Sphere (Vector *center, double radius, Vector *axis,
         Color *color, Texture *texture);
 
-    double Solve (Vector *origin, Vector *direction, 
-        double mind, double maxd);
-    void GetNormal (Vector *hit, Vector *normal);
-    void DetermineColor (Vector *normal, Color *color);
-
+    double  Solve (Vector *origin, Vector *direction, double mind, double maxd);
+    void    GetNormal (Vector *hit, Vector *normal);
+    void    DetermineColor (Vector *normal, Color *color);
     Sphere *Next ();
-    void SetNext (Sphere *sphere);
+    void    SetNext (Sphere *sphere);
 };
 
 class Plane {
@@ -111,13 +109,11 @@ public:
     Plane (Vector *center, Vector *normal, double scale, 
         Color *color, Texture *texture);
 
-    double Solve (Vector *origin, Vector *direction, 
-        double mind, double maxd);
-    void GetNormal (Vector *normal);
-    void DetermineColor (Vector *hit, Color *color);
-
-    Plane *Next ();
-    void SetNext (Plane *plane);
+    double  Solve (Vector *origin, Vector *direction, double mind, double maxd);
+    void    GetNormal (Vector *normal);
+    void    DetermineColor (Vector *hit, Color *color);
+    Plane  *Next ();
+    void    SetNext (Plane *plane);
 };
 
 class Cylinder {
@@ -134,13 +130,11 @@ public:
     Cylinder (Vector *center, Vector *direction, 
         double radius, double span, Color *color, Texture *texture);
 
-    double Solve (Vector *O, Vector *D,
-        double mind, double maxd);
-    void GetNormal (Vector *hit, Vector *normal);
-    void DetermineColor (Vector *normal, Color *color);
-
+    double    Solve (Vector *O, Vector *D, double mind, double maxd);
+    void      GetNormal (Vector *hit, Vector *normal);
+    void      DetermineColor (Vector *normal, Color *color);
     Cylinder *Next ();
-    void SetNext (Cylinder *cylinder);
+    void      SetNext (Cylinder *cylinder);
 };
 
 class Light {

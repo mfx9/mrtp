@@ -33,15 +33,12 @@ class Buffer {
     unsigned int width_, height_;
 
 public:
-    Buffer (unsigned int width, 
-        unsigned int height);
+    Buffer (unsigned int width, unsigned int height);
     ~Buffer ();
-
-    bool Allocate ();
-    void Clear ();
-
+    bool   Allocate ();
+    void   Clear ();
     Color *GetPointer ();
-    void WriteToPNG (string *filename);
+    void   WriteToPNG (string *filename);
 };
 
 #endif /* _BUFFER_H */

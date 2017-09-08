@@ -37,14 +37,11 @@ class Texture {
 public:
     Texture (string *filename);
     ~Texture ();
-
-    void Allocate ();
-    bool CheckFilename (string *filename);
-    Color *GetColor (double fracx, double fracy, 
-        double scale);
-
+    void     Allocate ();
+    bool     CheckFilename (string *filename);
+    Color   *GetColor (double fracx, double fracy, double scale);
     Texture *Next ();
-    void SetNext (Texture *next);
+    void     SetNext (Texture *next);
 };
 
 #endif /* _TEXTURE_H */

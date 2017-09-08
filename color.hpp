@@ -44,31 +44,16 @@ class Color {
     float red_, green_, blue_;
 
 public:
-    /* Constructors, etc. */
     ~Color ();
     Color ();
+    Color (unsigned char red, unsigned char green, unsigned char blue);
+    Color (float red, float green, float blue);
 
-    Color (float red, float green, 
-        float blue);
-    Color (unsigned char red, unsigned char green, 
-        unsigned char blue);
-
-    /* Setters. */
-    void Set (float red, float green, 
-        float blue);
-    void Set (unsigned char red, unsigned char green, 
-        unsigned char blue);
-
-    /* Getters. */
-    void Get (unsigned char *red, unsigned char *green,
-        unsigned char *blue);
-    void Get (float *red, float *green,
-        float *blue);
-
-    /* Copying. */
+    void Set (float red, float green, float blue);
+    void Set (unsigned char red, unsigned char green, unsigned char blue);
+    void Get (float *red, float *green, float *blue);
+    void Get (unsigned char *red, unsigned char *green, unsigned char *blue);
     void CopyTo (Color *other);
-
-    /* Other. */
     void Scale_InPlace (double scale);
     void Zero ();
 };

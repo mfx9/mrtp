@@ -38,51 +38,33 @@ class Vector {
     double x_, y_, z_;
 
 public:
-    /* 
-     * Constructors, etc. 
-     */
-    Vector (double x, double y, 
-        double z);
-    Vector (double *coor);
-    Vector ();
     ~Vector ();
-    /* 
-     * Setters. 
-     */
-    void Set (double x, double y, 
-        double z);
-    void Set (double *coor);
-    /* 
-     * Copying. 
-     */
-    void CopyTo (Vector *other);
-    /* 
-     * Other. 
-     */
+    Vector ();
+    Vector (double *coor);
+    Vector (double x, double y, double z);
+
+    void   Set (double x, double y, double z);
+    void   Set (double *coor);
+    void   CopyTo (Vector *other);
+    void   Scale_InPlace (double scale);
+    void   Normalize_InPlace ();
+    void   GenerateUnitVector (Vector *other);
+    void   Print ();
     double Len ();
-    void Scale_InPlace (double scale);
-    void Normalize_InPlace ();
-    void GenerateUnitVector (Vector *other);
-    void Print ();
-    /* 
-     * Sum of two vectors. 
-     */
+
+    /* Sum of two vectors. */
     Vector operator+ (Vector &other);
-    /* 
-     * Difference of two vectors. 
-     */
+
+    /* Difference of two vectors. */
     Vector operator- (Vector &other);
-    /* 
-     * Cross product. 
-     */
+
+    /* Cross product. */
     Vector operator^ (Vector &other);
-    /* 
-     * Dot product. 
-     */
+
+    /* Dot product. */
     double operator* (Vector &other);
-    /* 
-     * Scaling. 
-     */
+
+    /* Scaling. */
     Vector operator* (double scale);
 };
 

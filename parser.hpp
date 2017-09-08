@@ -94,22 +94,17 @@ public:
     Entry ();
     ~Entry ();
 
+    void   CopyTo (Entry *other);
+    void   Print ();
+    void   Clear ();
+    bool   AddText (const string *key, const string *text, unsigned int ntext);
+    bool   AddReal (const string *key, double *real, unsigned int nreal);
+    void   SetLabel (string *label);
+    void   StartQuery ();
+    bool   Query (string *key, ParserParameter_t *type, double *real, string *text);
+    void   GetLabel (string *label);
     Entry *Next ();
-    void SetNext (Entry *next);
-    void CopyTo (Entry *other);
-    void Print ();
-    void Clear ();
-
-    bool AddText (const string *key, const string *text, 
-        unsigned int ntext);
-    bool AddReal (const string *key, double *real, 
-        unsigned int nreal);
-    void SetLabel (string *label);
-
-    void StartQuery ();
-    bool Query (string *key, ParserParameter_t *type, double *real, 
-        string *text);
-    void GetLabel (string *label);
+    void   SetNext (Entry *next);
 };
 
 class Parser {
@@ -122,17 +117,16 @@ public:
     Parser (string *filename);
     ~Parser ();
 
-    void Parse ();
     ParserStatus_t Status ();
+    void Parse ();
+    void StartQuery ();
+    bool Query (Entry *entry);
 
     ParserCode_t CreateEntry (string *id, string collect[][MAX_TOKENS],
         unsigned int sizes[], unsigned int ncol, Entry *entry);
     unsigned int AddEntry (Entry *temp);
     unsigned int PopEntry (Entry *entry);
     unsigned int NumberEntries ();
-
-    void StartQuery ();
-    bool Query (Entry *entry);
 };
 
 /*

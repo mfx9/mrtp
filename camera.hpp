@@ -41,10 +41,8 @@ public:
         double fov, double roll);
     ~Camera ();
 
-    void CalculateVectors (Vector *vw, Vector *vh,
-        Vector *vo);
-    void GetDimensions (unsigned int *width,
-        unsigned int *height);
+    void CalculateVectors (Vector *vw, Vector *vh, Vector *vo);
+    void GetDimensions (unsigned int *width, unsigned int *height);
     void GetEye (Vector *vector);
 };
 
