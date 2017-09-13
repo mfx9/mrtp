@@ -21,7 +21,6 @@
 
 #include <cmath>
 #include <cstdio>
-
 #include "vector.hpp"
 
 /*

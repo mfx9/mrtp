@@ -18,6 +18,8 @@
  */
 #include "world.hpp"
 
+using namespace std;
+
 
 World::World (Parser *parser, unsigned int width,
         unsigned int height, double fov,
@@ -550,7 +552,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
             fade = 1.0 - (raylen / maxdist_);
         }
         else if (model_ == lightQuadratic) {
-            fade = 1.0 - sqr (raylen / maxdist_);
+            fade = 1.0 - pow (raylen / maxdist_, 2);
         }
         else {  /* if (model_ == lightNone) */
             fade = 1.0;

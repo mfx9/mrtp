@@ -23,9 +23,9 @@ Vector::~Vector () {
 }
 
 Vector::Vector () {
-    x_ = 0.0;
-    y_ = 0.0;
-    z_ = 0.0;
+    x_ = 0.0f;
+    y_ = 0.0f;
+    z_ = 0.0f;
 }
 
 Vector::Vector (double x, double y, 
@@ -74,16 +74,16 @@ void Vector::Normalize_InPlace () {
     double len, scale;
 
     len = sqrt (x_ * x_ + y_ * y_ + z_ * z_);
-    if (len != 0.0) {
-        scale = 1.0 / len;
+    if (len != 0.0f) {
+        scale = 1.0f / len;
         x_ *= scale;
         y_ *= scale;
         z_ *= scale;
     }
     else {
-        x_ = 0.0;
-        y_ = 0.0;
-        z_ = 0.0;
+        x_ = 0.0f;
+        y_ = 0.0f;
+        z_ = 0.0f;
     }
 }
 
@@ -125,24 +125,26 @@ void Vector::GenerateUnitVector (Vector *other) {
      */
     double x = ABS (x_), y = ABS (y_), 
         z = ABS (z_);
-    other->Set (0.0, 0.0, 1.0);
+    other->Set (0.0f, 0.0f, 1.0f);
 
     if (x < y) {
         if (x < z) {
-            other->Set (1.0, 0.0, 0.0);
+            other->Set (1.0f, 0.0f, 0.0f);
         }
     }
     else {  /* if ( x >= y) */
         if (y < z) {
-            other->Set (0.0, 1.0, 0.0);
+            other->Set (0.0f, 1.0f, 0.0f);
         }
     }
 }
 
+/*
 void Vector::Print () {
-    cout << fixed << showpoint;
-    cout << setprecision (PRINT_PRECISION);
+    cout << std::fixed << std::showpoint;
+    cout << std::setprecision (PRINT_PRECISION);
     cout << "X: " << x_
         << ", Y: " << y_
-        << ", Z: " << z_ << endl;
+        << ", Z: " << z_ << std::endl;
 }
+*/

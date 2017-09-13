@@ -18,6 +18,8 @@
  */
 #include "utils.hpp"
 
+using namespace std;
+
 
 bool TokenizeLine (const string *line, string *tokens,
         unsigned int *ntokens, unsigned int maxtokens) {

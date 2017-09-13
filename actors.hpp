@@ -19,28 +19,12 @@
 #ifndef _ACTORS_H
 #define _ACTORS_H
 
-
+#include <cstddef>  /* NULL pointer. */
 #include <cmath>
-
-#include <iostream>
-using namespace std;
 
 #include "vector.hpp"
 #include "color.hpp"
 #include "texture.hpp"
-
-
-#define TOLERANCE  0.000001
-
-#ifndef M_PI
-#define M_PI  3.14159
-#endif
-
-/*
- * Macros.
- */
-#define IS_ZERO(x) ((x > -TOLERANCE) && (x < TOLERANCE))
-#define IS_NOT_ZERO(x) ((x <= -TOLERANCE) || (x >= TOLERANCE))
 
 /*
  * Macro to solve a quadratic equation for t.
@@ -52,24 +36,24 @@ using namespace std;
  */
 #define SOLVE_QUADRATIC(a, b, c, t, mint, maxt) \
     double delta; \
-    delta = b * b - 4.0 * a * c; \
-    if (delta < 0.0) { \
-        t = -1.0; \
+    delta = b * b - 4.0f * a * c; \
+    if (delta < 0.0f) { \
+        t = -1.0f; \
     } \
     else { \
-        if IS_ZERO (delta) { \
-            t = -b / (2.0 * a); \
-        } \
-        else { \
+        if (delta != 0.0f) { \
             double sqdelta, ta, tb; \
             sqdelta = sqrt (delta); \
-            t  = 0.5 / a; \
+            t  = 0.5f / a; \
             ta = (-b - sqdelta) * t; \
             tb = (-b + sqdelta) * t; \
             t  = (ta < tb) ? ta : tb; \
         } \
+        else { \
+            t = -b / (2.0f * a); \
+        } \
         if ((t < mint) || (t > maxt)) { \
-            t = -1.0; \
+            t = -1.0f; \
         } \
     }
 

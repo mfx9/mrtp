@@ -22,8 +22,8 @@
 /*
  * Macros.
  */
-#define FLOAT_TO_BYTE(color) (unsigned char) (color * 255.0)
-#define BYTE_TO_FLOAT(color) ((float) color) / 255.0
+#define FLOAT_TO_BYTE(color) (unsigned char) (color * 255.0f)
+#define BYTE_TO_FLOAT(color) ((float) color) / 255.0f
 
 #define TRIM_LIMITS(x, min, max) { \
    if (x < min) { \
@@ -34,9 +34,9 @@
    } }
 
 #define TRIM_COLOR(red, green, blue) { \
-    TRIM_LIMITS (red,   0.0, 1.0); \
-    TRIM_LIMITS (green, 0.0, 1.0); \
-    TRIM_LIMITS (blue,  0.0, 1.0); \
+    TRIM_LIMITS (red,   0.0f, 1.0f); \
+    TRIM_LIMITS (green, 0.0f, 1.0f); \
+    TRIM_LIMITS (blue,  0.0f, 1.0f); \
         }
 
 

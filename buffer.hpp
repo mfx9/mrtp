@@ -19,12 +19,10 @@
 #ifndef _BUFFER_H
 #define _BUFFER_H
 
+#include <cstddef>  /* NULL pointer. */
 #include <string>
-using namespace std;
 
 #include "png.hpp"
-using namespace png;
-
 #include "color.hpp"
 
 
@@ -38,7 +36,7 @@ public:
     bool   Allocate ();
     void   Clear ();
     Color *GetPointer ();
-    void   WriteToPNG (string *filename);
+    void   WriteToPNG (std::string *filename);
 };
 
 #endif /* _BUFFER_H */

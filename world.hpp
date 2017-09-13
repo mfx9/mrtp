@@ -19,6 +19,7 @@
 #ifndef _WORLD_H
 #define _WORLD_H
 
+#include <cstddef>  /* NULL pointer. */
 #include <cmath>
 #include <string>
 #include <iostream>
@@ -30,10 +31,6 @@
 #include "buffer.hpp"
 #include "color.hpp"
 #include "texture.hpp"
-
-
-// #define DEBUG_WORLD     1
-#define sqr(x) (x * x)
 
 enum HitCode_t {hitNull, hitPlane, hitSphere, 
     hitCylinder};
@@ -105,7 +102,7 @@ public:
         Color *color, Texture *texture);
     void AddCylinder (Vector *center, Vector *direction, double radius, 
         double span, Color *color, Texture *texture);
-    Texture *AddTexture (string *filename);
+    Texture *AddTexture (std::string *filename);
 
     unsigned int PopPlane ();
     unsigned int PopSphere ();
@@ -119,7 +116,7 @@ public:
     void TraceRay (Vector *origin, Vector *direction,
         Color *color);
     void Render ();
-    void WritePNG (string *filename);
+    void WritePNG (std::string *filename);
 };
 
 #endif /* _WORLD_H */

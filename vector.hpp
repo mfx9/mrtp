@@ -20,15 +20,15 @@
 #define _VECTOR_H
 
 #include <cmath>
+/*
 #include <iomanip>
 #include <iostream>
-
-using namespace std;
+*/
 
 /*
  * Macros.
  */
-#define SIGN(x) ((x < 0.0) ? -1.0 : 1.0)
+#define SIGN(x) ((x < 0.0f) ? -1.0f : 1.0f)
 #define ABS(x) (x * (SIGN (x)))
 
 #define PRINT_PRECISION  4
@@ -43,8 +43,8 @@ public:
     Vector (double *coor);
     Vector (double x, double y, double z);
 
-    void   Set (double x, double y, double z);
     void   Set (double *coor);
+    void   Set (double x, double y, double z);
     void   CopyTo (Vector *other);
     void   Scale_InPlace (double scale);
     void   Normalize_InPlace ();

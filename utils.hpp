@@ -19,11 +19,10 @@
 #ifndef _UTILS_H
 #define _UTILS_H
 
+#include <cstddef>  /* NULL pointer. */
 #include <fstream>
 #include <sstream>
 #include <string>
-
-using namespace std;
 
 /*
  * Macros.
@@ -35,10 +34,10 @@ using namespace std;
 #define IS_NOT_WHITE(c) ((c != ' ') && (c != '\t'))
 
 
-extern bool TokenizeLine (const string *line, string *tokens,
+extern bool TokenizeLine (const std::string *line, std::string *tokens,
     unsigned int *ntokens, unsigned int maxtokens);
-extern bool ConvertTokens (const string *tokens, unsigned int ntokens, 
+extern bool ConvertTokens (const std::string *tokens, unsigned int ntokens, 
     double *out);
-extern bool CheckFilename (string *in, string *ext, string *out);
+extern bool CheckFilename (std::string *in, std::string *ext, std::string *out);
 
 #endif /* _UTILS_H */

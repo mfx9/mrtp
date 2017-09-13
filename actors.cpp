@@ -80,13 +80,15 @@ void Plane::DetermineColor (Vector *hit, Color *color) {
 
 double Plane::Solve (Vector *origin, Vector *direction, 
         double mind, double maxd) {
-    double bar, d = -1.0;
+    double bar, d = -1.0f;
+    Vector T;
 
     bar = (*direction) * normal_;
-    if IS_NOT_ZERO (bar) {
-        d = -((*origin - center_) * normal_) / bar;
+    if (bar != 0.0f) {
+        T = (*origin) - center_;
+        d = -(T * normal_) / bar;
         if ((d < mind) || (d > maxd)) {
-            d = -1.0;
+            d = -1.0f;
         }
     }
     return d;
@@ -149,7 +151,7 @@ double Sphere::Solve (Vector *origin, Vector *direction,
 
     double a, b, c, d;
     a  = (*direction) * (*direction);
-    b  = 2.0 * (*direction * T);
+    b  = 2.0f * (*direction * T);
     c  = (T * T) - (radius_ * radius_);
 
     SOLVE_QUADRATIC (a, b, c, d, mind, maxd);
@@ -183,15 +185,15 @@ void Sphere::DetermineColor (Vector *normal, Color *color) {
         fracy = phi / M_PI;
         
         dot   = (*normal) * texturex_;
-        theta = acos (dot / sin (phi)) / (2.0 * M_PI);
+        theta = acos (dot / sin (phi)) / (2.0f * M_PI);
         dot   = texturez_ * (*normal);
-        if (dot > 0.0) {
+        if (dot > 0.0f) {
             fracx = theta;
         }
         else {
-            fracx = 1.0 - theta;
+            fracx = 1.0f - theta;
         }
-        cp = texture_->GetColor (fracx, fracy, 1.0);
+        cp = texture_->GetColor (fracx, fracy, 1.0f);
     }
     cp->CopyTo (color);
 }
@@ -292,19 +294,19 @@ double Cylinder::Solve (Vector *O, Vector *D,
      * Solving a quadratic equation for t. 
      */
     double aa, bb, cc, t;
-    aa = 1.0 - (b * b);
-    bb = 2.0 * (a - b * d);
+    aa = 1.0f - (b * b);
+    bb = 2.0f * (a - b * d);
     cc = -(d * d) - f;
 
     SOLVE_QUADRATIC (aa, bb, cc, t, mind, maxd);
-    if (t > 0.0) {
+    if (t > 0.0f) {
         alpha_ = d + t * b;
         /*
          * Check if the cylinder is finite.
          */
-        if (span_ > 0.0) {
+        if (span_ > 0.0f) {
             if ((alpha_ < -span_) || (alpha_ > span_)) {
-                return -1.0;
+                return -1.0f;
             }
         }
     }
@@ -332,8 +334,8 @@ void Cylinder::DetermineColor (Vector *normal, Color *color) {
     else {
         dot   = texturex_ * (*normal);
         fracx = acos (dot) / M_PI;
-        fracy = alpha_ / (2.0 * M_PI * radius_);
-        cp    = texture_->GetColor (fracx, fracy, 1.0);
+        fracy = alpha_ / (2.0f * M_PI * radius_);
+        cp    = texture_->GetColor (fracx, fracy, 1.0f);
     }
     cp->CopyTo (color);
 }

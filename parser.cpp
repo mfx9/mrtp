@@ -18,6 +18,8 @@
  */
 #include "parser.hpp"
 
+using namespace std;
+
 
 Parser::Parser (string *filename) {
     filename_ = (*filename);

@@ -18,6 +18,9 @@
  */
 #include "buffer.hpp"
 
+using namespace std;
+using namespace png;
+
 
 Buffer::Buffer (unsigned int width, 
         unsigned int height) {

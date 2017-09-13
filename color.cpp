@@ -78,7 +78,7 @@ void Color::CopyTo (Color *other) {
 }
 
 void Color::Scale_InPlace (double scale) {
-    TRIM_LIMITS (scale, 0.0, 1.0);
+    TRIM_LIMITS (scale, 0.0f, 1.0f);
 
     red_   = red_   * (float) scale;
     green_ = green_ * (float) scale;
@@ -86,7 +86,7 @@ void Color::Scale_InPlace (double scale) {
 }
 
 void Color::Zero () {
-    red_   = 0.0;
-    green_ = 0.0;
-    blue_  = 0.0;
+    red_   = 0.0f;
+    green_ = 0.0f;
+    blue_  = 0.0f;
 }

@@ -19,26 +19,24 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 
+#include <cstddef>  /* NULL pointer. */
 #include <string>
-using namespace std;
 
 #include "png.hpp"
-using namespace png;
-
 #include "color.hpp"
 
 
 class Texture {
     unsigned int width_, height_;
-    Color   *data_;
-    string   filename_;
-    Texture *next_;
+    std::string  filename_;
+    Color    *data_;
+    Texture  *next_;
 
 public:
-    Texture (string *filename);
+    Texture (std::string *filename);
     ~Texture ();
     void     Allocate ();
-    bool     CheckFilename (string *filename);
+    bool     CheckFilename (std::string *filename);
     Color   *GetColor (double fracx, double fracy, double scale);
     Texture *Next ();
     void     SetNext (Texture *next);

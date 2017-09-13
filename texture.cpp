@@ -18,6 +18,9 @@
  */
 #include "texture.hpp"
 
+using namespace std;
+using namespace png;
+
 
 Texture::Texture (string *filename) {
     /*
