@@ -24,6 +24,10 @@
 #include <string>
 #include <iostream>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif /* _OPENMP */
+
 #include "vector.hpp"
 #include "actors.hpp"
 #include "camera.hpp"
@@ -40,7 +44,6 @@ enum LightModel_t {lightNone, lightLinear, lightQuadratic};
 
 class World {
     Buffer  *buffer_;
-
     Camera  *camera_;
     Light   *light_;
 
@@ -83,13 +86,13 @@ class World {
 
     Parser    *parser_;
     double     fov_;
-    unsigned int width_, height_;
+    unsigned int width_, height_, nthreads_;
 
 public:
     World (Parser *parser, unsigned int width,
         unsigned int height, double fov,
         double distance, double shadowfactor, 
-        LightModel_t lightmodel);
+        LightModel_t lightmodel, unsigned int nthreads);
     ~World ();
     void Initialize ();
 
@@ -108,13 +111,14 @@ public:
     unsigned int PopSphere ();
     unsigned int PopCylinder ();
     unsigned int PopTexture ();
-
     /*
      * Rendering, writing output, etc.
      *
      */
     void TraceRay (Vector *origin, Vector *direction,
         Color *color);
+    void RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
+            unsigned int block, unsigned int nlines);
     void Render ();
     void WritePNG (std::string *filename);
 };

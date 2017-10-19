@@ -31,8 +31,6 @@
 #define SIGN(x) ((x < 0.0f) ? -1.0f : 1.0f)
 #define ABS(x) (x * (SIGN (x)))
 
-#define PRINT_PRECISION  4
-
 
 class Vector {
     double x_, y_, z_;

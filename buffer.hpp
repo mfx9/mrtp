@@ -33,9 +33,9 @@ class Buffer {
 public:
     Buffer (unsigned int width, unsigned int height);
     ~Buffer ();
-    bool   Allocate ();
+    void   Allocate ();
     void   Clear ();
-    Color *GetPointer ();
+    Color *Pointer (unsigned int vline);
     void   WriteToPNG (std::string *filename);
 };
 

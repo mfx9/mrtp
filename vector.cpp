@@ -140,6 +140,8 @@ void Vector::GenerateUnitVector (Vector *other) {
 }
 
 /*
+#define PRINT_PRECISION  4
+
 void Vector::Print () {
     cout << std::fixed << std::showpoint;
     cout << std::setprecision (PRINT_PRECISION);

@@ -24,7 +24,7 @@ using namespace std;
 World::World (Parser *parser, unsigned int width,
         unsigned int height, double fov,
         double distance, double shadowfactor, 
-        LightModel_t lightmodel) {
+        LightModel_t lightmodel, unsigned int nthreads) {
     /* 
      * Initialize. 
      */
@@ -52,6 +52,7 @@ World::World (Parser *parser, unsigned int width,
     width_    = width;
     height_   = height;
     fov_      = fov;
+    nthreads_ = nthreads;
 }
 
 void World::Initialize () {
@@ -566,33 +567,67 @@ void World::TraceRay (Vector *origin, Vector *direction,
     }
 }
 
-void World::Render () {
-    Color *bp;
-    Vector vw, vh, vo, eye,
-        horiz, verti, origin, direction;
+void World::RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
+        unsigned int block, unsigned int nlines) {
     unsigned int i, j;
+    Vector  horizontal, vertical, origin, direction;
+    Color  *color;
 
-    /*
-     * Initialize.
-     */
+    color = buffer_->Pointer (block * nlines);
+    for (j = 0; j < nlines; j++) {
+        for (i = 0; i < width_; i++, color++) {
+            horizontal = (*vw) * (double) i;
+            vertical   = (*vh) * (double) (j + block * nlines);
+
+            origin     = (*vo) + horizontal + vertical;
+            direction  = origin - (*eye);
+            direction.Normalize_InPlace ();
+
+            TraceRay (&origin, &direction, color);
+        }
+    }
+}
+
+void World::Render () {
+    Vector vw, vh, vo, eye;
+
     camera_->CalculateVectors (&vw, &vh, &vo);
     camera_->GetEye (&eye);
 
-    bp = buffer_->GetPointer ();
-    /*
-     * Trace a ray for every pixel.
-     */
-    for (j = 0; j < height_; j++) {
-        for (i = 0; i < width_; i++) {
-            horiz     = vw * (double) i;
-            verti     = vh * (double) j;
-            origin    = vo + horiz + verti;
-            direction = origin - eye;
-            direction.Normalize_InPlace ();
+    if (nthreads_ < 2) {
+        /*
+         * Serial execution. 
+         */
+        RenderBlock (&vw, &vh, &vo, &eye, 0, height_);
+    }
+#ifdef _OPENMP
+    else {
+        /* 
+         * Parallel execution. 
+         *
+         * Split the buffer into several horizontal blocks, 
+         * each rendered by a separate thread.
+         *
+         * After each thread has finished, there may still be 
+         * some left-over lines to render.
+         */
+        unsigned int nlines, nfill, block;
 
-            TraceRay (&origin, &direction, bp++);
+        if (nthreads_ != 0) {
+            omp_set_num_threads (nthreads_);
+        }
+        nlines = height_ / nthreads_;
+
+        #pragma omp parallel for
+        for (block = 0; block < nthreads_; block++) {
+            RenderBlock (&vw, &vh, &vo, &eye, block, nlines);
+        }
+        nfill = height_ % nthreads_;
+        if (nfill) {
+            RenderBlock (&vw, &vh, &vo, &eye, block + 1, nfill);
         }
     }
+#endif /* _OPENMP */
 }
 
 void World::WritePNG (string *filename) {

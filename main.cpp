@@ -24,9 +24,12 @@ using namespace std;
 #include <string>
 #include <ctime>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif /* _OPENMP */
+
 #include "world.hpp"
 #include "parser.hpp"
-
 
 /*
  * Default settings.
@@ -41,12 +44,18 @@ using namespace std;
 /*
  * Program limits.
  */
-#define MIN_FOV        50.0
-#define MAX_FOV       170.0
-#define MIN_WIDTH   (DEFAULT_WIDTH  /  2)
-#define MAX_WIDTH   (DEFAULT_WIDTH  * 10)
-#define MIN_HEIGHT  (DEFAULT_HEIGHT /  2)
-#define MAX_HEIGHT  (DEFAULT_HEIGHT * 10)
+#define MIN_WIDTH     (DEFAULT_WIDTH  /  2)
+#define MAX_WIDTH     (DEFAULT_WIDTH  * 10)
+#define MIN_HEIGHT    (DEFAULT_HEIGHT /  2)
+#define MAX_HEIGHT    (DEFAULT_HEIGHT * 10)
+#define MIN_FOV          50.0
+#define MAX_FOV         170.0
+
+#ifdef _OPENMP
+    #define DEFAULT_THREADS   1
+    #define MIN_THREADS       1
+    #define MAX_THREADS      64
+#endif /* _OPENMP */
 
 /*
  * Exit codes.
@@ -61,10 +70,6 @@ void HelpScreen (string program) {
             "      Print this help screen.\n\n"
             "    -q, --quiet\n"
             "      Supress all messages, except errors.\n\n"
-            /*
-            "    -v, --version\n"
-            "      Version of the program.\n\n"
-            */
             "    -r, --resolution\n"
             "      Resolution of the rendered image, for\n"
             "      example 640x480 (default), 1024x768, etc.\n\n"
@@ -80,6 +85,11 @@ void HelpScreen (string program) {
             "      default is quadratic).\n\n"
             "    -s, --shadow\n"
             "      Shadow factor (default is 0.25).\n\n"
+#ifdef _OPENMP
+            "    -t, --threads\n"
+            "      Number of parallel threads, for example 0 (auto),\n"
+            "      1 (serial run, default), 2, 4, etc.\n\n"
+#endif /* _OPENMP */
             "Example:\n";
     cout << "    " << program << " -r 1024x768 -o test.png test.inp" << endl;
 }
@@ -103,6 +113,9 @@ int main (int argc, char **argv) {
     LightModel_t model    =  DEFAULT_MODEL;
     unsigned int width    =  DEFAULT_WIDTH;
     unsigned int height   =  DEFAULT_HEIGHT;
+#ifdef _OPENMP
+    unsigned int threads  =  DEFAULT_THREADS;
+#endif /* _OPENMP */
 
 
     if (argc < 2) {
@@ -280,6 +293,25 @@ int main (int argc, char **argv) {
             }
         }
 
+#ifdef _OPENMP
+        /*
+         * Set the number of threads.
+         */
+        else if ((text == "-t") || (text == "--threads")) {
+            if (i == (argc - 1)) {
+                cerr << "Number of threads not given." << endl;
+                return exitFail;
+            }
+            next = argv[++i];
+            convert.str (next);
+            convert >> threads;
+            if (!convert || (threads < MIN_THREADS) || (shadow > MAX_THREADS)) {
+                cerr << "Invalid number of threads." << endl;
+                return exitFail;
+            }
+        }
+#endif /* _OPENMP */
+
         /*
          * Get the input file.
          */
@@ -324,8 +356,13 @@ int main (int argc, char **argv) {
     /*
      * Build a world.
      */
+#ifdef _OPENMP
     World world (&parser, width, height, fov, distance, 
-        shadow, model);
+        shadow, model, threads);
+#else
+    World world (&parser, width, height, fov, distance, 
+        shadow, model, 0);
+#endif /* _OPENMP */
     world.Initialize ();
     if (!quiet) {
         cout << "Built world." << endl;
@@ -347,9 +384,20 @@ int main (int argc, char **argv) {
      * Finalize.
      */
     if (!quiet) {
-        cout << "OK. Elapsed time: " << setprecision (2) <<
-            ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
-            " sec" << endl;
+        double timeUsed;
+
+        timeUsed = double (timeStop - timeStart) / CLOCKS_PER_SEC;
+#ifdef _OPENMP
+        /* Correct the CPU time for the number of threads. */
+        if (!threads) {
+            threads = omp_get_num_procs ();
+        }
+        if (threads > 1) {
+            timeUsed /= double (threads);
+        }
+#endif /* _OPENMP */
+        cout << "OK. Elapsed time: " << setprecision (2) << 
+            timeUsed << " sec" << endl;
     }
     world.WritePNG (&output);
 

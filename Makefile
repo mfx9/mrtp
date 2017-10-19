@@ -1,8 +1,8 @@
 # . Makefile for mrtp
 
 PNGVER   = 0.2.9
-CC_FLAGS = -Ipng++/png++-$(PNGVER) -W -Wall -pedantic
-LD_FLAGS =
+CC_FLAGS = -Ipng++/png++-$(PNGVER) -W -Wall -pedantic -fopenmp
+LD_FLAGS = -fopenmp
 LIBS     = -lpng -lm 
 CXX      = g++
 

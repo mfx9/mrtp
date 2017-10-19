@@ -24,51 +24,26 @@ using namespace png;
 
 Buffer::Buffer (unsigned int width, 
         unsigned int height) {
-    /*
-     * Constructor.
-     */
     data_   =  NULL;
     width_  =  width;
     height_ =  height;
 }
 
-bool Buffer::Allocate () {
-    /*
-     * Allocate buffer.
-     *
-     */
-    if (data_ == NULL) {
-        size_t size = (size_t) (width_ * height_);
-        data_ = new Color [size];
-        return true;
-    }
-    return false;
+void Buffer::Allocate () {
+    data_ = new Color [(size_t) (width_ * height_)];
 }
 
 Buffer::~Buffer () {
-    /*
-     * Deallocate buffer.
-     *
-     */
     if (data_ != NULL) {
         delete[] data_;
     }
 }
 
-Color *Buffer::GetPointer () {
-    /*
-     * Get a pointer to the beginning
-     * of data.
-     *
-     */
-    return &data_[0];
+Color *Buffer::Pointer (unsigned int vline) {
+    return &data_[(size_t) (vline * width_)];
 }
 
 void Buffer::Clear () {
-    /*
-     * Fill the buffer with black.
-     *
-     */
     unsigned int i = 0;
     Color  *bp = &data_[0];
 
@@ -78,10 +53,6 @@ void Buffer::Clear () {
 }
 
 void Buffer::WriteToPNG (string *filename) {
-    /*
-     * Save the buffer to a PNG file.
-     *
-     */
     unsigned char red, green, blue;
     unsigned int  i, j;
     Color *bp;
