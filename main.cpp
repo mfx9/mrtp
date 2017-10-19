@@ -53,7 +53,7 @@ using namespace std;
 
 #ifdef _OPENMP
     #define DEFAULT_THREADS   1
-    #define MIN_THREADS       1
+    #define MIN_THREADS       0
     #define MAX_THREADS      64
 #endif /* _OPENMP */
 
@@ -305,9 +305,12 @@ int main (int argc, char **argv) {
             next = argv[++i];
             convert.str (next);
             convert >> threads;
-            if (!convert || (threads < MIN_THREADS) || (shadow > MAX_THREADS)) {
+            if (!convert || (threads > MAX_THREADS)) {
                 cerr << "Invalid number of threads." << endl;
                 return exitFail;
+            }
+            if (!threads) {
+                threads = omp_get_max_threads ();
             }
         }
 #endif /* _OPENMP */
@@ -388,11 +391,8 @@ int main (int argc, char **argv) {
 
         timeUsed = double (timeStop - timeStart) / CLOCKS_PER_SEC;
 #ifdef _OPENMP
-        /* Correct the CPU time for the number of threads. */
-        if (!threads) {
-            threads = omp_get_num_procs ();
-        }
         if (threads > 1) {
+            /* Correct the CPU time for the number of threads. */
             timeUsed /= double (threads);
         }
 #endif /* _OPENMP */

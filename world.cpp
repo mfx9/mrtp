@@ -611,21 +611,15 @@ void World::Render () {
          * After each thread has finished, there may still be 
          * some left-over lines to render.
          */
-        unsigned int nlines, nfill, nblocks, block;
+        unsigned int nlines, nfill, block;
 
-        if (!nthreads_) {
-            nblocks = omp_get_num_procs ();
-        }
-        else {
-            omp_set_num_threads (nthreads_);
-            nblocks = nthreads_;
-        }
-        nlines = height_ / nblocks;
+        omp_set_num_threads (nthreads_);
+        nlines = height_ / nthreads_;
         #pragma omp parallel for
-        for (block = 0; block < nblocks; block++) {
+        for (block = 0; block < nthreads_; block++) {
             RenderBlock (&vw, &vh, &vo, &eye, block, nlines);
         }
-        nfill = height_ % nblocks;
+        nfill = height_ % nthreads_;
         if (nfill) {
             RenderBlock (&vw, &vh, &vo, &eye, block + 1, nfill);
         }
