@@ -103,7 +103,7 @@ public:
 class Cylinder {
     Vector    A_, B_,
         texturex_, texturey_;
-    double    radius_, span_, alpha_;
+    double    radius_, span_;
     Color     color_;
     Texture  *texture_;
     Cylinder *next_;
@@ -116,7 +116,7 @@ public:
 
     double    Solve (Vector *O, Vector *D, double mind, double maxd);
     void      GetNormal (Vector *hit, Vector *normal);
-    void      DetermineColor (Vector *normal, Color *color);
+    void      DetermineColor (Vector *hit, Vector *normal, Color *color);
     Cylinder *Next ();
     void      SetNext (Cylinder *cylinder);
 };

@@ -498,7 +498,7 @@ void World::TraceRay (Vector *origin, Vector *direction,
         }
         else if (hit == hitCylinder) {
             hitcylinder->GetNormal (&inter, &normal);
-            hitcylinder->DetermineColor (&normal, &objcol);
+            hitcylinder->DetermineColor (&inter, &normal, &objcol);
         }
         /*
          * Find a vector between the intersection
@@ -610,11 +610,15 @@ void World::Render () {
          *
          * After each thread has finished, there may still be 
          * some left-over lines to render.
+         *
+         * NOTE: Methods that operate on actors (Solve, GetNormal, 
+         * etc.) must be thread-safe.
          */
         unsigned int nlines, nfill, block;
 
         omp_set_num_threads (nthreads_);
         nlines = height_ / nthreads_;
+
         #pragma omp parallel for
         for (block = 0; block < nthreads_; block++) {
             RenderBlock (&vw, &vh, &vo, &eye, block, nlines);

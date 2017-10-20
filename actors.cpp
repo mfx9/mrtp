@@ -159,11 +159,8 @@ double Sphere::Solve (Vector *origin, Vector *direction,
 }
 
 void Sphere::GetNormal (Vector *hit, Vector *normal) {
-    Vector T;
-
-    T = (*hit) - center_;
-    T.Normalize_InPlace ();
-    T.CopyTo (normal);
+    (*normal) = (*hit) - center_;
+    normal->Normalize_InPlace ();
 }
 
 void Sphere::DetermineColor (Vector *normal, Color *color) {
@@ -293,19 +290,19 @@ double Cylinder::Solve (Vector *O, Vector *D,
     /* 
      * Solving a quadratic equation for t. 
      */
-    double aa, bb, cc, t;
+    double aa, bb, cc, t, alpha;
     aa = 1.0f - (b * b);
     bb = 2.0f * (a - b * d);
     cc = -(d * d) - f;
 
     SOLVE_QUADRATIC (aa, bb, cc, t, mind, maxd);
     if (t > 0.0f) {
-        alpha_ = d + t * b;
         /*
          * Check if the cylinder is finite.
          */
         if (span_ > 0.0f) {
-            if ((alpha_ < -span_) || (alpha_ > span_)) {
+            alpha = d + t * b;
+            if ((alpha < -span_) || (alpha > span_)) {
                 return -1.0f;
             }
         }
@@ -314,27 +311,37 @@ double Cylinder::Solve (Vector *O, Vector *D,
 }
 
 void Cylinder::GetNormal (Vector *hit, Vector *normal) {
-    Vector T, Q, N;
+    /*
+     * N = Hit - [B . (Hit - A)] * B
+     */
+    Vector T, Q;
+    double alpha;
 
-    B_.CopyTo (&T);
-    T.Scale_InPlace (alpha_);
+    T = (*hit) - A_;
+    alpha = B_ * T;
+
+    T = B_ * alpha;
     Q = A_ + T;
-    N = (*hit) - Q;
-    N.Normalize_InPlace ();
-    N.CopyTo (normal);
+    (*normal) = (*hit) - Q;
+    normal->Normalize_InPlace ();
 }
 
-void Cylinder::DetermineColor (Vector *normal, Color *color) {
+void Cylinder::DetermineColor (Vector *hit, Vector *normal, 
+        Color *color) {
     Color  *cp;
-    double  dot, fracx, fracy;
 
     if (texture_ == NULL) {
         cp = &color_;
     }
     else {
+        double  dot, fracx, fracy, alpha;
+        Vector  T;
+
+        T = (*hit) - A_;
+        alpha = B_ * T;
         dot   = texturex_ * (*normal);
         fracx = acos (dot) / M_PI;
-        fracy = alpha_ / (2.0f * M_PI * radius_);
+        fracy = alpha / (2.0f * M_PI * radius_);
         cp    = texture_->GetColor (fracx, fracy, 1.0f);
     }
     cp->CopyTo (color);
