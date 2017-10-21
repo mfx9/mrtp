@@ -19,19 +19,16 @@ using namespace std;
 #include <string>
 #include <ctime>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif /* _OPENMP */
-
-#include "world.hpp"
 #include "parser.hpp"
+#include "world.hpp"
+#include "renderer.hpp"
 
 /*
  * Default settings.
  */
 #define DEFAULT_WIDTH     640
 #define DEFAULT_HEIGHT    480
-#define DEFAULT_FOV        70.0
+#define DEFAULT_FOV        93.0
 #define DEFAULT_DISTANCE   60.0
 #define DEFAULT_SHADOW      0.25
 #define DEFAULT_MODEL     lightQuadratic
@@ -72,7 +69,7 @@ void HelpScreen (string program) {
             "      Filename for the rendered image, in PNG\n"
             "      format (default is \"output.png\").\n\n"
             "    -f, --fov\n"
-            "      Field of vision, in degrees (default is 70).\n\n"
+            "      Field of vision, in degrees (default is 93).\n\n"
             "    -d, --distance\n"
             "      Distance to quench light (default is 60).\n\n"
             "    -m, --model\n"
@@ -300,12 +297,9 @@ int main (int argc, char **argv) {
             next = argv[++i];
             convert.str (next);
             convert >> threads;
-            if (!convert || (threads > MAX_THREADS)) {
+            if (!convert || (threads < MIN_THREADS) || (threads > MAX_THREADS)) {
                 cerr << "Invalid number of threads." << endl;
                 return exitFail;
-            }
-            if (!threads) {
-                threads = omp_get_max_threads ();
             }
         }
 #endif /* _OPENMP */
@@ -347,23 +341,32 @@ int main (int argc, char **argv) {
     }
     if (!quiet) {
         i = parser.NumberEntries ();
-        cout << "Parsing complete, created " << i << 
+        cout << "Parsing OK, created " << i << 
             " entries." << endl;
     }
 
     /*
      * Build a world.
      */
-#ifdef _OPENMP
-    World world (&parser, width, height, fov, distance, 
-        shadow, model, threads);
-#else
-    World world (&parser, width, height, fov, distance, 
-        shadow, model, 0);
-#endif /* _OPENMP */
+    World world (&parser);
     world.Initialize ();
     if (!quiet) {
-        cout << "Built world." << endl;
+        cout << "Building world OK." << endl;
+    }
+
+    /*
+     * Initialize a renderer.
+     */
+#ifdef _OPENMP
+    Renderer renderer (&world, width, height, fov, distance, 
+        shadow, model, threads);
+#else
+    Renderer renderer (&world, width, height, fov, distance, 
+        shadow, model, 1);
+#endif /* _OPENMP */
+    renderer.Initialize ();
+    if (!quiet) {
+        cout << "Setting up renderer OK." << endl;
     }
 
     /*
@@ -375,7 +378,7 @@ int main (int argc, char **argv) {
     if (!quiet) {
         cout << "Rendering..." << endl;
     }
-    world.Render ();
+    renderer.Render ();
     timeStop = clock ();
 
     /*
@@ -391,10 +394,10 @@ int main (int argc, char **argv) {
             timeUsed /= double (threads);
         }
 #endif /* _OPENMP */
-        cout << "OK. Elapsed time: " << setprecision (2) << 
+        cout << "Done. Elapsed time: " << setprecision (2) << 
             timeUsed << " sec" << endl;
     }
-    world.WritePNG (&output);
+    renderer.SaveFrame (&output);
 
     return exitOK;
 }

@@ -14,38 +14,22 @@
 #include "camera.hpp"
 
 
-Camera::Camera (Vector *origin, Vector *target,
-        unsigned int width, unsigned int height, double fov, 
+Camera::Camera (Vector *origin, Vector *target, 
         double roll) {
-    /*
-     * Constructor.
-     *
-     */
     origin->CopyTo (&eye_);
     target->CopyTo (&lookat_);
-
-    width_       = (double) width;
-    height_      = (double) height;
-    rotation_    = DEG_TO_RAD (roll);
-    ratio_       = width / height;
-    perspective_ = ratio_ / (2.0 * tan (DEG_TO_RAD (fov / 2.0)));
+    rotation_  = DEG_TO_RAD (roll);
 }
 
 Camera::~Camera () {
-}
-
-void Camera::GetDimensions (unsigned int *width, 
-        unsigned int *height) {
-    *width  = width_;
-    *height = height_;
 }
 
 void Camera::GetEye (Vector *vector) {
     eye_.CopyTo (vector);
 }
 
-void Camera::CalculateVectors (Vector *vw, Vector *vh,
-        Vector *vo) {
+void Camera::CalculateVectors (double width, double height, 
+        double perspective, Vector *vw, Vector *vh, Vector *vo) {
     /*
      * Calculate vectors that span the window.
      */
@@ -61,14 +45,14 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
      * if (i.x == 0.0 && i.y == 0.0)
      *     return false;
      */
-    Vector j, k (0.0, 0.0, 1.0);
+    Vector j, k (0.0f, 0.0f, 1.0f);
     j = i ^ k;
     j.Normalize_InPlace ();
 
     /*
      * Flip the cross-product instead?
      */
-    j.Scale_InPlace (-1.0);
+    j.Scale_InPlace (-1.0f);
     k = i ^ j;
     k.Normalize_InPlace ();
 
@@ -94,13 +78,13 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
     /*
      * Calculate the central point of the window.
      */
-    Vector center = (i * perspective_) + eye_;
+    Vector center = (i * perspective) + eye_;
 
     /*
      * Modify vectors (use ratio_ ?).
      */
-    j.Scale_InPlace (0.5);
-    k.Scale_InPlace (0.5);
+    j.Scale_InPlace (0.5f);
+    k.Scale_InPlace (0.5f);
 
     /*
      * Find three corners of the window.
@@ -114,9 +98,9 @@ void Camera::CalculateVectors (Vector *vw, Vector *vh,
      */
     wo.CopyTo (vo);
 
-    Vector horiz = (ww - wo) * (1.0 / width_ );
+    Vector horiz = (ww - wo) * (1.0f / width);
     horiz.CopyTo (vw);
 
-    Vector verti = (wh - wo) * (1.0 / height_);
+    Vector verti = (wh - wo) * (1.0f / height);
     verti.CopyTo (vh);
 }

@@ -16,10 +16,7 @@
 using namespace std;
 
 
-World::World (Parser *parser, unsigned int width,
-        unsigned int height, double fov,
-        double distance, double shadowfactor, 
-        LightModel_t lightmodel, unsigned int nthreads) {
+World::World (Parser *parser) {
     /* 
      * Initialize. 
      */
@@ -28,26 +25,14 @@ World::World (Parser *parser, unsigned int width,
     ncylinders_ = 0;
     ntextures_  = 0;
 
-    /*
-     * Set all pointers to NULL.
-     */
     planes_     = NULL;
     spheres_    = NULL;
     cylinders_  = NULL;
     textures_   = NULL;
-    buffer_     = NULL;
+
     camera_     = NULL;
     light_      = NULL;
-
-    maxdist_  = distance;
-    shadow_   = shadowfactor;
-    model_    = lightmodel;
-
-    parser_   = parser;
-    width_    = width;
-    height_   = height;
-    fov_      = fov;
-    nthreads_ = nthreads;
+    parser_     = parser;
 }
 
 void World::Initialize () {
@@ -58,12 +43,6 @@ void World::Initialize () {
         texts[MAX_COMPONENTS];
     double  reals[MAX_COMPONENTS];
     ParserParameter_t  type;
-
-    /*
-     * Allocate a buffer.
-     */
-    buffer_ = new Buffer (width_, height_);
-    buffer_->Allocate ();
 
     /*
      * Allocate camera, light, actors, etc.
@@ -92,8 +71,7 @@ void World::Initialize () {
                     roll = reals[0];
                 }
             }
-            camera_ = new Camera (&position, &target, width_, 
-                height_, fov_, roll);
+            camera_ = new Camera (&position, &target, roll);
         }
 
         /*
@@ -210,10 +188,6 @@ World::~World () {
     if (light_  != NULL) {
         delete light_;
     }
-    if (buffer_ != NULL) {
-        delete buffer_;
-    }
-
     /* Clear all planes. */
     do {
         PopPlane ();
@@ -414,221 +388,17 @@ Texture *World::AddTexture (string *filename) {
     return texture;
 }
 
-void World::TraceRay (Vector *origin, Vector *direction,
-        Color *color) {
-    Plane     *plane, *hitplane;
-    Sphere    *sphere, *hitsphere;
-    Cylinder  *cylinder, *hitcylinder;
-    double     dist, currd, dot, raylen, fade;
-    HitCode_t  hit;
-    Vector     inter, tl, normal;
-    Color      objcol;
-    bool       isshadow;
-
-    /*
-     * Initialize.
-     */
-    color->Zero ();
-    currd  = maxdist_;
-    hit    = hitNull;
-
-    /*
-     * Search for planes.
-     */
-    plane    = planes_;
-    hitplane = NULL;
-    while (plane != NULL) {
-        dist = plane->Solve (origin, direction, 0., maxdist_);
-        if ((dist > 0.) && (dist < currd)) {
-            currd    = dist;
-            hitplane = plane;
-            hit      = hitPlane;
-        }
-        plane = plane->Next ();
-    }
-
-    /*
-     * Search for spheres.
-     */
-    sphere    = spheres_;
-    hitsphere = NULL;
-    while (sphere != NULL) {
-        dist  = sphere->Solve (origin, direction, 0., maxdist_);
-        if ((dist > 0.) && (dist < currd)) {
-            currd     = dist;
-            hitsphere = sphere;
-            hit       = hitSphere;
-        }
-        sphere = sphere->Next ();
-    }
-
-    /*
-     * Search for cylinders. 
-     */
-    cylinder    = cylinders_;
-    hitcylinder = NULL;
-    while (cylinder != NULL) {
-        dist  = cylinder->Solve (origin, direction, 0., maxdist_);
-        if ((dist > 0.) && (dist < currd)) {
-            currd       = dist;
-            hitcylinder = cylinder;
-            hit         = hitCylinder;
-        }
-        cylinder = cylinder->Next ();
-    }
-
-    if (hit != hitNull) {
-        /*
-         * Found a ray/object intersection.
-         */
-        inter = ((*direction) * currd) + (*origin);
-
-        if (hit == hitPlane) {
-            hitplane->GetNormal (&normal);
-            hitplane->DetermineColor (&inter, &objcol);
-        }
-        else if (hit == hitSphere) {
-            hitsphere->GetNormal (&inter, &normal);
-            hitsphere->DetermineColor (&normal, &objcol);
-        }
-        else if (hit == hitCylinder) {
-            hitcylinder->GetNormal (&inter, &normal);
-            hitcylinder->DetermineColor (&inter, &normal, &objcol);
-        }
-        /*
-         * Find a vector between the intersection
-         *   and light.
-         *
-         */
-        light_->GetToLight (&inter, &tl);
-        raylen = tl.Len ();
-        tl.Normalize_InPlace ();
-        dot = normal * tl;
-
-        /*
-         * Planes cannot cast shadows so check only for
-         * spheres and cylinder.
-         *
-         */
-        isshadow = false;
-        sphere   = spheres_;
-        while (sphere != NULL) {
-            if (sphere != hitsphere) {
-                dist = sphere->Solve (&inter, &tl, 0., raylen);
-                if (dist > 0.) {
-                    isshadow = true;
-                    break;
-                }
-            }
-            sphere = sphere->Next ();
-        }
-        if (!isshadow) {
-            cylinder   = cylinders_;
-            while (cylinder != NULL) {
-                if (cylinder != hitcylinder) {
-                    dist = cylinder->Solve (&inter, &tl, 0., raylen);
-                    if (dist > 0.) {
-                        isshadow = true;
-                        break;
-                    }
-                }
-                cylinder = cylinder->Next ();
-            }
-        }
-
-        if (isshadow) {
-            dot *= shadow_;
-        }
-        /*
-         * Decrease light intensity for objects further
-         * away from the light.
-         *
-         */
-        if (model_ == lightLinear) {
-            fade = 1.0 - (raylen / maxdist_);
-        }
-        else if (model_ == lightQuadratic) {
-            fade = 1.0 - pow (raylen / maxdist_, 2);
-        }
-        else {  /* if (model_ == lightNone) */
-            fade = 1.0;
-        }
-        dot *= fade;
-        objcol.Scale_InPlace (dot);
-        /*
-         * Put a pixel in the frame buffer.
-         */
-        objcol.CopyTo (color); 
-    }
+void World::GetCamera (Camera **camera) {
+    *camera = camera_;
 }
 
-void World::RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
-        unsigned int block, unsigned int nlines) {
-    unsigned int i, j;
-    Vector  horizontal, vertical, origin, direction;
-    Color  *color;
-
-    color = buffer_->Pointer (block * nlines);
-    for (j = 0; j < nlines; j++) {
-        for (i = 0; i < width_; i++, color++) {
-            horizontal = (*vw) * (double) i;
-            vertical   = (*vh) * (double) (j + block * nlines);
-
-            origin     = (*vo) + horizontal + vertical;
-            direction  = origin - (*eye);
-            direction.Normalize_InPlace ();
-
-            TraceRay (&origin, &direction, color);
-        }
-    }
+void World::GetLight (Light **light) {
+    *light = light_;
 }
 
-void World::Render () {
-    Vector vw, vh, vo, eye;
-
-    camera_->CalculateVectors (&vw, &vh, &vo);
-    camera_->GetEye (&eye);
-
-    if (nthreads_ < 2) {
-        /*
-         * Serial execution. 
-         */
-        RenderBlock (&vw, &vh, &vo, &eye, 0, height_);
-    }
-#ifdef _OPENMP
-    else {
-        /* 
-         * Parallel execution. 
-         *
-         * Split the buffer into several horizontal blocks, 
-         * each rendered by a separate thread.
-         *
-         * After each thread has finished, there may still be 
-         * some left-over lines to render.
-         *
-         * NOTE: Methods that operate on actors (Solve, GetNormal, 
-         * etc.) must be thread-safe.
-         */
-        unsigned int nlines, nfill, block;
-
-        omp_set_num_threads (nthreads_);
-        nlines = height_ / nthreads_;
-
-        #pragma omp parallel for
-        for (block = 0; block < nthreads_; block++) {
-            RenderBlock (&vw, &vh, &vo, &eye, block, nlines);
-        }
-        nfill = height_ % nthreads_;
-        if (nfill) {
-            RenderBlock (&vw, &vh, &vo, &eye, block + 1, nfill);
-        }
-    }
-#endif /* _OPENMP */
-}
-
-void World::WritePNG (string *filename) {
-    /*
-     * Save image.
-     */
-    buffer_->WriteToPNG (filename);
+void World::GetActors (Plane **planes, Sphere **spheres, 
+        Cylinder **cylinders) {
+    *planes = planes_;
+    *spheres = spheres_;
+    *cylinders = cylinders_;
 }
