@@ -21,37 +21,6 @@
 #include "color.hpp"
 #include "texture.hpp"
 
-/*
- * Macro to solve a quadratic equation for t.
- *
- * Since t is a scale in: P = O + t*D, return
- * only the smaller t and within the limits of (mint, maxt).
- *
- * Otherwise return -1.
- */
-#define SOLVE_QUADRATIC(a, b, c, t, mint, maxt) \
-    double delta; \
-    delta = b * b - 4.0f * a * c; \
-    if (delta < 0.0f) { \
-        t = -1.0f; \
-    } \
-    else { \
-        if (delta != 0.0f) { \
-            double sqdelta, ta, tb; \
-            sqdelta = sqrt (delta); \
-            t  = 0.5f / a; \
-            ta = (-b - sqdelta) * t; \
-            tb = (-b + sqdelta) * t; \
-            t  = (ta < tb) ? ta : tb; \
-        } \
-        else { \
-            t = -b / (2.0f * a); \
-        } \
-        if ((t < mint) || (t > maxt)) { \
-            t = -1.0f; \
-        } \
-    }
-
 
 class Sphere {
     Vector   center_, texturex_, 

@@ -13,6 +13,9 @@
  */
 #include "actors.hpp"
 
+static double SolveQuadratic (double a, double b, double c, 
+    double mint, double maxt);
+
 
 /*****************************
  *          Planes           *
@@ -144,13 +147,12 @@ double Sphere::Solve (Vector *origin, Vector *direction,
     Vector T;
     T = (*origin) - center_;
 
-    double a, b, c, d;
+    double a, b, c;
     a  = (*direction) * (*direction);
     b  = 2.0f * (*direction * T);
     c  = (T * T) - (radius_ * radius_);
 
-    SOLVE_QUADRATIC (a, b, c, d, mind, maxd);
-    return d;
+    return SolveQuadratic (a, b, c, mind, maxd);
 }
 
 void Sphere::GetNormal (Vector *hit, Vector *normal) {
@@ -290,7 +292,7 @@ double Cylinder::Solve (Vector *O, Vector *D,
     bb = 2.0f * (a - b * d);
     cc = -(d * d) - f;
 
-    SOLVE_QUADRATIC (aa, bb, cc, t, mind, maxd);
+    t = SolveQuadratic (aa, bb, cc, mind, maxd);
     if (t > 0.0f) {
         /*
          * Check if the cylinder is finite.
@@ -364,4 +366,42 @@ Light::~Light () {
 void Light::GetToLight (Vector *hit, Vector *tolight) {
     Vector T = position_ - (*hit);
     T.CopyTo (tolight);
+}
+
+
+/*****************************
+ *     Utility functions     *
+ *****************************/
+double SolveQuadratic (double a, double b, double c, 
+        double mint, double maxt) {
+    /*
+     * Solve a quadratic equation for t.
+     *
+     * Since t is a scale in: P = O + t*D, return
+     * only the smaller t and within the limits of (mint, maxt).
+     *
+     * Otherwise return -1.
+     */
+    double delta, sqdelta, ta, tb, t;
+
+    delta = b * b - 4.0f * a * c;
+    if (delta < 0.0f) {
+        t = -1.0f;
+    }
+    else {
+        if (delta != 0.0f) {
+            sqdelta = sqrt (delta);
+            t  = 0.5f / a;
+            ta = (-b - sqdelta) * t;
+            tb = (-b + sqdelta) * t;
+            t  = (ta < tb) ? ta : tb;
+        }
+        else {
+            t = -b / (2.0f * a);
+        }
+        if ((t < mint) || (t > maxt)) {
+            t = -1.0f;
+        }
+    }
+    return t;
 }

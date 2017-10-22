@@ -29,9 +29,6 @@ Renderer::Renderer (World *world, unsigned int width,
     shadow_ = shadowfactor;
     model_ = lightmodel;
     nthreads_ = nthreads;
-
-    ratio_ = (double) width / (double) height;
-    perspective_ = ratio_ / (2.0f * tan (DEG_TO_RAD (fov_ / 2.0f)));
 }
 
 Renderer::~Renderer () {
@@ -45,6 +42,9 @@ void Renderer::Initialize () {
         buffer_ = new Buffer (width_, height_);
         buffer_->Allocate ();
     }
+
+    ratio_ = (double) width_ / (double) height_;
+    perspective_ = ratio_ / (2.0f * tan (DEG_TO_RAD (fov_ / 2.0f)));
 }
 
 void Renderer::SaveFrame (string *path) {
@@ -234,7 +234,6 @@ void Renderer::Render () {
         perspective_, &vw, &vh, &vo);
     camera->GetEye (&eye);
 
-
 #ifdef _OPENMP
     if (nthreads_ == 1) {
         /*
@@ -255,7 +254,7 @@ void Renderer::Render () {
          * NOTE: Methods that operate on actors (Solve, GetNormal, 
          * etc.) must be thread-safe.
          *
-         * If nthreads = 0, use as many threads as available.
+         * If nthreads=0, use as many threads as available.
          */
         unsigned int nlines, nfill, block;
 
