@@ -16,10 +16,9 @@
 
 #include <cstddef>  /* NULL pointer. */
 #include <iostream>
-#include <string>
 #include <fstream>
-
-#include "utils.hpp"
+#include <sstream>
+#include <string>
 
 
 /*
@@ -66,50 +65,47 @@ class Entry {
     unsigned int npar_, current_;
 
     /*
-     * Parameter keys (position, center, etc).
+     * keys: parameter keys (position, center, etc).
+     *
+     * type: type of each parameter (real or text).
+     *
+     * real: real numbers (components of 3D vectors, etc).
+     *
+     * text: strings (usually filenames of texture files).
      */
     std::string keys_[MAX_LINES];
-
-    /*
-     * Type of each parameter (real or text).
-     */
     ParserParameter_t type_[MAX_LINES];
 
-    /*
-     * Real numbers (components of 3D vectors, etc).
-     */
-    double real_[MAX_LINES][MAX_COMPONENTS];
-
-    /*
-     * Strings (usually filenames of texture files).
-     */
     std::string text_[MAX_LINES][MAX_COMPONENTS];
+    double real_[MAX_LINES][MAX_COMPONENTS];
 
 public:
     Entry (std::string *label);
     Entry ();
     ~Entry ();
 
-    void   CopyTo (Entry *other);
-    void   Print ();
-    void   Clear ();
-    bool   AddText (const std::string *key, const std::string *text, 
-        unsigned int ntext);
-    bool   AddReal (const std::string *key, double *real, unsigned int nreal);
-    void   SetLabel (std::string *label);
-    void   StartQuery ();
-    bool   Query (std::string *key, ParserParameter_t *type, double *real, 
-        std::string *text);
-    void   GetLabel (std::string *label);
+    void CopyTo (Entry *other);
+    void Print ();
+    void Clear ();
+    bool AddText (const std::string *key, const std::string *text, 
+            unsigned int ntext);
+    bool AddReal (const std::string *key, double *real, unsigned int nreal);
+    void SetLabel (std::string *label);
+    void StartQuery ();
+    bool Query (std::string *key, ParserParameter_t *type, double *real, 
+            std::string *text);
+    void GetLabel (std::string *label);
+    void SetNext (Entry *next);
     Entry *Next ();
-    void   SetNext (Entry *next);
 };
 
+
 class Parser {
-    std::string   filename_;
+    std::string  filename_;
+    ParserStatus_t  status_;
+
     Entry   *entries_;
     unsigned int  nentries_, current_;
-    ParserStatus_t  status_;
 
 public:
     Parser (std::string *filename);
@@ -121,32 +117,10 @@ public:
     bool Query (Entry *entry);
 
     ParserCode_t CreateEntry (std::string *id, std::string collect[][MAX_TOKENS],
-        unsigned int sizes[], unsigned int ncol, Entry *entry);
+            unsigned int sizes[], unsigned int ncol, Entry *entry);
     unsigned int AddEntry (Entry *temp);
     unsigned int PopEntry (Entry *entry);
     unsigned int NumberEntries ();
 };
-
-/*
- * Structures to store templates.
- */
-struct TemplateParameter {
-    char         id, replace;
-    std::string  label, defaults;
-    Bitmask_t    flags;
-};
-
-struct TemplateItem {
-    std::string  id;
-    const TemplateParameter *templ;
-    unsigned int ntempl;
-};
-
-/*
- * Global constants.
- */
-extern const TemplateItem kItems[];
-extern const unsigned int kSizeItems;
-
 
 #endif /* _PARSER_H */
