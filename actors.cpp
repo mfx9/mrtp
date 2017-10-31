@@ -7,16 +7,14 @@
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 #include "actors.hpp"
+
+static double SolveQuadratic (double a, double b, double c, 
+    double mint, double maxt);
 
 
 /*****************************
@@ -149,21 +147,17 @@ double Sphere::Solve (Vector *origin, Vector *direction,
     Vector T;
     T = (*origin) - center_;
 
-    double a, b, c, d;
+    double a, b, c;
     a  = (*direction) * (*direction);
     b  = 2.0f * (*direction * T);
     c  = (T * T) - (radius_ * radius_);
 
-    SOLVE_QUADRATIC (a, b, c, d, mind, maxd);
-    return d;
+    return SolveQuadratic (a, b, c, mind, maxd);
 }
 
 void Sphere::GetNormal (Vector *hit, Vector *normal) {
-    Vector T;
-
-    T = (*hit) - center_;
-    T.Normalize_InPlace ();
-    T.CopyTo (normal);
+    (*normal) = (*hit) - center_;
+    normal->Normalize_InPlace ();
 }
 
 void Sphere::DetermineColor (Vector *normal, Color *color) {
@@ -293,19 +287,19 @@ double Cylinder::Solve (Vector *O, Vector *D,
     /* 
      * Solving a quadratic equation for t. 
      */
-    double aa, bb, cc, t;
+    double aa, bb, cc, t, alpha;
     aa = 1.0f - (b * b);
     bb = 2.0f * (a - b * d);
     cc = -(d * d) - f;
 
-    SOLVE_QUADRATIC (aa, bb, cc, t, mind, maxd);
+    t = SolveQuadratic (aa, bb, cc, mind, maxd);
     if (t > 0.0f) {
-        alpha_ = d + t * b;
         /*
          * Check if the cylinder is finite.
          */
         if (span_ > 0.0f) {
-            if ((alpha_ < -span_) || (alpha_ > span_)) {
+            alpha = d + t * b;
+            if ((alpha < -span_) || (alpha > span_)) {
                 return -1.0f;
             }
         }
@@ -314,27 +308,37 @@ double Cylinder::Solve (Vector *O, Vector *D,
 }
 
 void Cylinder::GetNormal (Vector *hit, Vector *normal) {
-    Vector T, Q, N;
+    /*
+     * N = Hit - [B . (Hit - A)] * B
+     */
+    Vector T, Q;
+    double alpha;
 
-    B_.CopyTo (&T);
-    T.Scale_InPlace (alpha_);
+    T = (*hit) - A_;
+    alpha = B_ * T;
+
+    T = B_ * alpha;
     Q = A_ + T;
-    N = (*hit) - Q;
-    N.Normalize_InPlace ();
-    N.CopyTo (normal);
+    (*normal) = (*hit) - Q;
+    normal->Normalize_InPlace ();
 }
 
-void Cylinder::DetermineColor (Vector *normal, Color *color) {
+void Cylinder::DetermineColor (Vector *hit, Vector *normal, 
+        Color *color) {
     Color  *cp;
-    double  dot, fracx, fracy;
 
     if (texture_ == NULL) {
         cp = &color_;
     }
     else {
+        double  dot, fracx, fracy, alpha;
+        Vector  T;
+
+        T = (*hit) - A_;
+        alpha = B_ * T;
         dot   = texturex_ * (*normal);
         fracx = acos (dot) / M_PI;
-        fracy = alpha_ / (2.0f * M_PI * radius_);
+        fracy = alpha / (2.0f * M_PI * radius_);
         cp    = texture_->GetColor (fracx, fracy, 1.0f);
     }
     cp->CopyTo (color);
@@ -362,4 +366,42 @@ Light::~Light () {
 void Light::GetToLight (Vector *hit, Vector *tolight) {
     Vector T = position_ - (*hit);
     T.CopyTo (tolight);
+}
+
+
+/*****************************
+ *     Utility functions     *
+ *****************************/
+double SolveQuadratic (double a, double b, double c, 
+        double mint, double maxt) {
+    /*
+     * Solve a quadratic equation for t.
+     *
+     * Since t is a scale in: P = O + t*D, return
+     * only the smaller t and within the limits of (mint, maxt).
+     *
+     * Otherwise return -1.
+     */
+    double delta, sqdelta, ta, tb, t;
+
+    delta = b * b - 4.0f * a * c;
+    if (delta < 0.0f) {
+        t = -1.0f;
+    }
+    else {
+        if (delta != 0.0f) {
+            sqdelta = sqrt (delta);
+            t  = 0.5f / a;
+            ta = (-b - sqdelta) * t;
+            tb = (-b + sqdelta) * t;
+            t  = (ta < tb) ? ta : tb;
+        }
+        else {
+            t = -b / (2.0f * a);
+        }
+        if ((t < mint) || (t > maxt)) {
+            t = -1.0f;
+        }
+    }
+    return t;
 }

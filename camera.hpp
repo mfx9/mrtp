@@ -7,11 +7,6 @@
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -26,22 +21,18 @@
 /*
  * Macros.
  */
-#define DEG_TO_RAD(angle) (angle * M_PI / 180.0)
+#define DEG_TO_RAD(angle) (angle * M_PI / 180.0f)
 
 
 class Camera {
     Vector  eye_, lookat_;
-    double  width_, height_,
-        ratio_, perspective_, rotation_;
+    double rotation_;
 
 public:
-    Camera (Vector *origin, Vector *target,
-        unsigned int width, unsigned int height, 
-        double fov, double roll);
+    Camera (Vector *origin, Vector *target, double roll);
     ~Camera ();
-
-    void CalculateVectors (Vector *vw, Vector *vh, Vector *vo);
-    void GetDimensions (unsigned int *width, unsigned int *height);
+    void CalculateVectors (double width, double height, 
+            double perspective, Vector *vw, Vector *vh, Vector *vo);
     void GetEye (Vector *vector);
 };
 

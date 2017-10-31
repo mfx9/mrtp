@@ -7,11 +7,6 @@
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -21,6 +16,90 @@
 using namespace std;
 
 
+/*****************************
+ *      Local functions      *
+ *****************************/
+static bool TokenizeLine (const string *line, string *tokens,
+    unsigned int *ntokens, unsigned int maxtokens);
+static bool ConvertTokens (const string *tokens, unsigned int ntokens, 
+    double *out);
+static bool CheckFilename (string *in, string *ext, string *out);
+
+
+/*****************************
+ *           Tables          *
+ *****************************/
+struct TemplateParameter {
+    char       id, replace;
+    string     label, defaults;
+    Bitmask_t  flags;
+};
+
+struct TemplateItem {
+    string  id;
+    const TemplateParameter *templ;
+    unsigned int ntempl;
+};
+
+const TemplateParameter kCamera[] = {
+    { 1,  0,  "position",  "", BIT_VECTOR },
+    { 2,  0,  "target",  "", BIT_VECTOR },
+    { 3,  0,  "roll",  "0.0", BIT_REAL | BIT_OPTIONAL },
+    };
+
+const TemplateParameter kLight[] = {
+    { 1,  0,  "position",  "", BIT_VECTOR},
+    };
+
+const TemplateParameter kPlane[] = {
+    { 1,  0,  "center",  "", BIT_VECTOR },
+    { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
+    { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
+    { 4,  5,  "color",  "", BIT_VECTOR },
+    { 5,  4,  "texture",  "", BIT_TEXT },
+    };
+
+const TemplateParameter kSphere[] = {
+    { 1,  0, "position",  "", BIT_VECTOR },
+    { 2,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
+    { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
+    { 4,  5, "color",  "", BIT_VECTOR },
+    { 5,  4, "texture",  "", BIT_TEXT },
+    };
+
+const TemplateParameter kCylinder[] = {
+    { 1,  0, "center",  "", BIT_VECTOR },
+    { 2,  0, "direction",  "", BIT_VECTOR | BIT_CHECK_ZERO },
+    { 3,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
+    { 4,  0, "span",  "-1.0", BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
+    { 5,  6, "color",  "", BIT_VECTOR },
+    { 6,  5, "texture",  "", BIT_TEXT },
+    };
+
+const TemplateItem kItems[] = {
+    {"camera", kCamera,
+        (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])) },
+
+    {"light", kLight,
+        (unsigned int) (sizeof (kLight) / sizeof (kLight[0])) },
+
+    {"plane", kPlane,
+        (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])) },
+
+    {"sphere", kSphere,
+        (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])) },
+
+    {"cylinder", kCylinder,
+        (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])) },
+    };
+
+const unsigned int kSizeItems =
+        (unsigned int) sizeof (kItems) / sizeof (kItems[0]);
+
+
+/*****************************
+ *           Parser          *
+ *****************************/
 Parser::Parser (string *filename) {
     filename_ = (*filename);
     nentries_ = 0;
@@ -482,7 +561,7 @@ void Parser::Parse () {
 
 
 /*****************************
- *          Entries          *
+ *           Entry           *
  *****************************/
 Entry::Entry (string *label) {
     label_ = (*label);
@@ -639,59 +718,106 @@ bool Entry::Query (string *key, ParserParameter_t *type, double *reals,
 
 
 /*****************************
- *           Tables          *
+ *      Local functions      *
  *****************************/
-const TemplateParameter kCamera[] = {
-    { 1,  0,  "position",  "", BIT_VECTOR },
-    { 2,  0,  "target",  "", BIT_VECTOR },
-    { 3,  0,  "roll",  "0.0", BIT_REAL | BIT_OPTIONAL },
-    };
+bool TokenizeLine (const string *line, string *tokens,
+            unsigned int *ntokens, unsigned int maxtokens) {
+    /*
+     * Split a line to tokens.
+     *
+     * Remove redundant blank characters and comments.
+     */
+    char    c, pc;
+    string  accu;
+    unsigned int i, ti, len;
 
-const TemplateParameter kLight[] = {
-    { 1,  0,  "position",  "", BIT_VECTOR},
-    };
+    ti  = 0;
+    len = line->length ();
 
-const TemplateParameter kPlane[] = {
-    { 1,  0,  "center",  "", BIT_VECTOR },
-    { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
-    { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 4,  5,  "color",  "", BIT_VECTOR },
-    { 5,  4,  "texture",  "", BIT_TEXT },
-    };
+    if (len > 0) {
+        accu = "";
+        pc   = line->at (0);
+        for (i = 0; i < len; i++) {
+            c = line->at (i);
+            if (c == '#') {
+                /* Open a comment. */
+                break;
+            }
+            if ((c != ' ') && (c != '\t')) {
+                /* Not a white character. */
+                accu += c;
+            }
+            if (((c == ' ') || (c == '\t')) && 
+                    ((pc != ' ') && (pc != '\t')) ||
+                    (i == (len - 1))) {
+                /* Current character is white, previous character 
+                        is not. */
+                if (ti == maxtokens) {
+                    return false;
+                }
+                tokens[ti++] = accu;
+                accu = "";
+            }
+            pc = c;
+        }
+        if (accu != "") {
+            tokens[ti++] = accu;
+        }
+    }
+    (*ntokens) = ti;
+    return true;
+}
 
-const TemplateParameter kSphere[] = {
-    { 1,  0, "position",  "", BIT_VECTOR },
-    { 2,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
-    { 4,  5, "color",  "", BIT_VECTOR },
-    { 5,  4, "texture",  "", BIT_TEXT },
-    };
+bool ConvertTokens (const string *tokens, unsigned int ntokens, 
+        double *out) {
+    /*
+     * Convert tokens to real numbers.
+     */
+    double        test;
+    unsigned int  i;
+    stringstream  convert;
 
-const TemplateParameter kCylinder[] = {
-    { 1,  0, "center",  "", BIT_VECTOR },
-    { 2,  0, "direction",  "", BIT_VECTOR | BIT_CHECK_ZERO },
-    { 3,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 4,  0, "span",  "-1.0", BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
-    { 5,  6, "color",  "", BIT_VECTOR },
-    { 6,  5, "texture",  "", BIT_TEXT },
-    };
+    for (i = 0; i < ntokens; i++) {
+        convert.str (tokens[i]);
+        convert >> test;
+        if (!convert) {
+            return false;
+        }
+        out[i] = test;
+        convert.clear ();
+    }
+    return true;
+}
 
-const TemplateItem kItems[] = {
-    {"camera", kCamera,
-        (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])) },
+bool CheckFilename (string *in, string *out, string *ext) {
+    /*
+     * Check for a valid filename.
+     */
+    string filename = (*in);
+    unsigned int position = filename.length () - 1;
 
-    {"light", kLight,
-        (unsigned int) (sizeof (kLight) / sizeof (kLight[0])) },
+    if ((filename.at (0) != '"') || (filename.at (position) != '"')) {
+        return false;
+    }
+    string trim = filename.substr (1, position - 1);
+    (*out) = trim;
+    /*
+     * Check for a valid extension.
+     */
+    if (ext != NULL) {
+        string extension = trim.substr (position - 4, 3);
+        if (extension != (*ext)) {
+            return false;
+        }
+    }
+    /*
+     * Check if the file exists.
+     */
+    const char *text = trim.c_str ();
+    ifstream file (text);
 
-    {"plane", kPlane,
-        (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])) },
-
-    {"sphere", kSphere,
-        (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])) },
-
-    {"cylinder", kCylinder,
-        (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])) },
-    };
-
-const unsigned int kSizeItems =
-        (unsigned int) sizeof (kItems) / sizeof (kItems[0]);
+    if (!file.good ()) {
+        return false;
+    }
+    return true;
+}

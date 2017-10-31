@@ -7,11 +7,6 @@
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -24,16 +19,16 @@ using namespace std;
 #include <string>
 #include <ctime>
 
-#include "world.hpp"
 #include "parser.hpp"
-
+#include "world.hpp"
+#include "renderer.hpp"
 
 /*
  * Default settings.
  */
 #define DEFAULT_WIDTH     640
 #define DEFAULT_HEIGHT    480
-#define DEFAULT_FOV        70.0
+#define DEFAULT_FOV        93.0
 #define DEFAULT_DISTANCE   60.0
 #define DEFAULT_SHADOW      0.25
 #define DEFAULT_MODEL     lightQuadratic
@@ -41,12 +36,18 @@ using namespace std;
 /*
  * Program limits.
  */
-#define MIN_FOV        50.0
-#define MAX_FOV       170.0
-#define MIN_WIDTH   (DEFAULT_WIDTH  /  2)
-#define MAX_WIDTH   (DEFAULT_WIDTH  * 10)
-#define MIN_HEIGHT  (DEFAULT_HEIGHT /  2)
-#define MAX_HEIGHT  (DEFAULT_HEIGHT * 10)
+#define MIN_WIDTH     (DEFAULT_WIDTH  /  2)
+#define MAX_WIDTH     (DEFAULT_WIDTH  * 10)
+#define MIN_HEIGHT    (DEFAULT_HEIGHT /  2)
+#define MAX_HEIGHT    (DEFAULT_HEIGHT * 10)
+#define MIN_FOV          50.0
+#define MAX_FOV         170.0
+
+#ifdef _OPENMP
+    #define DEFAULT_THREADS   1
+    #define MIN_THREADS       0
+    #define MAX_THREADS      64
+#endif /* _OPENMP */
 
 /*
  * Exit codes.
@@ -61,10 +62,6 @@ void HelpScreen (string program) {
             "      Print this help screen.\n\n"
             "    -q, --quiet\n"
             "      Supress all messages, except errors.\n\n"
-            /*
-            "    -v, --version\n"
-            "      Version of the program.\n\n"
-            */
             "    -r, --resolution\n"
             "      Resolution of the rendered image, for\n"
             "      example 640x480 (default), 1024x768, etc.\n\n"
@@ -72,7 +69,7 @@ void HelpScreen (string program) {
             "      Filename for the rendered image, in PNG\n"
             "      format (default is \"output.png\").\n\n"
             "    -f, --fov\n"
-            "      Field of vision, in degrees (default is 70).\n\n"
+            "      Field of vision, in degrees (default is 93).\n\n"
             "    -d, --distance\n"
             "      Distance to quench light (default is 60).\n\n"
             "    -m, --model\n"
@@ -80,6 +77,11 @@ void HelpScreen (string program) {
             "      default is quadratic).\n\n"
             "    -s, --shadow\n"
             "      Shadow factor (default is 0.25).\n\n"
+#ifdef _OPENMP
+            "    -t, --threads\n"
+            "      Number of parallel threads, for example 0 (auto),\n"
+            "      1 (serial run, default), 2, 4, etc.\n\n"
+#endif /* _OPENMP */
             "Example:\n";
     cout << "    " << program << " -r 1024x768 -o test.png test.inp" << endl;
 }
@@ -103,6 +105,9 @@ int main (int argc, char **argv) {
     LightModel_t model    =  DEFAULT_MODEL;
     unsigned int width    =  DEFAULT_WIDTH;
     unsigned int height   =  DEFAULT_HEIGHT;
+#ifdef _OPENMP
+    unsigned int threads  =  DEFAULT_THREADS;
+#endif /* _OPENMP */
 
 
     if (argc < 2) {
@@ -280,6 +285,25 @@ int main (int argc, char **argv) {
             }
         }
 
+#ifdef _OPENMP
+        /*
+         * Set the number of threads.
+         */
+        else if ((text == "-t") || (text == "--threads")) {
+            if (i == (argc - 1)) {
+                cerr << "Number of threads not given." << endl;
+                return exitFail;
+            }
+            next = argv[++i];
+            convert.str (next);
+            convert >> threads;
+            if (!convert || (threads < MIN_THREADS) || (threads > MAX_THREADS)) {
+                cerr << "Invalid number of threads." << endl;
+                return exitFail;
+            }
+        }
+#endif /* _OPENMP */
+
         /*
          * Get the input file.
          */
@@ -317,18 +341,32 @@ int main (int argc, char **argv) {
     }
     if (!quiet) {
         i = parser.NumberEntries ();
-        cout << "Parsing complete, created " << i << 
+        cout << "Parsing OK, created " << i << 
             " entries." << endl;
     }
 
     /*
      * Build a world.
      */
-    World world (&parser, width, height, fov, distance, 
-        shadow, model);
+    World world (&parser);
     world.Initialize ();
     if (!quiet) {
-        cout << "Built world." << endl;
+        cout << "Building world OK." << endl;
+    }
+
+    /*
+     * Initialize a renderer.
+     */
+#ifdef _OPENMP
+    Renderer renderer (&world, width, height, fov, distance, 
+        shadow, model, threads);
+#else
+    Renderer renderer (&world, width, height, fov, distance, 
+        shadow, model, 1);
+#endif /* _OPENMP */
+    renderer.Initialize ();
+    if (!quiet) {
+        cout << "Setting up renderer OK." << endl;
     }
 
     /*
@@ -340,18 +378,26 @@ int main (int argc, char **argv) {
     if (!quiet) {
         cout << "Rendering..." << endl;
     }
-    world.Render ();
+    renderer.Render ();
     timeStop = clock ();
 
     /*
      * Finalize.
      */
     if (!quiet) {
-        cout << "OK. Elapsed time: " << setprecision (2) <<
-            ((timeStop - timeStart) / double (CLOCKS_PER_SEC)) << 
-            " sec" << endl;
+        double timeUsed;
+
+        timeUsed = double (timeStop - timeStart) / CLOCKS_PER_SEC;
+#ifdef _OPENMP
+        if (threads > 1) {
+            /* Correct the CPU time for the number of threads. */
+            timeUsed /= double (threads);
+        }
+#endif /* _OPENMP */
+        cout << "Done. Elapsed time: " << setprecision (2) << 
+            timeUsed << " sec" << endl;
     }
-    world.WritePNG (&output);
+    renderer.SaveFrame (&output);
 
     return exitOK;
 }
