@@ -13,22 +13,33 @@
  */
 #include "actors.hpp"
 
-static double SolveQuadratic (double a, double b, double c, 
-    double mint, double maxt);
+/**** Local functions. ****/
+static double SolveQuadratic (double a, double b, double c, double mint, 
+                              double maxt);
 
-
-/*****************************
- *          Planes           *
- *****************************/
-Plane::Plane () {
+/**** Base class. ****/
+Actor::Actor () {
     next_ = NULL;
+    texture_ = NULL;
+    color_.Zero ();
 }
 
-Plane::~Plane () {
+Actor::~Actor () {
 }
+
+Actor *Actor::Next () {
+    return next_;
+}
+
+void Actor::SetNext (Actor *next) {
+    next_ = next;
+}
+
+
+/**** Planes. ****/
 
 Plane::Plane (Vector *center, Vector *normal, double scale, 
-        Color *color, Texture *texture) {
+              Color *color, Texture *texture) {
     center->CopyTo (&center_);
     texture_ = texture;
     scale_   = scale;
@@ -47,15 +58,16 @@ Plane::Plane (Vector *center, Vector *normal, double scale,
         Vector T;
         normal_.GenerateUnitVector (&T);
         
-        texturex_ = T ^ normal_;
-        texturex_.Normalize_InPlace ();
+        tx_ = T ^ normal_;
+        tx_.Normalize_InPlace ();
         
-        texturey_ = normal_ ^ texturex_;
-        texturey_.Normalize_InPlace ();
+        ty_ = normal_ ^ tx_;
+        ty_.Normalize_InPlace ();
     }
 }
 
-void Plane::DetermineColor (Vector *hit, Color *color) {
+void Plane::DetermineColor (Vector *hit, Vector *normal, 
+                            Color *color) {
     Vector  V;
     double  vx, vy;
     Color  *cp;
@@ -69,15 +81,15 @@ void Plane::DetermineColor (Vector *hit, Color *color) {
          * Calculate components of V (dot products).
          * 
          */
-        vx = V * texturex_;
-        vy = V * texturey_;
+        vx = V * tx_;
+        vy = V * ty_;
         cp = texture_->GetColor (vx, vy, scale_);
     }
     cp->CopyTo (color);
 }
 
 double Plane::Solve (Vector *origin, Vector *direction, 
-        double mind, double maxd) {
+                     double mind, double maxd) {
     double bar, d = -1.0f;
     Vector T;
 
@@ -92,33 +104,17 @@ double Plane::Solve (Vector *origin, Vector *direction,
     return d;
 }
 
-void Plane::GetNormal (Vector *normal) {
+void Plane::GetNormal (Vector *hit, Vector *normal) {
     normal_.CopyTo (normal);
 }
 
-Plane *Plane::Next () {
-    return next_;
-}
 
-void Plane::SetNext (Plane *plane) {
-    next_ = plane;
-}
-
-
-/*****************************
- *          Spheres          *
- *****************************/
-Sphere::Sphere () {
-    next_ = NULL;
-}
-
-Sphere::~Sphere () {
-}
+/**** Spheres. ****/
 
 Sphere::Sphere (Vector *center, double radius, Vector *axis, 
-        Color *color, Texture *texture) {
+                Color *color, Texture *texture) {
     center->CopyTo (&center_);
-    radius_  = radius;
+    R_       = radius;
     texture_ = texture;
     next_    = NULL;
     /*
@@ -129,28 +125,28 @@ Sphere::Sphere (Vector *center, double radius, Vector *axis,
         color->CopyTo (&color_);
     }
     else {
-        axis->CopyTo (&texturey_);
-        texturey_.Normalize_InPlace ();
+        axis->CopyTo (&ty_);
+        ty_.Normalize_InPlace ();
     
         Vector T;
-        texturey_.GenerateUnitVector (&T);
-        texturex_ = T ^ texturey_;
-        texturex_.Normalize_InPlace ();
+        ty_.GenerateUnitVector (&T);
+        tx_ = T ^ ty_;
+        tx_.Normalize_InPlace ();
     
-        texturez_ = texturey_ ^ texturex_;
-        texturez_.Normalize_InPlace ();
+        tz_ = ty_ ^ tx_;
+        tz_.Normalize_InPlace ();
     }
 }
 
 double Sphere::Solve (Vector *origin, Vector *direction, 
-        double mind, double maxd) {
+                      double mind, double maxd) {
     Vector T;
     T = (*origin) - center_;
 
     double a, b, c;
     a  = (*direction) * (*direction);
     b  = 2.0f * (*direction * T);
-    c  = (T * T) - (radius_ * radius_);
+    c  = (T * T) - (R_ * R_);
 
     return SolveQuadratic (a, b, c, mind, maxd);
 }
@@ -160,7 +156,8 @@ void Sphere::GetNormal (Vector *hit, Vector *normal) {
     normal->Normalize_InPlace ();
 }
 
-void Sphere::DetermineColor (Vector *normal, Color *color) {
+void Sphere::DetermineColor (Vector *hit, Vector *normal, 
+                             Color *color) {
     Color  *cp;
     double  phi, theta, dot, 
         fracx, fracy;
@@ -174,13 +171,13 @@ void Sphere::DetermineColor (Vector *normal, Color *color) {
          * https://www.cs.unc.edu/~rademach/xroads-RT/RTarticle.html
          *
          */
-        dot   = texturey_ * (*normal);
+        dot   = ty_ * (*normal);
         phi   = acos (-dot);
         fracy = phi / M_PI;
         
-        dot   = (*normal) * texturex_;
+        dot   = (*normal) * tx_;
         theta = acos (dot / sin (phi)) / (2.0f * M_PI);
-        dot   = texturez_ * (*normal);
+        dot   = tz_ * (*normal);
         if (dot > 0.0f) {
             fracx = theta;
         }
@@ -192,32 +189,17 @@ void Sphere::DetermineColor (Vector *normal, Color *color) {
     cp->CopyTo (color);
 }
 
-Sphere *Sphere::Next () {
-    return next_;
-}
 
-void Sphere::SetNext (Sphere *sphere) {
-    next_ = sphere;
-}
-
-
-/*****************************
- *         Cylinders         *
- *****************************/
-Cylinder::Cylinder () {
-    next_ = NULL;
-}
-
-Cylinder::~Cylinder () {
-}
+/**** Cylinders. ****/
 
 Cylinder::Cylinder (Vector *center, Vector *direction, 
-        double radius, double span, Color *color, Texture *texture) {
+                    double radius, double span, Color *color, 
+                    Texture *texture) {
     /*
      * Radius, origin, etc.
      */
     center->CopyTo (&A_);
-    radius_  = radius;
+    R_       = radius;
     span_    = span;
     texture_ = texture;
     next_    = NULL;
@@ -236,15 +218,15 @@ Cylinder::Cylinder (Vector *center, Vector *direction,
         color->CopyTo (&color_);
     }
     else {
-        B_.GenerateUnitVector (&texturey_);
+        B_.GenerateUnitVector (&ty_);
 
-        texturex_ = texturey_ ^ B_;
-        texturex_.Normalize_InPlace ();
+        tx_ = ty_ ^ B_;
+        tx_.Normalize_InPlace ();
     }
 }
 
 double Cylinder::Solve (Vector *O, Vector *D,
-        double mind, double maxd) {
+                        double mind, double maxd) {
     /*
      * Capital letters are vectors.
      *   A       Origin    of cylinder
@@ -282,7 +264,7 @@ double Cylinder::Solve (Vector *O, Vector *D,
     a  = T  * (*D);
     b  = B_ * (*D);
     d  = T  * B_;
-    f  = (radius_ * radius_) - (T * T);
+    f  = (R_ * R_) - (T * T);
 
     /* 
      * Solving a quadratic equation for t. 
@@ -324,7 +306,7 @@ void Cylinder::GetNormal (Vector *hit, Vector *normal) {
 }
 
 void Cylinder::DetermineColor (Vector *hit, Vector *normal, 
-        Color *color) {
+                               Color *color) {
     Color  *cp;
 
     if (texture_ == NULL) {
@@ -336,26 +318,17 @@ void Cylinder::DetermineColor (Vector *hit, Vector *normal,
 
         T = (*hit) - A_;
         alpha = B_ * T;
-        dot   = texturex_ * (*normal);
+        dot   = tx_ * (*normal);
         fracx = acos (dot) / M_PI;
-        fracy = alpha / (2.0f * M_PI * radius_);
+        fracy = alpha / (2.0f * M_PI * R_);
         cp    = texture_->GetColor (fracx, fracy, 1.0f);
     }
     cp->CopyTo (color);
 }
 
-Cylinder *Cylinder::Next () {
-    return next_;
-}
 
-void Cylinder::SetNext (Cylinder *cylinder) {
-    next_ = cylinder;
-}
+/**** Light. ****/
 
-
-/*****************************
- *           Light           *
- *****************************/
 Light::Light (Vector *origin) {
     origin->CopyTo (&position_);
 }
@@ -369,11 +342,10 @@ void Light::GetToLight (Vector *hit, Vector *tolight) {
 }
 
 
-/*****************************
- *     Utility functions     *
- *****************************/
-double SolveQuadratic (double a, double b, double c, 
-        double mint, double maxt) {
+/**** Utility functions. ****/
+
+double SolveQuadratic (double a, double b, double c, double mint, 
+                       double maxt) {
     /*
      * Solve a quadratic equation for t.
      *

@@ -51,17 +51,51 @@ void Renderer::SaveFrame (string *path) {
     buffer_->WriteToPNG (path);
 }
 
+bool Renderer::SolveShadows (Vector *origin, Vector *direction, double maxdist, 
+                             Actor *actor, Actor **hitactor) {
+    double d;
+    bool   hit = false;
+
+    while (actor != NULL) {
+        d = actor->Solve (origin, direction, 0.0f, maxdist);
+        if (d > 0.0f) {
+            (*hitactor) = actor;
+            hit = true;
+            break;
+        }
+        actor = actor->Next ();
+    }
+    return hit;
+}
+
+bool Renderer::SolveHits (Vector *origin, Vector *direction, Actor *actor, 
+                          Actor **hitactor, double *currd) {
+    double d;
+    bool   hit = false;
+
+    while (actor != NULL) {
+        d = actor->Solve (origin, direction, 0.0f, maxdist_);
+        if ((d > 0.0f) && (d < (*currd))) {
+            (*currd)    = d;
+            (*hitactor) = actor;
+            hit         = true;
+        }
+        actor = actor->Next ();
+    }
+    return hit;
+}
+
 void Renderer::TraceRay (Vector *origin, Vector *direction, 
-        Color *color) {
+                         Color *color) {
     Light     *light;
-    Plane     *planes, *plane, *hitplane;
-    Sphere    *spheres, *sphere, *hitsphere;
-    Cylinder  *cylinders, *cylinder, *hitcylinder;
-    double     dist, currd, dot, raylen, fade;
-    HitCode_t  hit;
+    Plane     *planes;
+    Sphere    *spheres;
+    Cylinder  *cylinders;
+    Actor     *hitactor;
+    double     currd, dot, raylen, fade;
     Vector     inter, tl, normal;
     Color      objcol;
-    bool       isshadow;
+    bool       hitplane, hitsphere, hitcylinder, hitshadow;
 
     /*
      * Initialize.
@@ -71,71 +105,21 @@ void Renderer::TraceRay (Vector *origin, Vector *direction,
 
     color->Zero ();
     currd  = maxdist_;
-    hit    = hitNull;
-
-    /*
-     * Search for planes.
+    /* 
+     * Find intersections with actors. 
      */
-    plane    = planes;
-    hitplane = NULL;
-    while (plane != NULL) {
-        dist = plane->Solve (origin, direction, 0.0f, maxdist_);
-        if ((dist > 0.0f) && (dist < currd)) {
-            currd    = dist;
-            hitplane = plane;
-            hit      = hitPlane;
-        }
-        plane = plane->Next ();
-    }
+    hitplane = SolveHits (origin, direction, planes, &hitactor, &currd);
+    hitsphere = SolveHits (origin, direction, spheres, &hitactor, &currd);
+    hitcylinder = SolveHits (origin, direction, cylinders, &hitactor, &currd);
 
-    /*
-     * Search for spheres.
-     */
-    sphere    = spheres;
-    hitsphere = NULL;
-    while (sphere != NULL) {
-        dist  = sphere->Solve (origin, direction, 0.0f, maxdist_);
-        if ((dist > 0.0f) && (dist < currd)) {
-            currd     = dist;
-            hitsphere = sphere;
-            hit       = hitSphere;
-        }
-        sphere = sphere->Next ();
-    }
-
-    /*
-     * Search for cylinders. 
-     */
-    cylinder    = cylinders;
-    hitcylinder = NULL;
-    while (cylinder != NULL) {
-        dist  = cylinder->Solve (origin, direction, 0.0f, maxdist_);
-        if ((dist > 0.0f) && (dist < currd)) {
-            currd       = dist;
-            hitcylinder = cylinder;
-            hit         = hitCylinder;
-        }
-        cylinder = cylinder->Next ();
-    }
-
-    if (hit != hitNull) {
+    if (hitplane || hitsphere || hitcylinder) {
         /*
          * Found a ray/object intersection.
          */
         inter = ((*direction) * currd) + (*origin);
 
-        if (hit == hitPlane) {
-            hitplane->GetNormal (&normal);
-            hitplane->DetermineColor (&inter, &objcol);
-        }
-        else if (hit == hitSphere) {
-            hitsphere->GetNormal (&inter, &normal);
-            hitsphere->DetermineColor (&normal, &objcol);
-        }
-        else if (hit == hitCylinder) {
-            hitcylinder->GetNormal (&inter, &normal);
-            hitcylinder->DetermineColor (&inter, &normal, &objcol);
-        }
+        hitactor->GetNormal (&inter, &normal);
+        hitactor->DetermineColor (&inter, &normal, &objcol);
         /*
          * Find a vector between the intersection
          *   and light.
@@ -151,33 +135,12 @@ void Renderer::TraceRay (Vector *origin, Vector *direction,
          * spheres and cylinder.
          *
          */
-        isshadow = false;
-        sphere   = spheres;
-        while (sphere != NULL) {
-            if (sphere != hitsphere) {
-                dist = sphere->Solve (&inter, &tl, 0.0f, raylen);
-                if (dist > 0.0f) {
-                    isshadow = true;
-                    break;
-                }
-            }
-            sphere = sphere->Next ();
-        }
-        if (!isshadow) {
-            cylinder   = cylinders;
-            while (cylinder != NULL) {
-                if (cylinder != hitcylinder) {
-                    dist = cylinder->Solve (&inter, &tl, 0.0f, raylen);
-                    if (dist > 0.0f) {
-                        isshadow = true;
-                        break;
-                    }
-                }
-                cylinder = cylinder->Next ();
-            }
+        hitshadow = SolveShadows (&inter, &tl, raylen, spheres, &hitactor);
+        if (!hitshadow) {
+            hitshadow = SolveShadows (&inter, &tl, raylen, cylinders, &hitactor);
         }
 
-        if (isshadow) {
+        if (hitshadow) {
             dot *= shadow_;
         }
         /*

@@ -210,7 +210,7 @@ World::~World () {
 }
 
 unsigned int World::PopPlane () {
-    Plane *prev, *next, *last;
+    Actor *prev, *next, *last;
 
     if (nplanes_ > 0) {
         last = planes_;
@@ -229,7 +229,7 @@ unsigned int World::PopPlane () {
 }
 
 unsigned int World::PopSphere () {
-    Sphere *prev, *next, *last;
+    Actor *prev, *next, *last;
 
     if (nspheres_ > 0) {
         last = spheres_;
@@ -248,7 +248,7 @@ unsigned int World::PopSphere () {
 }
 
 unsigned int World::PopCylinder () {
-    Cylinder *prev, *next, *last;
+    Actor *prev, *next, *last;
 
     if (ncylinders_ > 0) {
         last = cylinders_;
@@ -286,8 +286,9 @@ unsigned int World::PopTexture () {
 }
 
 void World::AddPlane (Vector *center, Vector *normal, 
-        double texscale, Color *color, Texture *texture) {
-    Plane *next, *last, *plane;
+                      double texscale, Color *color, Texture *texture) {
+    Actor *next, *last;
+    Plane *plane;
 
     plane = new Plane (center, normal, texscale, 
         color, texture);
@@ -306,8 +307,9 @@ void World::AddPlane (Vector *center, Vector *normal,
 }
 
 void World::AddSphere (Vector *center, double radius,
-        Vector *axis, Color *color, Texture *texture) {
-    Sphere *next, *last, *sphere;
+                       Vector *axis, Color *color, Texture *texture) {
+    Actor  *next, *last;
+    Sphere *sphere;
 
     sphere = new Sphere (center, radius, axis, 
         color, texture);
@@ -326,8 +328,10 @@ void World::AddSphere (Vector *center, double radius,
 }
 
 void World::AddCylinder (Vector *center, Vector *direction, 
-        double radius, double span, Color *color, Texture *texture) {
-    Cylinder *next, *last, *cylinder;
+                         double radius, double span, Color *color, 
+                         Texture *texture) {
+    Actor    *next, *last;
+    Cylinder *cylinder;
 
     cylinder = new Cylinder (center, direction, radius,
         span, color, texture);

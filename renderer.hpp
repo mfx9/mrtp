@@ -34,10 +34,6 @@
  */
 #define DEG_TO_RAD(angle) (angle * M_PI / 180.0f)
 
-
-enum HitCode_t {hitNull, hitPlane, hitSphere, 
-    hitCylinder};
-
 enum LightModel_t {lightNone, lightLinear, lightQuadratic};
 
 
@@ -63,20 +59,28 @@ class Renderer {
     double  fov_, ratio_, perspective_;
     unsigned int width_, height_, nthreads_;
 
+    /* 
+     * Private methods. 
+     */
+    bool SolveShadows (Vector *origin, Vector *direction, double maxdist, 
+                       Actor *actor, Actor **hitactor);
+    bool SolveHits (Vector *origin, Vector *direction, Actor *actor, 
+                    Actor **hitactor, double *currd);
+    void TraceRay (Vector *origin, Vector *direction,
+                   Color *color);
+    void RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
+                      unsigned int block, unsigned int nlines);
+
 public:
     Renderer (World *world, unsigned int width,
-        unsigned int height, double fov,
-        double distance, double shadowfactor, 
-        LightModel_t lightmodel, unsigned int nthreads);
+              unsigned int height, double fov,
+              double distance, double shadowfactor, 
+              LightModel_t lightmodel, unsigned int nthreads);
     ~Renderer ();
 
-    void Initialize ();
     void Render ();
+    void Initialize ();
     void SaveFrame (std::string *path);
-    void TraceRay (Vector *origin, Vector *direction,
-        Color *color);
-    void RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
-            unsigned int block, unsigned int nlines);
 };
 
 #endif /* _RENDERER_H */
