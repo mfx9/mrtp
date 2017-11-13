@@ -53,12 +53,12 @@ void Renderer::SaveFrame (string *path) {
 
 bool Renderer::SolveShadows (Vector *origin, Vector *direction, double maxdist, 
                              Actor *actor, Actor **hitactor) {
-    double d;
+    double distance;
     bool   hit = false;
 
     while (actor != NULL) {
-        d = actor->Solve (origin, direction, 0.0f, maxdist);
-        if (d > 0.0f) {
+        distance = actor->Solve (origin, direction, 0.0f, maxdist);
+        if (distance > 0.0f) {
             (*hitactor) = actor;
             hit = true;
             break;
@@ -70,13 +70,13 @@ bool Renderer::SolveShadows (Vector *origin, Vector *direction, double maxdist,
 
 bool Renderer::SolveHits (Vector *origin, Vector *direction, Actor *actor, 
                           Actor **hitactor, double *currd) {
-    double d;
+    double distance;
     bool   hit = false;
 
     while (actor != NULL) {
-        d = actor->Solve (origin, direction, 0.0f, maxdist_);
-        if ((d > 0.0f) && (d < (*currd))) {
-            (*currd)    = d;
+        distance = actor->Solve (origin, direction, 0.0f, maxdist_);
+        if ((distance > 0.0f) && (distance < (*currd))) {
+            (*currd)    = distance;
             (*hitactor) = actor;
             hit         = true;
         }
@@ -126,7 +126,7 @@ void Renderer::TraceRay (Vector *origin, Vector *direction,
          *
          */
         light->GetToLight (&inter, &tl);
-        raylen = tl.Len ();
+        raylen = tl.Magnitude ();
         tl.Normalize_InPlace ();
         dot = normal * tl;
 

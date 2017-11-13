@@ -23,43 +23,55 @@ Vector::Vector () {
     z_ = 0.0f;
 }
 
-Vector::Vector (double x, double y, 
-        double z) {
+Vector::Vector (const double x, const double y, 
+                const double z) {
     x_ = x;
     y_ = y;
     z_ = z;
 }
 
-Vector::Vector (double *coor) {
-    x_ = coor[0];
-    y_ = coor[1];
-    z_ = coor[2];
+Vector::Vector (const double *flat) {
+    x_ = flat[0];
+    y_ = flat[1];
+    z_ = flat[2];
 }
 
-void Vector::Set (double x, double y, 
-        double z) {
+void Vector::Set (const double x, const double y, 
+                  const double z) {
     x_ = x;
     y_ = y;
     z_ = z;
 }
 
-void Vector::Set (double *coor) {
-    x_ = coor[0];
-    y_ = coor[1];
-    z_ = coor[2];
+void Vector::Set (const double *flat) {
+    x_ = flat[0];
+    y_ = flat[1];
+    z_ = flat[2];
 }
 
-void Vector::CopyTo (Vector *other) {
+void Vector::Get (double *x, double *y, double *z) const {
+    (*x) = x_;
+    (*y) = y_;
+    (*z) = z_;
+}
+
+void Vector::Get (double *flat) const {
+    flat[0] = x_;
+    flat[1] = y_;
+    flat[2] = z_;
+}
+
+void Vector::CopyTo (Vector *other) const {
     other->x_ = x_;
     other->y_ = y_;
     other->z_ = z_;
 }
 
-double Vector::Len () {
+double Vector::Magnitude () const {
     return sqrt (x_ * x_ + y_ * y_ + z_ * z_);
 }
 
-void Vector::Scale_InPlace (double scale) {
+void Vector::Scale_InPlace (const double scale) {
     x_ *= scale;
     y_ *= scale;
     z_ *= scale;
@@ -82,17 +94,18 @@ void Vector::Normalize_InPlace () {
     }
 }
 
-Vector Vector::operator+ (Vector &other) {
+Vector Vector::operator+ (const Vector &other) const {
     Vector T (x_ + other.x_, y_ + other.y_, z_ + other.z_);
     return T;
 }
 
-Vector Vector::operator- (Vector &other) {
+Vector Vector::operator- (const Vector &other) const {
     Vector T (x_ - other.x_, y_ - other.y_, z_ - other.z_);
     return T;
 }
 
-Vector Vector::operator^ (Vector &other) {
+Vector Vector::operator^ (const Vector &other) const {
+    /* Cross product. */
     Vector T (
         y_ * other.z_ - z_ * other.y_,
         z_ * other.x_ - x_ * other.z_,
@@ -100,16 +113,18 @@ Vector Vector::operator^ (Vector &other) {
     return T;
 }
 
-double Vector::operator* (Vector &other) {
+double Vector::operator* (const Vector &other) const {
+    /* Dot product. */
     return (x_ * other.x_ + y_ * other.y_ + z_ * other.z_);
 }
 
-Vector Vector::operator* (double scale) {
+Vector Vector::operator* (const double scale) const {
+    /* Scaling. */
     Vector T (x_ * scale, y_ * scale, z_ * scale);
     return T;
 }
 
-void Vector::GenerateUnitVector (Vector *other) {
+Vector Vector::GenerateUnitVector () const {
     /*
      * Method finds the smallest component of a vector
      * and generates an "associated" unit vector.
@@ -118,26 +133,39 @@ void Vector::GenerateUnitVector (Vector *other) {
      * vector should give a non-zero vector.
      *
      */
-    double x = ABS (x_), y = ABS (y_), 
-        z = ABS (z_);
-    other->Set (0.0f, 0.0f, 1.0f);
+    Vector T (0.0f, 0.0f, 1.0f);
+
+    double x = (x_ < 0.0f) ? -x_ : x_;
+    double y = (y_ < 0.0f) ? -y_ : y_;
+    double z = (z_ < 0.0f) ? -z_ : z_;
 
     if (x < y) {
         if (x < z) {
-            other->Set (1.0f, 0.0f, 0.0f);
+            T.Set (1.0f, 0.0f, 0.0f);
         }
     }
     else {  /* if ( x >= y) */
         if (y < z) {
-            other->Set (0.0f, 1.0f, 0.0f);
+            T.Set (0.0f, 1.0f, 0.0f);
         }
     }
+    return T;
+}
+
+Vector Vector::Reflect (const Vector *normal) const {
+    /*
+     * r' = r - (2 * (r . N)) * N
+     */
+    Vector T;
+
+    T = (*this) - ((*normal) * (2.0f * ((*this) * (*normal))));
+    return T;
 }
 
 /*
 #define PRINT_PRECISION  4
 
-void Vector::Print () {
+void Vector::Print () const {
     cout << std::fixed << std::showpoint;
     cout << std::setprecision (PRINT_PRECISION);
     cout << "X: " << x_

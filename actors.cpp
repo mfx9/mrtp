@@ -56,7 +56,7 @@ Plane::Plane (Vector *center, Vector *normal, double scale,
     }
     else {
         Vector T;
-        normal_.GenerateUnitVector (&T);
+        T = normal_.GenerateUnitVector ();
         
         tx_ = T ^ normal_;
         tx_.Normalize_InPlace ();
@@ -129,7 +129,7 @@ Sphere::Sphere (Vector *center, double radius, Vector *axis,
         ty_.Normalize_InPlace ();
     
         Vector T;
-        ty_.GenerateUnitVector (&T);
+        T = ty_.GenerateUnitVector ();
         tx_ = T ^ ty_;
         tx_.Normalize_InPlace ();
     
@@ -218,8 +218,7 @@ Cylinder::Cylinder (Vector *center, Vector *direction,
         color->CopyTo (&color_);
     }
     else {
-        B_.GenerateUnitVector (&ty_);
-
+        ty_ = B_.GenerateUnitVector ();
         tx_ = ty_ ^ B_;
         tx_.Normalize_InPlace ();
     }

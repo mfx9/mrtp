@@ -20,45 +20,37 @@
 #include <iostream>
 */
 
-/*
- * Macros.
- */
-#define SIGN(x) ((x < 0.0f) ? -1.0f : 1.0f)
-#define ABS(x) (x * (SIGN (x)))
-
 
 class Vector {
-    double x_, y_, z_;
+    double  x_, y_, z_;
 
 public:
     ~Vector ();
     Vector ();
-    Vector (double *coor);
-    Vector (double x, double y, double z);
+    Vector (const double *flat);
+    Vector (const double x, const double y, const double z);
 
-    void   Set (double *coor);
-    void   Set (double x, double y, double z);
-    void   CopyTo (Vector *other);
-    void   Scale_InPlace (double scale);
-    void   Normalize_InPlace ();
-    void   GenerateUnitVector (Vector *other);
-    void   Print ();
-    double Len ();
+    void Set (const double *flat);
+    void Set (const double x, const double y, const double z);
+    void Get (double *flat) const;
+    void Get (double *x, double *y, double *z) const;
 
-    /* Sum of two vectors. */
-    Vector operator+ (Vector &other);
+    void Scale_InPlace (const double scale);
+    void Normalize_InPlace ();
 
-    /* Difference of two vectors. */
-    Vector operator- (Vector &other);
+    void CopyTo (Vector *other) const;
+    void Print () const;
+    double Magnitude () const;
 
-    /* Cross product. */
-    Vector operator^ (Vector &other);
+    Vector Reflect (const Vector *other) const;
+    Vector GenerateUnitVector () const;
 
-    /* Dot product. */
-    double operator* (Vector &other);
+    Vector operator+ (const Vector &other) const;
+    Vector operator- (const Vector &other) const;
+    Vector operator* (const double scale) const;
 
-    /* Scaling. */
-    Vector operator* (double scale);
+    double operator* (const Vector &other) const;
+    Vector operator^ (const Vector &other) const;
 };
 
 #endif /* _VECTOR_H */
