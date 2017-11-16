@@ -93,8 +93,7 @@ public:
     bool AddReal (const std::string *key, double *real, unsigned int nreal);
     void SetLabel (std::string *label);
     void StartQuery ();
-    bool Query (std::string *key, ParserParameter_t *type, double *real, 
-            std::string *text);
+    bool Query (std::string *key, double **numerical, std::string **textual);
     void GetLabel (std::string *label);
     void SetNext (Entry *next);
     Entry *Next ();
@@ -115,7 +114,7 @@ public:
     ParserStatus_t Status ();
     void Parse ();
     void StartQuery ();
-    bool Query (Entry *entry);
+    bool Query (Entry **entry);
 
     ParserCode_t CreateEntry (std::string *id, std::string collect[][MAX_TOKENS],
             unsigned int sizes[], unsigned int ncol, Entry *entry);

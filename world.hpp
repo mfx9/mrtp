@@ -14,7 +14,10 @@
 #ifndef _WORLD_H
 #define _WORLD_H
 
-#include <cstddef>  /* NULL pointer. */
+/* NULL pointer. */
+#include <cstddef>
+
+#include <list>
 #include <string>
 #include <iostream>
 
@@ -31,42 +34,34 @@ class World {
     Camera  *camera_;
     Light   *light_;
 
-    Plane        *planes_;
-    unsigned int  nplanes_;
+    Actor *actors_;
+    unsigned int nactors_;
 
-    Sphere       *spheres_;
-    unsigned int  nspheres_;
+    Texture *textures_;
+    unsigned int ntextures_;
 
-    Cylinder     *cylinders_;
-    unsigned int  ncylinders_;
+    /*
+     * Private methods.
+     */
+    void CreateCamera (Entry *entry);
+    void CreateLight (Entry *light);
+    void CreatePlane (Entry *entry);
+    void CreateSphere (Entry *entry);
+    void CreateCylinder (Entry *entry);
 
-    Texture      *textures_;
-    unsigned int  ntextures_;
+    void PushActor (Actor *actor);
+    Actor *PopActor ();
+
+    Texture *PushTexture (std::string *filename);
+    Texture *PopTexture ();
 
 public:
     World (Parser *parser);
     ~World ();
     void Initialize ();
 
-    void GetCamera (Camera **camera);
-    void GetLight (Light **light);
-    void GetActors (Plane **planes, Sphere **spheres, Cylinder **cylinders);
-
-    void AddPlane (Vector *center, Vector *normal, double texscale, 
-                   double reflect, Color *color, Texture *texture);
-    unsigned int PopPlane ();
-
-    void AddSphere (Vector *center, double radius, Vector *axis, 
-                    double reflect, Color *color, Texture *texture);
-    unsigned int PopSphere ();
-
-    void AddCylinder (Vector *center, Vector *direction, double radius, 
-                      double span, double reflect, Color *color, 
-                      Texture *texture);
-    unsigned int PopCylinder ();
-
-    Texture *AddTexture (std::string *filename);
-    unsigned int PopTexture ();
+    void AssignCamera (Camera **camera);
+    void AssignLightActors (Light **light, Actor **actors);
 };
 
 #endif /* _WORLD_H */

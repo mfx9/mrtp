@@ -23,39 +23,34 @@ Color::~Color () {
 Color::Color () {
 }
 
-Color::Color (const real_t red, const real_t green, 
-              const real_t blue) {
+Color::Color (const real_t red, const real_t green, const real_t blue) {
     red_   = red;
     green_ = green;
     blue_  = blue;
 }
 
-Color::Color (const unsigned char red, 
-              const unsigned char green, const unsigned char blue) {
-    red_   = (real_t) red   * kConvertToFloat;
-    green_ = (real_t) green * kConvertToFloat;
-    blue_  = (real_t) blue  * kConvertToFloat;
+void Color::Set (const real_t *flat) {
+    red_   = flat[0];
+    green_ = flat[1];
+    blue_  = flat[2];
 }
 
-void Color::Set (const real_t red, const real_t green, 
-                 const real_t blue) {
+void Color::Set (const real_t red, const real_t green, const real_t blue) {
     red_   = red;
     green_ = green;
     blue_  = blue;
 }
 
-void Color::Set (const unsigned char red, 
-                 const unsigned char green, const unsigned char blue) {
+void Color::Set (const byte_t red, const byte_t green, const byte_t blue) {
     red_   = (real_t) red   * kConvertToFloat;
     green_ = (real_t) green * kConvertToFloat;
     blue_  = (real_t) blue  * kConvertToFloat;
 }
 
-void Color::Get (unsigned char *red, unsigned char *green, 
-                 unsigned char *blue) const {
-    *red   = (unsigned char) (kConvertToByte * red_);
-    *green = (unsigned char) (kConvertToByte * green_);
-    *blue  = (unsigned char) (kConvertToByte * blue_);
+void Color::Get (byte_t *red, byte_t *green, byte_t *blue) const {
+    *red   = (byte_t) (kConvertToByte * red_);
+    *green = (byte_t) (kConvertToByte * green_);
+    *blue  = (byte_t) (kConvertToByte * blue_);
 }
 
 void Color::Get (real_t *red, real_t *green, real_t *blue) const {

@@ -17,362 +17,255 @@ using namespace std;
 
 
 World::World (Parser *parser) {
-    /* 
-     * Initialize. 
-     */
-    nplanes_    = 0;
-    nspheres_   = 0;
-    ncylinders_ = 0;
-    ntextures_  = 0;
-
-    planes_     = NULL;
-    spheres_    = NULL;
-    cylinders_  = NULL;
-    textures_   = NULL;
-
+    parser_     = parser;
     camera_     = NULL;
     light_      = NULL;
-    parser_     = parser;
+    actors_     = NULL;
+    textures_   = NULL;
+
+    nactors_    = 0;
+    ntextures_  = 0;
 }
 
 void World::Initialize () {
-    Entry   entry;
-    ParserParameter_t  type;
+    Entry   *entry;
+    string   id;
 
-    string  label, key, texts[MAX_COMPONENTS];
-    double  reals[MAX_COMPONENTS];
-
-    /*
-     * Allocate camera, light, actors, etc.
-     */
     parser_->StartQuery ();
     while (parser_->Query (&entry)) {
 
-        entry.GetLabel (&label);
-        entry.StartQuery ();
+        entry->GetLabel (&id);
+        entry->StartQuery ();
 
-        /*
-         * Add a camera.
-         */
-        if (label == "camera") {
-            Vector  position;
-            Vector  target;
-            double  roll;
-
-            while (entry.Query (&key, &type, reals, texts)) {
-                if (key == "position") {
-                    position.Set (reals);
-                }
-                else if (key == "target") {
-                    target.Set (reals);
-                }
-                else {  /* if (key == "roll") */
-                    roll = reals[0];
-                }
-            }
-            camera_ = new Camera (&position, &target, roll);
+        if (id == "camera") {
+            CreateCamera (entry);
         }
-
-        /*
-         * Add a light.
-         */
-        else if (label == "light") {
-            Vector position;
-
-            entry.Query (&key, &type, reals, texts);
-            position.Set (reals);
-            light_ = new Light (&position);
+        else if (id == "light") {
+            CreateLight (entry);
         }
-
-        /*
-         * Add a plane.
-         */
-        else if (label == "plane") {
-            Vector    center;
-            Vector    normal;
-            double    scale;
-            double    reflect;
-            Color     color;
-            Texture  *texture = NULL;
-
-            while (entry.Query (&key, &type, reals, texts)) {
-                if (key == "center") {
-                    center.Set (reals);
-                }
-                else if (key == "normal") {
-                    normal.Set (reals);
-                }
-                else if (key == "scale") {
-                    scale = reals[0];
-                }
-                else if (key == "color") {
-                    color.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);
-                }
-                else if (key == "reflect") {
-                    reflect = reals[0];
-                }
-                else {  /* if (key == "texture") */
-                    texture = AddTexture (&texts[0]);
-                }
-            }
-            AddPlane (&center, &normal, scale, reflect, &color, texture);
+        else if (id == "plane") {
+            CreatePlane (entry);
         }
-
-        /*
-         * Add a sphere.
-         */
-        else if (label == "sphere") {
-            Vector   position;
-            Vector   axis;
-            double   radius;
-            double   reflect;
-            Color    color;
-            Texture *texture = NULL;
-
-            while (entry.Query (&key, &type, reals, texts)) {
-                if (key == "position") {
-                    position.Set (reals);
-                }
-                else if (key == "radius") {
-                    radius = reals[0];
-                }
-                else if (key == "axis") {
-                    axis.Set (reals);
-                }
-                else if (key == "color") {
-                    color.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);
-                }
-                else if (key == "reflect") {
-                    reflect = reals[0];
-                }
-                else {  /* if (key == "texture") */
-                    texture = AddTexture (&texts[0]);
-                }
-            }
-            AddSphere (&position, radius, &axis, reflect, &color, texture);
+        else if (id == "sphere") {
+            CreateSphere (entry);
         }
-
-        /*
-         * Add a cylinder.
-         */
-        else if (label == "cylinder") {
-            Vector    center;
-            Vector    direction;
-            double    radius;
-            double    span;
-            double    reflect;
-            Color     color;
-            Texture  *texture = NULL;
-
-            while (entry.Query (&key, &type, reals, texts)) {
-                if (key == "center") {
-                    center.Set (reals);
-                }
-                else if (key == "direction") {
-                    direction.Set (reals);
-                }
-                else if (key == "radius") {
-                    radius = reals[0];
-                }
-                else if (key == "span") {
-                    span = reals[0];
-                }
-                else if (key == "color") {
-                    color.Set ((float) reals[0], (float) reals[1], 
-                        (float) reals[2]);
-                }
-                else if (key == "reflect") {
-                    reflect = reals[0];
-                }
-                else {  /* if (key == "texture") */
-                    texture = AddTexture (&texts[0]);
-                }
-            }
-            AddCylinder (&center, &direction, radius, span, reflect, 
-                &color, texture);
+        else if (id == "cylinder") {
+            CreateCylinder (entry);
         }
     }
 }
 
 World::~World () {
+    Actor *actor;
+    Texture *texture;
+
+    /* Destroy textures and actors. */
+    while (ntextures_ > 0) {
+        texture = PopTexture ();
+        delete texture;
+    }
+    while (nactors_ > 0) {
+        actor = PopActor ();
+        delete actor;
+    }
+    /* Destroy camera and light. */
     if (camera_ != NULL) {
         delete camera_;
     }
     if (light_  != NULL) {
         delete light_;
     }
-    /* Clear all planes. */
-    do {
-        PopPlane ();
-    } while (nplanes_ > 0);
-
-    /* Clear all spheres. */
-    do {
-        PopSphere ();
-    } while (nspheres_ > 0);
-
-    /* Clear all cylinders. */
-    do {
-        PopCylinder ();
-    } while (ncylinders_ > 0);
-
-    /* Clear all textures. */
-    do {
-        PopTexture ();
-    } while (ntextures_ > 0);
 }
 
-unsigned int World::PopPlane () {
-    Actor *prev, *next, *last;
+void World::CreateCamera (Entry *entry) {
+    string   key, *textual;
+    double  *numerical;
 
-    if (nplanes_ > 0) {
-        last = planes_;
-        prev = NULL;
-        while ((next = last->Next ()) != NULL) {
-            prev = last;
-            last = next;
+    Vector  position;
+    Vector  target;
+    double  roll;
+
+    while (entry->Query (&key, &numerical, &textual)) {
+        if (key == "position") {
+            position.Set (numerical);
         }
-        if (prev != NULL) {
-            prev->SetNext (NULL);
+        else if (key == "target") {
+            target.Set (numerical);
         }
-        delete last;
-        nplanes_--;
+        else {  /* if (key == "roll") */
+            roll = numerical[0];
+        }
     }
-    return nplanes_;
+    camera_ = new Camera (&position, &target, roll);
 }
 
-unsigned int World::PopSphere () {
-    Actor *prev, *next, *last;
+void World::CreateLight (Entry *entry) {
+    string   key, *textual;
+    double  *numerical;
 
-    if (nspheres_ > 0) {
-        last = spheres_;
-        prev = NULL;
-        while ((next = last->Next ()) != NULL) {
-            prev = last;
-            last = next;
+    Vector position;
+
+    entry->Query (&key, &numerical, &textual);
+    position.Set (numerical);
+    light_ = new Light (&position);
+}
+
+void World::CreatePlane (Entry *entry) {
+    string   key, *textual;
+    double  *numerical;
+
+    double    scale;
+    double    reflect;
+    Vector    center;
+    Vector    normal;
+    Color     color;
+    Actor    *plane;
+    Texture  *texture = NULL;
+
+    while (entry->Query (&key, &numerical, &textual)) {
+        if (key == "center") {
+            center.Set (numerical);
         }
-        if (prev != NULL) {
-            prev->SetNext (NULL);
+        else if (key == "normal") {
+            normal.Set (numerical);
         }
-        delete last;
-        nspheres_--;
+        else if (key == "scale") {
+            scale = numerical[0];
+        }
+        else if (key == "color") {
+            color.Set ((real_t *) numerical);
+        }
+        else if (key == "reflect") {
+            reflect = numerical[0];
+        }
+        else {  /* if (key == "texture") */
+            texture = PushTexture (&textual[0]);
+        }
     }
-    return nspheres_;
+    plane = new Plane (&center, &normal, scale, reflect, &color, 
+                       texture);
+    PushActor (plane);
 }
 
-unsigned int World::PopCylinder () {
-    Actor *prev, *next, *last;
+void World::CreateSphere (Entry *entry) {
+    string   key, *textual;
+    double  *numerical;
 
-    if (ncylinders_ > 0) {
-        last = cylinders_;
-        prev = NULL;
-        while ((next = last->Next ()) != NULL) {
-            prev = last;
-            last = next;
+    Vector   position;
+    Vector   axis;
+    double   radius;
+    double   reflect;
+    Color    color;
+    Actor   *sphere;
+    Texture *texture = NULL;
+
+    while (entry->Query (&key, &numerical, &textual)) {
+        if (key == "position") {
+            position.Set (numerical);
         }
-        if (prev != NULL) {
-            prev->SetNext (NULL);
+        else if (key == "radius") {
+            radius = numerical[0];
         }
-        delete last;
-        ncylinders_--;
+        else if (key == "axis") {
+            axis.Set (numerical);
+        }
+        else if (key == "color") {
+            color.Set ((real_t *) numerical);
+        }
+        else if (key == "reflect") {
+            reflect = numerical[0];
+        }
+        else {  /* if (key == "texture") */
+            texture = PushTexture (&textual[0]);
+        }
     }
-    return ncylinders_;
+    sphere = new Sphere (&position, radius, &axis, reflect, &color, 
+                         texture);
+    PushActor (sphere);
 }
 
-unsigned int World::PopTexture () {
-    Texture *prev, *next, *last;
+void World::CreateCylinder (Entry *entry) {
+    string   key, *textual;
+    double  *numerical;
 
-    if (ntextures_ > 0) {
-        last = textures_;
-        prev = NULL;
-        while ((next = last->Next ()) != NULL) {
-            prev = last;
-            last = next;
+    Vector    center;
+    Vector    direction;
+    double    radius;
+    double    span;
+    double    reflect;
+    Color     color;
+    Actor    *cylinder;
+    Texture  *texture = NULL;
+
+    while (entry->Query (&key, &numerical, &textual)) {
+        if (key == "center") {
+            center.Set (numerical);
         }
-        if (prev != NULL) {
-            prev->SetNext (NULL);
+        else if (key == "direction") {
+            direction.Set (numerical);
         }
-        delete last;
-        ntextures_--;
+        else if (key == "radius") {
+            radius = numerical[0];
+        }
+        else if (key == "span") {
+            span = numerical[0];
+        }
+        else if (key == "color") {
+            color.Set ((real_t *) numerical);
+        }
+        else if (key == "reflect") {
+            reflect = numerical[0];
+        }
+        else {  /* if (key == "texture") */
+            texture = PushTexture (&textual[0]);
+        }
     }
-    return ntextures_;
+    cylinder = new Cylinder (&center, &direction, radius, span, reflect, 
+            &color, texture);
+    PushActor (cylinder);
 }
 
-void World::AddPlane (Vector *center, Vector *normal, 
-                      double texscale, double reflect, Color *color, 
-                      Texture *texture) {
+void World::PushActor (Actor *actor) {
     Actor *next, *last;
-    Plane *plane;
 
-    plane = new Plane (center, normal, texscale, reflect, 
-        color, texture);
-    if (nplanes_ < 1) {
-        planes_ = plane;
+    if (nactors_ < 1) {
+        actors_ = actor;
     }
     else {
-        next = planes_;
+        next = actors_;
         do {
             last = next;
             next = last->Next ();
         } while (next != NULL);
-        last->SetNext (plane);
+        last->SetNext (actor);
     }
-    nplanes_++;
+    nactors_++;
 }
 
-void World::AddSphere (Vector *center, double radius,
-                       Vector *axis, double reflect, Color *color, 
-                       Texture *texture) {
-    Actor  *next, *last;
-    Sphere *sphere;
+Actor *World::PopActor () {
+    Actor *prev, *next, *last, *pop = NULL;
 
-    sphere = new Sphere (center, radius, axis, reflect, 
-        color, texture);
-    if (nspheres_ < 1) {
-        spheres_ = sphere;
-    }
-    else {
-        next = spheres_;
-        do {
+    if (nactors_ > 0) {
+        last = actors_;
+        prev = NULL;
+        while ((next = last->Next ()) != NULL) {
+            prev = last;
             last = next;
-            next = last->Next ();
-        } while (next != NULL);
-        last->SetNext (sphere);
+        }
+        if (prev != NULL) {
+            prev->SetNext (NULL);
+        }
+        pop = last;
+        nactors_--;
     }
-    nspheres_++;
+    return pop;
 }
 
-void World::AddCylinder (Vector *center, Vector *direction, 
-                         double radius, double span, double reflect, 
-                         Color *color, Texture *texture) {
-    Actor    *next, *last;
-    Cylinder *cylinder;
-
-    cylinder = new Cylinder (center, direction, radius,
-        span, reflect, color, texture);
-    if (ncylinders_ < 1) {
-        cylinders_ = cylinder;
-    }
-    else {
-        next = cylinders_;
-        do {
-            last = next;
-            next = last->Next ();
-        } while (next != NULL);
-        last->SetNext (cylinder);
-    }
-    ncylinders_++;
-}
-
-Texture *World::AddTexture (string *filename) {
+Texture *World::PushTexture (string *filename) {
     Texture *next, *last, *texture;
-    bool  found;
+    bool found;
 
-    /*
-     * Do not add a texture that already exists. 
-     */
+    /* Do not add a texture that already exists. */
     if (ntextures_ > 0) {
         next  = textures_;
         found = false;
@@ -388,9 +281,7 @@ Texture *World::AddTexture (string *filename) {
             return last;
         }
     }
-    /*
-     * Create a new texture.
-     */
+    /* Create a new texture. */
     texture = new Texture (filename);
     texture->Allocate ();
 
@@ -409,17 +300,30 @@ Texture *World::AddTexture (string *filename) {
     return texture;
 }
 
-void World::GetCamera (Camera **camera) {
+Texture *World::PopTexture () {
+    Texture *prev, *next, *last, *pop = NULL;
+
+    if (ntextures_ > 0) {
+        last = textures_;
+        prev = NULL;
+        while ((next = last->Next ()) != NULL) {
+            prev = last;
+            last = next;
+        }
+        if (prev != NULL) {
+            prev->SetNext (NULL);
+        }
+        pop = last;
+        ntextures_--;
+    }
+    return pop;
+}
+
+void World::AssignCamera (Camera **camera) {
     *camera = camera_;
 }
 
-void World::GetLight (Light **light) {
+void World::AssignLightActors (Light **light, Actor **actors) {
     *light = light_;
-}
-
-void World::GetActors (Plane **planes, Sphere **spheres, 
-                       Cylinder **cylinders) {
-    *planes = planes_;
-    *spheres = spheres_;
-    *cylinders = cylinders_;
+    *actors = actors_;
 }

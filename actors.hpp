@@ -32,7 +32,8 @@ class Light {
 public:
     Light (Vector *origin);
     ~Light ();
-    void LightRay (Vector *hit, Vector *ray);
+    double Intensity (Vector *hit, Vector *normal, Vector *ray, 
+                      double *distance);
 };
 
 
@@ -43,6 +44,7 @@ protected:
     Color     color_;
     Texture  *texture_;
     Actor    *next_;
+    bool      hasShadow_;
     bool      reflective_;
     double    reflect_;
 
@@ -50,6 +52,7 @@ public:
     Actor ();
     Actor *Next ();
     void SetNext (Actor *next);
+    bool HasShadow ();
     bool Reflective (double *reflect);
 
     virtual ~Actor ();

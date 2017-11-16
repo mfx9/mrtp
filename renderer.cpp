@@ -60,10 +60,12 @@ bool Renderer::SolveShadows (Vector *origin, Vector *direction, double maxdist,
     bool   hit = false;
 
     while (actor != NULL) {
-        distance = actor->Solve (origin, direction, 0.0f, maxdist);
-        if (distance > 0.0f) {
-            hit = true;
-            break;
+        if (actor->HasShadow ()) {
+            distance = actor->Solve (origin, direction, 0.0f, maxdist);
+            if (distance > 0.0f) {
+                hit = true;
+                break;
+            }
         }
         actor = actor->Next ();
     }
@@ -91,52 +93,30 @@ void Renderer::TraceRay_r (Vector *origin, Vector *direction,
                            unsigned int depth, 
                            double mixing, Color *color) {
     Light     *light;
-    Plane     *planes;
-    Sphere    *spheres;
-    Cylinder  *cylinders;
-
-    Actor     *hitactor;
+    Actor     *actors, *hitactor;
     double     currd, raylen, intensity, shadow, ambient, factor;
     Vector     inter, ray, normal, reflected;
     Color      objcol;
-    bool       hitplane, hitsphere, hitcylinder, isshadow;
+    bool       hit, isshadow;
 
-    world_->GetLight (&light);
-    world_->GetActors (&planes, &spheres, &cylinders);
+    world_->AssignLightActors (&light, &actors);
 
     currd = maxdist_;
+    hit = SolveHits (origin, direction, actors, &hitactor, &currd);
 
-    hitplane = SolveHits (origin, direction, planes, &hitactor, &currd);
-    hitsphere = SolveHits (origin, direction, spheres, &hitactor, &currd);
-    hitcylinder = SolveHits (origin, direction, cylinders, &hitactor, &currd);
-
-    if (hitplane || hitsphere || hitcylinder) {
+    if (hit) {
         /* Found an intersection. */
         inter = ((*direction) * currd) + (*origin);
 
         hitactor->GetNormal (&inter, &normal);
         hitactor->DetermineColor (&inter, &normal, &objcol);
 
-        /* Find a vector between the intersecion and light. */
-        light->LightRay (&inter, &ray);
-        raylen = ray.Normalize_InPlace ();
-        intensity = normal * ray;
+        /* Calculate the intensity of light. */
+        intensity = light->Intensity (&inter, &normal, &ray, &raylen);
 
-        /* intensity = (intensity < 0.0f) ? 0.0f : ((intensity > 1.0f) ? 1.0f : intensity); */
-        intensity = (intensity < 0.0f) ? 0.0f : intensity;
-
-        /* Check if the intersection is in a shadow. 
-         *
-         * Planes cannot cast shadows, check only for spheres and cylinders.
-         */
-        shadow = 1.0f;
-        isshadow = SolveShadows (&inter, &ray, raylen, spheres);
-        if (!isshadow) {
-            isshadow = SolveShadows (&inter, &ray, raylen, cylinders);
-        }
-        if (isshadow) {
-            shadow = shadow_;
-        }
+        /* Check if the intersection is in a shadow. */
+        isshadow = SolveShadows (&inter, &ray, raylen, actors);
+        shadow = (isshadow) ? shadow_ : 1.0f;
 
         /* Decrease light intensity for actors away from the light. */
         ambient = 1.0f;
@@ -167,6 +147,7 @@ void Renderer::TraceRay_r (Vector *origin, Vector *direction,
         /* If the hit actor is reflective, trace a reflected ray. */
         if (hitactor->Reflective (&factor)) {
             direction->Reflect (&normal, &reflected);
+
             TraceRay_r (&inter, &reflected, depth, factor, color);
         }
     }
@@ -199,7 +180,7 @@ void Renderer::Render () {
     Vector   vw, vh, vo, eye;
     Camera  *camera;
 
-    world_->GetCamera (&camera);
+    world_->AssignCamera (&camera);
 
     camera->CalculateVectors ((double) width_, (double) height_, 
         perspective_, &vw, &vh, &vo);

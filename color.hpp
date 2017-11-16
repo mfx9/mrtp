@@ -15,6 +15,7 @@
 #define _COLOR_H
 
 typedef float real_t;
+typedef unsigned char byte_t;
 
 
 class Color {
@@ -23,16 +24,14 @@ class Color {
 public:
     ~Color ();
     Color ();
-    Color (const unsigned char red, const unsigned char green, 
-           const unsigned char blue);
     Color (const real_t red, const real_t green, const real_t blue);
 
+    void Set (const real_t *flat);
     void Set (const real_t red, const real_t green, const real_t blue);
-    void Set (const unsigned char red, const unsigned char green, 
-              const unsigned char blue);
+    void Set (const byte_t red, const byte_t green, const byte_t blue);
+
     void Get (real_t *red, real_t *green, real_t *blue) const;
-    void Get (unsigned char *red, unsigned char *green, 
-              unsigned char *blue) const;
+    void Get (byte_t *red, byte_t *green, byte_t *blue) const;
 
     void CopyTo (Color *other) const;
     void Scale_InPlace (const real_t scale);

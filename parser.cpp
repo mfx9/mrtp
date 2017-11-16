@@ -167,7 +167,7 @@ void Parser::StartQuery () {
     current_ = nentries_;
 }
 
-bool Parser::Query (Entry *entry) {
+bool Parser::Query (Entry **entry) {
     Entry  *next;
     unsigned int i;
 
@@ -176,7 +176,7 @@ bool Parser::Query (Entry *entry) {
         for (i = 0; i < (current_ - 1); i++) {
             next = next->Next ();
         }
-        next->CopyTo (entry);
+        *entry = next;
         current_--;
         return true;
     }
@@ -694,8 +694,7 @@ void Entry::StartQuery () {
     current_ = npar_;
 }
 
-bool Entry::Query (string *key, ParserParameter_t *type, double *reals, 
-        string *texts) {
+bool Entry::Query (string *key, double **numerical, string **textual) {
     /*
      * Connect the parser with the actual initialization 
      * of actors.
@@ -704,27 +703,15 @@ bool Entry::Query (string *key, ParserParameter_t *type, double *reals,
      * in a while type of loop, until false is returned.
      *
      */
-    unsigned int j, k;
-
     if (current_ < 1) {
         return false;
     }
-    j = (current_ - 1);
-
-    if (type_[j] == parameterReal) {
-        for (k = 0; k < MAX_COMPONENTS; k++) {
-            reals[k] = real_[j][k];
-        }
-    }
-    else {  /* (type_[j] == parameterText) */
-        for (k = 0; k < MAX_COMPONENTS; k++) {
-            texts[k] = text_[j][k];
-        }
-    }
-    (*key)  = keys_[j];
-    (*type) = type_[j];
-
     current_--;
+
+    *key = keys_[current_];
+    *textual = &text_[current_][0];
+    *numerical = &real_[current_][0];
+
     return true;
 }
 

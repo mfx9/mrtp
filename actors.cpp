@@ -35,9 +35,13 @@ void Actor::SetNext (Actor *next) {
     next_ = next;
 }
 
+bool Actor::HasShadow () {
+    return hasShadow_;
+}
+
 bool Actor::Reflective (double *reflect) {
     if (reflective_) {
-        *reflect = reflect_;
+        (*reflect) = reflect_;
     }
     return reflective_;
 }
@@ -52,6 +56,7 @@ Plane::Plane (Vector *center, Vector *normal, double scale,
     texture_ = texture;
     scale_ = scale;
     next_ = NULL;
+    hasShadow_ = false;
     reflect_ = reflect;
     reflective_ = (reflect_ > 0.0f) ? true : false;
 
@@ -122,6 +127,7 @@ Sphere::Sphere (Vector *center, double radius, Vector *axis,
     R_ = radius;
     texture_ = texture;
     next_ = NULL;
+    hasShadow_ = true;
     reflect_ = reflect;
     reflective_ = (reflect_ > 0.0f) ? true : false;
 
@@ -204,6 +210,7 @@ Cylinder::Cylinder (Vector *center, Vector *direction,
     span_ = span;
     texture_ = texture;
     next_ = NULL;
+    hasShadow_ = true;
     reflect_ = reflect;
     reflective_ = (reflect_ > 0.0f) ? true : false;
 
@@ -331,9 +338,15 @@ Light::Light (Vector *origin) {
 Light::~Light () {
 }
 
-void Light::LightRay (Vector *hit, Vector *ray) {
-    Vector T = position_ - (*hit);
-    T.CopyTo (ray);
+double Light::Intensity (Vector *hit, Vector *normal, Vector *ray, 
+                         double *distance) {
+    double intensity;
+
+    (*ray) = position_ - (*hit);
+    (*distance) = ray->Normalize_InPlace ();
+
+    intensity = (*normal) * (*ray);
+    return (intensity < 0.0f) ? 0.0f : intensity;
 }
 
 
