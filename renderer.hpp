@@ -52,9 +52,16 @@ class Renderer {
      * of shadows.
      *
      * cutoff: the maximum distance reached by rays.
+     *
+     * maxdepth: the maximum number of recursions of every 
+     * reflected ray.
+     *
+     * relfshadow: if true, reflect shadows from shadowed surfaces.
      */
     LightModel_t  model_;
-    double  maxdist_, shadow_, cutoff_;
+    double        maxdist_, shadow_, cutoff_;
+    unsigned int  maxdepth_;
+    bool          reflshadow_;
 
     double  fov_, ratio_, perspective_;
     unsigned int width_, height_, nthreads_;
@@ -63,11 +70,11 @@ class Renderer {
      * Private methods. 
      */
     bool SolveShadows (Vector *origin, Vector *direction, double maxdist, 
-                       Actor *actor, Actor **hitactor);
+                       Actor *actor);
     bool SolveHits (Vector *origin, Vector *direction, Actor *actor, 
                     Actor **hitactor, double *currd);
-    void TraceRay (Vector *origin, Vector *direction,
-                   Color *color);
+    void TraceRay_r (Vector *origin, Vector *direction, 
+                     unsigned int depth, double mixing, Color *color);
     void RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
                       unsigned int block, unsigned int nlines);
 
@@ -75,7 +82,8 @@ public:
     Renderer (World *world, unsigned int width,
               unsigned int height, double fov,
               double distance, double shadowfactor, 
-              LightModel_t lightmodel, unsigned int nthreads);
+              LightModel_t lightmodel, unsigned int maxdepth, 
+              bool reflshadow, unsigned int nthreads);
     ~Renderer ();
 
     void Render ();

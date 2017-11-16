@@ -37,12 +37,10 @@ World::World (Parser *parser) {
 
 void World::Initialize () {
     Entry   entry;
-    string  label;
-
-    string  key,
-        texts[MAX_COMPONENTS];
-    double  reals[MAX_COMPONENTS];
     ParserParameter_t  type;
+
+    string  label, key, texts[MAX_COMPONENTS];
+    double  reals[MAX_COMPONENTS];
 
     /*
      * Allocate camera, light, actors, etc.
@@ -57,8 +55,9 @@ void World::Initialize () {
          * Add a camera.
          */
         if (label == "camera") {
-            Vector position, target;
-            double roll;
+            Vector  position;
+            Vector  target;
+            double  roll;
 
             while (entry.Query (&key, &type, reals, texts)) {
                 if (key == "position") {
@@ -89,8 +88,10 @@ void World::Initialize () {
          * Add a plane.
          */
         else if (label == "plane") {
-            Vector    center, normal;
+            Vector    center;
+            Vector    normal;
             double    scale;
+            double    reflect;
             Color     color;
             Texture  *texture = NULL;
 
@@ -108,19 +109,24 @@ void World::Initialize () {
                     color.Set ((float) reals[0], (float) reals[1], 
                         (float) reals[2]);
                 }
+                else if (key == "reflect") {
+                    reflect = reals[0];
+                }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddPlane (&center, &normal, scale, &color, texture);
+            AddPlane (&center, &normal, scale, reflect, &color, texture);
         }
 
         /*
          * Add a sphere.
          */
         else if (label == "sphere") {
-            Vector   position, axis;
+            Vector   position;
+            Vector   axis;
             double   radius;
+            double   reflect;
             Color    color;
             Texture *texture = NULL;
 
@@ -138,19 +144,25 @@ void World::Initialize () {
                     color.Set ((float) reals[0], (float) reals[1], 
                         (float) reals[2]);
                 }
+                else if (key == "reflect") {
+                    reflect = reals[0];
+                }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddSphere (&position, radius, &axis, &color, texture);
+            AddSphere (&position, radius, &axis, reflect, &color, texture);
         }
 
         /*
          * Add a cylinder.
          */
         else if (label == "cylinder") {
-            Vector    center, direction;
-            double    radius, span;
+            Vector    center;
+            Vector    direction;
+            double    radius;
+            double    span;
+            double    reflect;
             Color     color;
             Texture  *texture = NULL;
 
@@ -171,11 +183,14 @@ void World::Initialize () {
                     color.Set ((float) reals[0], (float) reals[1], 
                         (float) reals[2]);
                 }
+                else if (key == "reflect") {
+                    reflect = reals[0];
+                }
                 else {  /* if (key == "texture") */
                     texture = AddTexture (&texts[0]);
                 }
             }
-            AddCylinder (&center, &direction, radius, span, 
+            AddCylinder (&center, &direction, radius, span, reflect, 
                 &color, texture);
         }
     }
@@ -286,11 +301,12 @@ unsigned int World::PopTexture () {
 }
 
 void World::AddPlane (Vector *center, Vector *normal, 
-                      double texscale, Color *color, Texture *texture) {
+                      double texscale, double reflect, Color *color, 
+                      Texture *texture) {
     Actor *next, *last;
     Plane *plane;
 
-    plane = new Plane (center, normal, texscale, 
+    plane = new Plane (center, normal, texscale, reflect, 
         color, texture);
     if (nplanes_ < 1) {
         planes_ = plane;
@@ -307,11 +323,12 @@ void World::AddPlane (Vector *center, Vector *normal,
 }
 
 void World::AddSphere (Vector *center, double radius,
-                       Vector *axis, Color *color, Texture *texture) {
+                       Vector *axis, double reflect, Color *color, 
+                       Texture *texture) {
     Actor  *next, *last;
     Sphere *sphere;
 
-    sphere = new Sphere (center, radius, axis, 
+    sphere = new Sphere (center, radius, axis, reflect, 
         color, texture);
     if (nspheres_ < 1) {
         spheres_ = sphere;
@@ -328,13 +345,13 @@ void World::AddSphere (Vector *center, double radius,
 }
 
 void World::AddCylinder (Vector *center, Vector *direction, 
-                         double radius, double span, Color *color, 
-                         Texture *texture) {
+                         double radius, double span, double reflect, 
+                         Color *color, Texture *texture) {
     Actor    *next, *last;
     Cylinder *cylinder;
 
     cylinder = new Cylinder (center, direction, radius,
-        span, color, texture);
+        span, reflect, color, texture);
     if (ncylinders_ < 1) {
         cylinders_ = cylinder;
     }
@@ -401,7 +418,7 @@ void World::GetLight (Light **light) {
 }
 
 void World::GetActors (Plane **planes, Sphere **spheres, 
-        Cylinder **cylinders) {
+                       Cylinder **cylinders) {
     *planes = planes_;
     *spheres = spheres_;
     *cylinders = cylinders_;

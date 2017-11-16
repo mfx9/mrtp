@@ -19,7 +19,8 @@ using namespace std;
 Renderer::Renderer (World *world, unsigned int width,
         unsigned int height, double fov,
         double distance, double shadowfactor, 
-        LightModel_t lightmodel, unsigned int nthreads) {
+        LightModel_t lightmodel, unsigned int maxdepth, 
+        bool reflshadow, unsigned int nthreads) {
     world_ = world;
     buffer_ = NULL;
     width_ = width;
@@ -28,6 +29,8 @@ Renderer::Renderer (World *world, unsigned int width,
     maxdist_ = distance;
     shadow_ = shadowfactor;
     model_ = lightmodel;
+    maxdepth_ = maxdepth;
+    reflshadow_ = reflshadow;
     nthreads_ = nthreads;
 }
 
@@ -52,14 +55,13 @@ void Renderer::SaveFrame (string *path) {
 }
 
 bool Renderer::SolveShadows (Vector *origin, Vector *direction, double maxdist, 
-                             Actor *actor, Actor **hitactor) {
+                             Actor *actor) {
     double distance;
     bool   hit = false;
 
     while (actor != NULL) {
         distance = actor->Solve (origin, direction, 0.0f, maxdist);
         if (distance > 0.0f) {
-            (*hitactor) = actor;
             hit = true;
             break;
         }
@@ -85,89 +87,94 @@ bool Renderer::SolveHits (Vector *origin, Vector *direction, Actor *actor,
     return hit;
 }
 
-void Renderer::TraceRay (Vector *origin, Vector *direction, 
-                         Color *color) {
+void Renderer::TraceRay_r (Vector *origin, Vector *direction, 
+                           unsigned int depth, 
+                           double mixing, Color *color) {
     Light     *light;
     Plane     *planes;
     Sphere    *spheres;
     Cylinder  *cylinders;
-    Actor     *hitactor;
-    double     currd, dot, raylen, fade;
-    Vector     inter, tl, normal;
-    Color      objcol;
-    bool       hitplane, hitsphere, hitcylinder, hitshadow;
 
-    /*
-     * Initialize.
-     */
+    Actor     *hitactor;
+    double     currd, raylen, intensity, shadow, ambient, factor;
+    Vector     inter, ray, normal, reflected;
+    Color      objcol;
+    bool       hitplane, hitsphere, hitcylinder, isshadow;
+
     world_->GetLight (&light);
     world_->GetActors (&planes, &spheres, &cylinders);
 
-    color->Zero ();
-    currd  = maxdist_;
-    /* 
-     * Find intersections with actors. 
-     */
+    currd = maxdist_;
+
     hitplane = SolveHits (origin, direction, planes, &hitactor, &currd);
     hitsphere = SolveHits (origin, direction, spheres, &hitactor, &currd);
     hitcylinder = SolveHits (origin, direction, cylinders, &hitactor, &currd);
 
     if (hitplane || hitsphere || hitcylinder) {
-        /*
-         * Found a ray/object intersection.
-         */
+        /* Found an intersection. */
         inter = ((*direction) * currd) + (*origin);
 
         hitactor->GetNormal (&inter, &normal);
         hitactor->DetermineColor (&inter, &normal, &objcol);
-        /*
-         * Find a vector between the intersection
-         *   and light.
-         *
-         */
-        light->GetToLight (&inter, &tl);
-        raylen = tl.Magnitude ();
-        tl.Normalize_InPlace ();
-        dot = normal * tl;
 
-        /*
-         * Planes cannot cast shadows so check only for
-         * spheres and cylinder.
+        /* Find a vector between the intersecion and light. */
+        light->LightRay (&inter, &ray);
+        raylen = ray.Normalize_InPlace ();
+        intensity = normal * ray;
+
+        /* intensity = (intensity < 0.0f) ? 0.0f : ((intensity > 1.0f) ? 1.0f : intensity); */
+        intensity = (intensity < 0.0f) ? 0.0f : intensity;
+
+        /* Check if the intersection is in a shadow. 
          *
+         * Planes cannot cast shadows, check only for spheres and cylinders.
          */
-        hitshadow = SolveShadows (&inter, &tl, raylen, spheres, &hitactor);
-        if (!hitshadow) {
-            hitshadow = SolveShadows (&inter, &tl, raylen, cylinders, &hitactor);
+        shadow = 1.0f;
+        isshadow = SolveShadows (&inter, &ray, raylen, spheres);
+        if (!isshadow) {
+            isshadow = SolveShadows (&inter, &ray, raylen, cylinders);
+        }
+        if (isshadow) {
+            shadow = shadow_;
         }
 
-        if (hitshadow) {
-            dot *= shadow_;
+        /* Decrease light intensity for actors away from the light. */
+        ambient = 1.0f;
+        if (model_ != lightNone) {
+            if (model_ == lightLinear) {
+                ambient = 1.0f - (raylen / maxdist_);
+            }
+            else {  /* if (model_ == lightQuadratic) */
+                ambient = 1.0f - pow (raylen / maxdist_, 2);
+            }
         }
-        /*
-         * Decrease light intensity for objects further
-         * away from the light.
-         *
+
+        /* Combine colors. */
+        color->Combine_InPlace (&objcol, mixing * intensity * shadow * ambient);
+
+        /* Quit if the surface is shadowed, but reflections from shadowed
+         * surfaces are not allowed.
          */
-        if (model_ == lightLinear) {
-            fade = 1.0f - (raylen / maxdist_);
+        if (isshadow && (!reflshadow_)) {
+            return;
         }
-        else if (model_ == lightQuadratic) {
-            fade = 1.0f - pow (raylen / maxdist_, 2);
+
+        /* Quit if the maximum level of recursion is reached. */
+        if (++depth > maxdepth_) {
+            return;
         }
-        else {  /* if (model_ == lightNone) */
-            fade = 1.0f;
+
+        /* If the hit actor is reflective, trace a reflected ray. */
+        if (hitactor->Reflective (&factor)) {
+            direction->Reflect (&normal, &reflected);
+            TraceRay_r (&inter, &reflected, depth, factor, color);
         }
-        dot *= fade;
-        objcol.Scale_InPlace (dot);
-        /*
-         * Put a pixel in the frame buffer.
-         */
-        objcol.CopyTo (color); 
     }
+    /* No intersections found, quit. */
 }
 
 void Renderer::RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
-        unsigned int block, unsigned int nlines) {
+                            unsigned int block, unsigned int nlines) {
     unsigned int i, j;
     Vector  horizontal, vertical, origin, direction;
     Color  *color;
@@ -182,7 +189,8 @@ void Renderer::RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
             direction  = origin - (*eye);
             direction.Normalize_InPlace ();
 
-            TraceRay (&origin, &direction, color);
+            color->Zero ();
+            TraceRay_r (&origin, &direction, 0, 1.0f, color);
         }
     }
 }

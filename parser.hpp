@@ -37,7 +37,7 @@
  * Custom data types.
  */
 enum ParserFlag_t {flagText, flagReal, flagVector, flagOptional,
-    flagCheckZero, flagCheckPositive};
+    flagCheckZero, flagCheckPositive, flagCheckZeroOne};
 
 enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
     codeRepeated, codeFilename, codeValue, codeConflict};
@@ -57,6 +57,7 @@ typedef unsigned int Bitmask_t;
 #define BIT_OPTIONAL        MAKE_MASK (flagOptional)
 #define BIT_CHECK_ZERO      MAKE_MASK (flagCheckZero)
 #define BIT_CHECK_POSITIVE  MAKE_MASK (flagCheckPositive)
+#define BIT_CHECK_ZERO_ONE  MAKE_MASK (flagCheckZeroOne)
 
 
 class Entry {

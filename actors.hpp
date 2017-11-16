@@ -23,27 +23,34 @@
 #include "texture.hpp"
 
 
-/* Not really an actor. */
+/**** Light. ****/
+
 class Light {
     Vector  position_;
+    Color   color_;
 
 public:
     Light (Vector *origin);
     ~Light ();
-    void GetToLight (Vector *hit, Vector *tolight);
+    void LightRay (Vector *hit, Vector *ray);
 };
 
-/* Base class for all actors. */
+
+/**** Actors. ****/
+
 class Actor {
 protected:
     Color     color_;
     Texture  *texture_;
     Actor    *next_;
+    bool      reflective_;
+    double    reflect_;
 
 public:
     Actor ();
     Actor *Next ();
     void SetNext (Actor *next);
+    bool Reflective (double *reflect);
 
     virtual ~Actor ();
     virtual double Solve (Vector *origin, Vector *direction, double mind, 
@@ -62,7 +69,7 @@ class Sphere : public Actor {
 
 public:
     Sphere (Vector *center, double radius, Vector *axis,
-            Color *color, Texture *texture);
+            double reflect, Color *color, Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, double mind, 
                   double maxd);
@@ -79,7 +86,7 @@ class Plane : public Actor {
 
 public:
     Plane (Vector *center, Vector *normal, double scale, 
-           Color *color, Texture *texture);
+           double reflect, Color *color, Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, double mind, 
                   double maxd);
@@ -97,7 +104,8 @@ class Cylinder : public Actor {
 
 public:
     Cylinder (Vector *center, Vector *direction, 
-              double radius, double span, Color *color, Texture *texture);
+              double radius, double span, double reflect, Color *color, 
+              Texture *texture);
 
     double Solve (Vector *origin, Vector *direction, double mind, 
                   double maxd);

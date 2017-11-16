@@ -26,12 +26,14 @@ using namespace std;
 /*
  * Default settings.
  */
-#define DEFAULT_WIDTH     640
-#define DEFAULT_HEIGHT    480
-#define DEFAULT_FOV        93.0
-#define DEFAULT_DISTANCE   60.0
-#define DEFAULT_SHADOW      0.25
-#define DEFAULT_MODEL     lightQuadratic
+#define DEFAULT_WIDTH      640
+#define DEFAULT_HEIGHT     480
+#define DEFAULT_FOV         93.0
+#define DEFAULT_DISTANCE    60.0
+#define DEFAULT_SHADOW       0.25
+#define DEFAULT_MODEL        lightQuadratic
+#define DEFAULT_REFLECT      3
+#define DEFAULT_REF_SHADOW   true
 
 /*
  * Program limits.
@@ -40,6 +42,8 @@ using namespace std;
 #define MAX_WIDTH     (DEFAULT_WIDTH  * 10)
 #define MIN_HEIGHT    (DEFAULT_HEIGHT /  2)
 #define MAX_HEIGHT    (DEFAULT_HEIGHT * 10)
+#define MIN_REFLECT       0
+#define MAX_REFLECT      10
 #define MIN_FOV          50.0
 #define MAX_FOV         170.0
 
@@ -75,6 +79,11 @@ void HelpScreen (string program) {
             "    -m, --model\n"
             "      Light quenching model (none, linear, quadratic,\n"
             "      default is quadratic).\n\n"
+            "    -R, --reflect\n"
+            "      Maximum number of recursion levels of reflected\n"
+            "      rays (default is 3).\n\n"
+            "    -S, --no-reflect-shadows\n"
+            "      Do not reflect rays from shadowed surfaces.\n\n"
             "    -s, --shadow\n"
             "      Shadow factor (default is 0.25).\n\n"
 #ifdef _OPENMP
@@ -96,17 +105,19 @@ int main (int argc, char **argv) {
     /* 
      * Modifiable parameters.
      */
-    bool         quiet    =  false;
-    string       input    =  "";
-    string       output   =  "";
-    double       fov      =  DEFAULT_FOV;
-    double       distance =  DEFAULT_DISTANCE;
-    double       shadow   =  DEFAULT_SHADOW;
-    LightModel_t model    =  DEFAULT_MODEL;
-    unsigned int width    =  DEFAULT_WIDTH;
-    unsigned int height   =  DEFAULT_HEIGHT;
+    bool         quiet      =  false;
+    string       input      =  "";
+    string       output     =  "";
+    double       fov        =  DEFAULT_FOV;
+    double       distance   =  DEFAULT_DISTANCE;
+    double       shadow     =  DEFAULT_SHADOW;
+    LightModel_t model      =  DEFAULT_MODEL;
+    unsigned int reflect    =  DEFAULT_REFLECT;
+    bool         reflshadow =  DEFAULT_REF_SHADOW;
+    unsigned int width      =  DEFAULT_WIDTH;
+    unsigned int height     =  DEFAULT_HEIGHT;
 #ifdef _OPENMP
-    unsigned int threads  =  DEFAULT_THREADS;
+    unsigned int threads    =  DEFAULT_THREADS;
 #endif /* _OPENMP */
 
 
@@ -285,6 +296,30 @@ int main (int argc, char **argv) {
             }
         }
 
+        /*
+         * Set the depth of reflections.
+         */
+        else if ((text == "-R") || (text == "--reflect")) {
+            if (i == (argc - 1)) {
+                cerr << "Number of reflections not given." << endl;
+                return exitFail;
+            }
+            next = argv[++i];
+            convert.str (next);
+            convert >> reflect;
+            if (!convert || (reflect < MIN_REFLECT) || (reflect > MAX_REFLECT)) {
+                cerr << "Invalid number of reflections." << endl;
+                return exitFail;
+            }
+        }
+
+        /*
+         * Set reflective shadows.
+         */
+        else if ((text == "-S") || (text == "--no-reflect-shadows")) {
+            reflshadow = false;
+        }
+
 #ifdef _OPENMP
         /*
          * Set the number of threads.
@@ -359,10 +394,10 @@ int main (int argc, char **argv) {
      */
 #ifdef _OPENMP
     Renderer renderer (&world, width, height, fov, distance, 
-        shadow, model, threads);
+        shadow, model, reflect, reflshadow, threads);
 #else
     Renderer renderer (&world, width, height, fov, distance, 
-        shadow, model, 1);
+        shadow, model, reflect, reflshadow, 1);
 #endif /* _OPENMP */
     renderer.Initialize ();
     if (!quiet) {

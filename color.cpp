@@ -13,6 +13,9 @@
  */
 #include "color.hpp"
 
+const real_t  kConvertToByte = 255.0f;
+const real_t  kConvertToFloat = 1.0f / kConvertToByte;
+
 
 Color::~Color () {
 }
@@ -20,64 +23,70 @@ Color::~Color () {
 Color::Color () {
 }
 
-Color::Color (float red, float green, 
-        float blue) {
-    /* TRIM_COLOR (red, green, blue); */
-
+Color::Color (const real_t red, const real_t green, 
+              const real_t blue) {
     red_   = red;
     green_ = green;
     blue_  = blue;
 }
 
-Color::Color (unsigned char red, 
-        unsigned char green, unsigned char blue) {
-    red_   = BYTE_TO_FLOAT (red);
-    green_ = BYTE_TO_FLOAT (green);
-    blue_  = BYTE_TO_FLOAT (blue);
+Color::Color (const unsigned char red, 
+              const unsigned char green, const unsigned char blue) {
+    red_   = (real_t) red   * kConvertToFloat;
+    green_ = (real_t) green * kConvertToFloat;
+    blue_  = (real_t) blue  * kConvertToFloat;
 }
 
-void Color::Set (float red, float green, 
-        float blue) {
-    /* TRIM_COLOR (red, green, blue); */
-
+void Color::Set (const real_t red, const real_t green, 
+                 const real_t blue) {
     red_   = red;
     green_ = green;
     blue_  = blue;
 }
 
-void Color::Set (unsigned char red, 
-        unsigned char green, unsigned char blue) {
-    red_   = BYTE_TO_FLOAT (red);
-    green_ = BYTE_TO_FLOAT (green);
-    blue_  = BYTE_TO_FLOAT (blue);
+void Color::Set (const unsigned char red, 
+                 const unsigned char green, const unsigned char blue) {
+    red_   = (real_t) red   * kConvertToFloat;
+    green_ = (real_t) green * kConvertToFloat;
+    blue_  = (real_t) blue  * kConvertToFloat;
 }
 
-void Color::Get (unsigned char *red, 
-        unsigned char *green, unsigned char *blue) {
-    *red   = FLOAT_TO_BYTE (red_);
-    *green = FLOAT_TO_BYTE (green_);
-    *blue  = FLOAT_TO_BYTE (blue_);
+void Color::Get (unsigned char *red, unsigned char *green, 
+                 unsigned char *blue) const {
+    *red   = (unsigned char) (kConvertToByte * red_);
+    *green = (unsigned char) (kConvertToByte * green_);
+    *blue  = (unsigned char) (kConvertToByte * blue_);
 }
 
-void Color::Get (float *red, float *green, 
-        float *blue) {
+void Color::Get (real_t *red, real_t *green, real_t *blue) const {
     *red   = red_;
     *green = green_;
     *blue  = blue_;
 }
 
-void Color::CopyTo (Color *other) {
+void Color::CopyTo (Color *other) const {
     other->red_   = red_;
     other->green_ = green_;
     other->blue_  = blue_;
 }
 
-void Color::Scale_InPlace (double scale) {
-    TRIM_LIMITS (scale, 0.0f, 1.0f);
+void Color::Scale_InPlace (real_t scale) {
+    /*
+    static const real_t min = 0.0f, max = 1.0f;
 
-    red_   = red_   * (float) scale;
-    green_ = green_ * (float) scale;
-    blue_  = blue_  * (float) scale;
+    scale = (scale < min) ? min : ((scale > max) ? max : scale);
+    */
+    red_   = red_   * (real_t) scale;
+    green_ = green_ * (real_t) scale;
+    blue_  = blue_  * (real_t) scale;
+}
+
+void Color::Combine_InPlace (const Color *other, const real_t lambda) {
+    real_t complement = 1.0f - lambda;
+
+    red_   = red_   * complement + other->red_   * lambda;
+    green_ = green_ * complement + other->green_ * lambda;
+    blue_  = blue_  * complement + other->blue_  * lambda;
 }
 
 void Color::Zero () {

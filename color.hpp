@@ -14,42 +14,29 @@
 #ifndef _COLOR_H
 #define _COLOR_H
 
-/*
- * Macros.
- */
-#define FLOAT_TO_BYTE(color) (unsigned char) (color * 255.0f)
-#define BYTE_TO_FLOAT(color) ((float) color) / 255.0f
-
-#define TRIM_LIMITS(x, min, max) { \
-   if (x < min) { \
-       x = min; \
-   } \
-   else if (x > max) { \
-       x = max; \
-   } }
-
-#define TRIM_COLOR(red, green, blue) { \
-    TRIM_LIMITS (red,   0.0f, 1.0f); \
-    TRIM_LIMITS (green, 0.0f, 1.0f); \
-    TRIM_LIMITS (blue,  0.0f, 1.0f); \
-        }
+typedef float real_t;
 
 
 class Color {
-    float red_, green_, blue_;
+    real_t  red_, green_, blue_;
 
 public:
     ~Color ();
     Color ();
-    Color (unsigned char red, unsigned char green, unsigned char blue);
-    Color (float red, float green, float blue);
+    Color (const unsigned char red, const unsigned char green, 
+           const unsigned char blue);
+    Color (const real_t red, const real_t green, const real_t blue);
 
-    void Set (float red, float green, float blue);
-    void Set (unsigned char red, unsigned char green, unsigned char blue);
-    void Get (float *red, float *green, float *blue);
-    void Get (unsigned char *red, unsigned char *green, unsigned char *blue);
-    void CopyTo (Color *other);
-    void Scale_InPlace (double scale);
+    void Set (const real_t red, const real_t green, const real_t blue);
+    void Set (const unsigned char red, const unsigned char green, 
+              const unsigned char blue);
+    void Get (real_t *red, real_t *green, real_t *blue) const;
+    void Get (unsigned char *red, unsigned char *green, 
+              unsigned char *blue) const;
+
+    void CopyTo (Color *other) const;
+    void Scale_InPlace (const real_t scale);
+    void Combine_InPlace (const Color *other, const real_t lambda);
     void Zero ();
 };
 

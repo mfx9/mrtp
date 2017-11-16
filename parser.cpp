@@ -16,19 +16,17 @@
 using namespace std;
 
 
-/*****************************
- *      Local functions      *
- *****************************/
+/**** Local functions. ****/
+
 static bool TokenizeLine (const string *line, string *tokens,
-    unsigned int *ntokens, unsigned int maxtokens);
+                          unsigned int *ntokens, unsigned int maxtokens);
 static bool ConvertTokens (const string *tokens, unsigned int ntokens, 
-    double *out);
+                           double *out);
 static bool CheckFilename (string *in, string *ext, string *out);
 
 
-/*****************************
- *           Tables          *
- *****************************/
+/**** Tables. ****/
+
 struct TemplateParameter {
     char       id, replace;
     string     label, defaults;
@@ -55,16 +53,18 @@ const TemplateParameter kPlane[] = {
     { 1,  0,  "center",  "", BIT_VECTOR },
     { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
     { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 4,  5,  "color",  "", BIT_VECTOR },
-    { 5,  4,  "texture",  "", BIT_TEXT },
+    { 4,  0,  "reflect",  "0.0", BIT_REAL | BIT_CHECK_POSITIVE | BIT_OPTIONAL },
+    { 5,  6,  "color",  "", BIT_VECTOR },
+    { 6,  5,  "texture",  "", BIT_TEXT },
     };
 
 const TemplateParameter kSphere[] = {
     { 1,  0, "position",  "", BIT_VECTOR },
     { 2,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
     { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
-    { 4,  5, "color",  "", BIT_VECTOR },
-    { 5,  4, "texture",  "", BIT_TEXT },
+    { 4,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
+    { 5,  6, "color",  "", BIT_VECTOR },
+    { 6,  5, "texture",  "", BIT_TEXT },
     };
 
 const TemplateParameter kCylinder[] = {
@@ -72,8 +72,9 @@ const TemplateParameter kCylinder[] = {
     { 2,  0, "direction",  "", BIT_VECTOR | BIT_CHECK_ZERO },
     { 3,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
     { 4,  0, "span",  "-1.0", BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
-    { 5,  6, "color",  "", BIT_VECTOR },
-    { 6,  5, "texture",  "", BIT_TEXT },
+    { 5,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
+    { 6,  7, "color",  "", BIT_VECTOR },
+    { 7,  6, "texture",  "", BIT_TEXT },
     };
 
 const TemplateItem kItems[] = {
@@ -97,9 +98,8 @@ const unsigned int kSizeItems =
         (unsigned int) sizeof (kItems) / sizeof (kItems[0]);
 
 
-/*****************************
- *           Parser          *
- *****************************/
+/**** Parser. ****/
+
 Parser::Parser (string *filename) {
     filename_ = (*filename);
     nentries_ = 0;
@@ -184,7 +184,8 @@ bool Parser::Query (Entry *entry) {
 }
 
 ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
-        unsigned int sizes[], unsigned int ncol, Entry *entry) {
+                                  unsigned int sizes[], unsigned int ncol, 
+                                  Entry *entry) {
     bool          check, found;
     string        label, filename, extension;
     double        output[MAX_COMPONENTS];
@@ -279,7 +280,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             if (CHECK_BIT (templ->flags, flagCheckZero)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
-                    if (output[j] != 0.0) {
+                    if (output[j] != 0.0f) {
                         check = true;
                         break;
                     }
@@ -291,7 +292,19 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             else if (CHECK_BIT (templ->flags, flagCheckPositive)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
-                    if (output[j] > 0.0) {
+                    if (output[j] > 0.0f) {
+                        check = true;
+                        break;
+                    }
+                }
+                if (!check) {
+                    return codeValue;
+                }
+            }
+            else if (CHECK_BIT (templ->flags, flagCheckZeroOne)) {
+                check = false;
+                for (j = 0; j < (ntokens - 1); j++) {
+                    if ((output[j] >= 0.0f) && (output[j] <= 1.0f)) {
                         check = true;
                         break;
                     }
@@ -560,9 +573,8 @@ void Parser::Parse () {
 }
 
 
-/*****************************
- *           Entry           *
- *****************************/
+/**** Entry. ****/
+
 Entry::Entry (string *label) {
     label_ = (*label);
     next_  = NULL;
@@ -717,9 +729,8 @@ bool Entry::Query (string *key, ParserParameter_t *type, double *reals,
 }
 
 
-/*****************************
- *      Local functions      *
- *****************************/
+/**** Utility functions. ****/
+
 bool TokenizeLine (const string *line, string *tokens,
             unsigned int *ntokens, unsigned int maxtokens) {
     /*

@@ -77,12 +77,12 @@ void Vector::Scale_InPlace (const double scale) {
     z_ *= scale;
 }
 
-void Vector::Normalize_InPlace () {
-    double len, scale;
+double Vector::Normalize_InPlace () {
+    double magnitude, scale;
 
-    len = sqrt (x_ * x_ + y_ * y_ + z_ * z_);
-    if (len != 0.0f) {
-        scale = 1.0f / len;
+    magnitude = sqrt (x_ * x_ + y_ * y_ + z_ * z_);
+    if (magnitude != 0.0f) {
+        scale = 1.0f / magnitude;
         x_ *= scale;
         y_ *= scale;
         z_ *= scale;
@@ -92,6 +92,7 @@ void Vector::Normalize_InPlace () {
         y_ = 0.0f;
         z_ = 0.0f;
     }
+    return magnitude;
 }
 
 Vector Vector::operator+ (const Vector &other) const {
@@ -124,7 +125,7 @@ Vector Vector::operator* (const double scale) const {
     return T;
 }
 
-Vector Vector::GenerateUnitVector () const {
+void Vector::GenerateUnitVector (Vector *unit) const {
     /*
      * Method finds the smallest component of a vector
      * and generates an "associated" unit vector.
@@ -133,33 +134,31 @@ Vector Vector::GenerateUnitVector () const {
      * vector should give a non-zero vector.
      *
      */
-    Vector T (0.0f, 0.0f, 1.0f);
-
     double x = (x_ < 0.0f) ? -x_ : x_;
     double y = (y_ < 0.0f) ? -y_ : y_;
     double z = (z_ < 0.0f) ? -z_ : z_;
 
+    unit->Set (0.0f, 0.0f, 1.0f);
     if (x < y) {
         if (x < z) {
-            T.Set (1.0f, 0.0f, 0.0f);
+            unit->Set (1.0f, 0.0f, 0.0f);
         }
     }
     else {  /* if ( x >= y) */
         if (y < z) {
-            T.Set (0.0f, 1.0f, 0.0f);
+            unit->Set (0.0f, 1.0f, 0.0f);
         }
     }
-    return T;
 }
 
-Vector Vector::Reflect (const Vector *normal) const {
+void Vector::Reflect (const Vector *normal, Vector *reflected) const {
     /*
      * r' = r - (2 * (r . N)) * N
      */
     Vector T;
 
-    T = (*this) - ((*normal) * (2.0f * ((*this) * (*normal))));
-    return T;
+    T = (*normal) * (2.0f * ((*this) * (*normal)));
+    (*reflected) = (*this) - T;
 }
 
 /*

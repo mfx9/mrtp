@@ -53,15 +53,16 @@ public:
     void GetActors (Plane **planes, Sphere **spheres, Cylinder **cylinders);
 
     void AddPlane (Vector *center, Vector *normal, double texscale, 
-        Color *color, Texture *texture);
+                   double reflect, Color *color, Texture *texture);
     unsigned int PopPlane ();
 
     void AddSphere (Vector *center, double radius, Vector *axis, 
-        Color *color, Texture *texture);
+                    double reflect, Color *color, Texture *texture);
     unsigned int PopSphere ();
 
     void AddCylinder (Vector *center, Vector *direction, double radius, 
-        double span, Color *color, Texture *texture);
+                      double span, double reflect, Color *color, 
+                      Texture *texture);
     unsigned int PopCylinder ();
 
     Texture *AddTexture (std::string *filename);

@@ -36,14 +36,14 @@ public:
     void Get (double *x, double *y, double *z) const;
 
     void Scale_InPlace (const double scale);
-    void Normalize_InPlace ();
+    double Normalize_InPlace ();
 
     void CopyTo (Vector *other) const;
     void Print () const;
     double Magnitude () const;
 
-    Vector Reflect (const Vector *other) const;
-    Vector GenerateUnitVector () const;
+    void Reflect (const Vector *normal, Vector *reflected) const;
+    void GenerateUnitVector (Vector *unit) const;
 
     Vector operator+ (const Vector &other) const;
     Vector operator- (const Vector &other) const;

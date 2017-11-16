@@ -35,28 +35,35 @@ void Actor::SetNext (Actor *next) {
     next_ = next;
 }
 
+bool Actor::Reflective (double *reflect) {
+    if (reflective_) {
+        *reflect = reflect_;
+    }
+    return reflective_;
+}
+
 
 /**** Planes. ****/
 
 Plane::Plane (Vector *center, Vector *normal, double scale, 
-              Color *color, Texture *texture) {
+              double reflect, Color *color, Texture *texture) {
     center->CopyTo (&center_);
+
     texture_ = texture;
-    scale_   = scale;
-    next_    = NULL;
+    scale_ = scale;
+    next_ = NULL;
+    reflect_ = reflect;
+    reflective_ = (reflect_ > 0.0f) ? true : false;
 
     normal->CopyTo (&normal_);
     normal_.Normalize_InPlace ();
-    /*
-     * Prepare texturing.
-     *
-     */
+
     if (texture_ == NULL) {
         color->CopyTo (&color_);
     }
     else {
         Vector T;
-        T = normal_.GenerateUnitVector ();
+        normal_.GenerateUnitVector (&T);
         
         tx_ = T ^ normal_;
         tx_.Normalize_InPlace ();
@@ -76,11 +83,8 @@ void Plane::DetermineColor (Vector *hit, Vector *normal,
         cp = &color_;
     }
     else {
-        V = (*hit) - center_;
-        /*
-         * Calculate components of V (dot products).
-         * 
-         */
+        V  = (*hit) - center_;
+        /* Calculate components of V (dot products). */
         vx = V * tx_;
         vy = V * ty_;
         cp = texture_->GetColor (vx, vy, scale_);
@@ -112,15 +116,15 @@ void Plane::GetNormal (Vector *hit, Vector *normal) {
 /**** Spheres. ****/
 
 Sphere::Sphere (Vector *center, double radius, Vector *axis, 
-                Color *color, Texture *texture) {
+                double reflect, Color *color, Texture *texture) {
     center->CopyTo (&center_);
-    R_       = radius;
+
+    R_ = radius;
     texture_ = texture;
-    next_    = NULL;
-    /*
-     * Prepare texturing.
-     *
-     */
+    next_ = NULL;
+    reflect_ = reflect;
+    reflective_ = (reflect_ > 0.0f) ? true : false;
+
     if (texture_ == NULL) {
         color->CopyTo (&color_);
     }
@@ -129,7 +133,7 @@ Sphere::Sphere (Vector *center, double radius, Vector *axis,
         ty_.Normalize_InPlace ();
     
         Vector T;
-        T = ty_.GenerateUnitVector ();
+        ty_.GenerateUnitVector (&T);
         tx_ = T ^ ty_;
         tx_.Normalize_InPlace ();
     
@@ -159,8 +163,7 @@ void Sphere::GetNormal (Vector *hit, Vector *normal) {
 void Sphere::DetermineColor (Vector *hit, Vector *normal, 
                              Color *color) {
     Color  *cp;
-    double  phi, theta, dot, 
-        fracx, fracy;
+    double  phi, theta, dot, fracx, fracy;
 
     if (texture_ == NULL) {
         cp = &color_;
@@ -193,32 +196,25 @@ void Sphere::DetermineColor (Vector *hit, Vector *normal,
 /**** Cylinders. ****/
 
 Cylinder::Cylinder (Vector *center, Vector *direction, 
-                    double radius, double span, Color *color, 
-                    Texture *texture) {
-    /*
-     * Radius, origin, etc.
-     */
+                    double radius, double span, double reflect, 
+                    Color *color, Texture *texture) {
     center->CopyTo (&A_);
-    R_       = radius;
-    span_    = span;
-    texture_ = texture;
-    next_    = NULL;
 
-    /*
-     * Direction of the cylinder.
-     */
+    R_ = radius;
+    span_ = span;
+    texture_ = texture;
+    next_ = NULL;
+    reflect_ = reflect;
+    reflective_ = (reflect_ > 0.0f) ? true : false;
+
     direction->CopyTo (&B_);
     B_.Normalize_InPlace ();
 
-    /*
-     * Prepare texturing.
-     *
-     */
     if (texture_ == NULL) {
         color->CopyTo (&color_);
     }
     else {
-        ty_ = B_.GenerateUnitVector ();
+        B_.GenerateUnitVector (&ty_);
         tx_ = ty_ ^ B_;
         tx_.Normalize_InPlace ();
     }
@@ -335,9 +331,9 @@ Light::Light (Vector *origin) {
 Light::~Light () {
 }
 
-void Light::GetToLight (Vector *hit, Vector *tolight) {
+void Light::LightRay (Vector *hit, Vector *ray) {
     Vector T = position_ - (*hit);
-    T.CopyTo (tolight);
+    T.CopyTo (ray);
 }
 
 
