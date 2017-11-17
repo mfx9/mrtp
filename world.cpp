@@ -28,38 +28,36 @@ World::World (Parser *parser) {
 }
 
 void World::Initialize () {
-    Entry   *entry;
-    string   id;
+    Entry  *entry;
 
     parser_->StartQuery ();
     while (parser_->Query (&entry)) {
 
-        entry->GetLabel (&id);
         entry->StartQuery ();
 
-        if (id == "camera") {
+        if (entry->CheckLabel ("camera")) {
             CreateCamera (entry);
         }
-        else if (id == "light") {
+        else if (entry->CheckLabel ("light")) {
             CreateLight (entry);
         }
-        else if (id == "plane") {
+        else if (entry->CheckLabel ("plane")) {
             CreatePlane (entry);
         }
-        else if (id == "sphere") {
+        else if (entry->CheckLabel ("sphere")) {
             CreateSphere (entry);
         }
-        else if (id == "cylinder") {
+        else if (entry->CheckLabel ("cylinder")) {
             CreateCylinder (entry);
         }
     }
 }
 
 World::~World () {
-    Actor *actor;
-    Texture *texture;
+    Actor    *actor;
+    Texture  *texture;
 
-    /* Destroy textures and actors. */
+    /* Destroy textures, actors, camera, light. */
     while (ntextures_ > 0) {
         texture = PopTexture ();
         delete texture;
@@ -68,7 +66,7 @@ World::~World () {
         actor = PopActor ();
         delete actor;
     }
-    /* Destroy camera and light. */
+
     if (camera_ != NULL) {
         delete camera_;
     }
@@ -265,7 +263,9 @@ Texture *World::PushTexture (string *filename) {
     Texture *next, *last, *texture;
     bool found;
 
-    /* Do not add a texture that already exists. */
+    /* 
+     * Do not add a texture that already exists. 
+     */
     if (ntextures_ > 0) {
         next  = textures_;
         found = false;
@@ -281,7 +281,9 @@ Texture *World::PushTexture (string *filename) {
             return last;
         }
     }
-    /* Create a new texture. */
+    /* 
+     * Create a new texture. 
+     */
     texture = new Texture (filename);
     texture->Allocate ();
 

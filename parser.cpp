@@ -100,87 +100,54 @@ const unsigned int kSizeItems =
 
 /**** Parser. ****/
 
-Parser::Parser (string *filename) {
-    filename_ = (*filename);
+Parser::Parser (string *path) {
+    path_  = *path;
     nentries_ = 0;
 }
 
 Parser::~Parser () {
     if (nentries_ > 0) {
+        /* Destroy all entries. */
+
+        list<Entry *>::iterator  current, last;
+        Entry  *entry;
+
+        current = entries_.begin ();
+        last = entries_.end ();
+
         do {
-            PopEntry (NULL);
-        } while (nentries_ > 0);
+            entry = *current;
+            delete entry;
+            nentries_--;
+        } while ((++current) != last);
     }
 }
 
-ParserStatus_t Parser::Status () {
+ParserStatus_t Parser::Check (unsigned int *nentries) {
+    *nentries = nentries_;
+
     return status_;
 }
 
-unsigned int Parser::NumberEntries () {
-    return nentries_;
-}
-
-unsigned int Parser::AddEntry (Entry *temp) {
-    Entry *entry, *next, *last;
-
-    entry  = new Entry ();
-    temp->CopyTo (entry);
-
-    if (nentries_ < 1) {
-        entries_ = entry;
-    }
-    else {
-        next = entries_;
-        do {
-            last = next;
-            next = last->Next ();
-        } while (next != NULL);
-        last->SetNext (entry);
-    }
-    return (++nentries_);
-}
-
-unsigned int Parser::PopEntry (Entry *entry) {
-    Entry *prev, *next, *last;
-
-    if (nentries_ > 0) {
-        last = entries_;
-        prev = NULL;
-        while ((next = last->Next ()) != NULL) {
-            prev = last;
-            last = next;
-        }
-        if (prev != NULL) {
-            prev->SetNext (NULL);
-        }
-        if (entry != NULL) {
-            last->CopyTo (entry);
-        }
-        delete last;
-        nentries_--;
-    }
-    return nentries_;
-}
-
 void Parser::StartQuery () {
-    current_ = nentries_;
+    current_ = 0;
 }
 
 bool Parser::Query (Entry **entry) {
-    Entry  *next;
+    if (current_ == nentries_) {
+        return false;
+    }
+
+    list<Entry *>::iterator  item;
     unsigned int i;
 
-    if (current_ > 0) {
-        next = entries_;
-        for (i = 0; i < (current_ - 1); i++) {
-            next = next->Next ();
-        }
-        *entry = next;
-        current_--;
-        return true;
+    item = entries_.begin ();
+    for (i = 0; i < current_; i++) {
+        item++;
     }
-    return false;
+    *entry = *item;
+    current_++;
+    return true;
 }
 
 ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
@@ -313,7 +280,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     return codeValue;
                 }
             }
-            entry->AddReal (&label, output, (ntokens - 1));
+            entry->AddNumerical (&label, output, (ntokens - 1));
         }
         else {
             /*
@@ -324,7 +291,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             if (!check) {
                 return codeFilename;
             }
-            entry->AddText (&label, &filename, 1);
+            entry->AddTextual (&label, &filename, 1);
         }
     }
 
@@ -345,10 +312,10 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
 
                 if (!CHECK_BIT (templ->flags, flagText)) {
                     ConvertTokens (tokens, ntokens, output);
-                    entry->AddReal (&templ->label, output, ntokens);
+                    entry->AddNumerical (&templ->label, output, ntokens);
                 }
                 else {
-                    entry->AddText (&templ->label, tokens, ntokens);
+                    entry->AddTextual (&templ->label, tokens, ntokens);
                 }
             }
             else {
@@ -387,21 +354,18 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
 }
 
 void Parser::Parse () {
-    string tokens[MAX_TOKENS];
-    unsigned int ntokens;
+    string        tokens[MAX_TOKENS];
+    string        collect[MAX_LINES][MAX_TOKENS];
+    string        line, item;
 
-    string collect[MAX_LINES][MAX_TOKENS];
-    unsigned int npar, sizes[MAX_LINES];
+    unsigned int  i, nlines, start, ncam, nlig, nact;
+    unsigned int  npar, sizes[MAX_LINES];
+    unsigned int  ntokens;
 
-    unsigned int i, nlines,
-        start, ncam, nlig, nact;
-
-    bool check;
-    ParserMode_t mode;
-    ParserCode_t code;
-
-    string line, item;
-    Entry  entry;
+    ParserMode_t  mode;
+    ParserCode_t  code;
+    bool          check;
+    Entry        *entry;
 
     /*
      * Initialize.
@@ -416,12 +380,11 @@ void Parser::Parse () {
     /*
      * Open the input file.
      */
-    const char *fn = filename_.c_str ();
+    const char *fn = path_.c_str ();
     ifstream config (fn);
 
     if (!config.is_open ()) {
-        cerr << "File \"" << filename_ 
-            << "\" cannot be opened." << endl;
+        cerr << "File \"" << path_ << "\" cannot be opened." << endl;
         return;
     }
 
@@ -431,17 +394,10 @@ void Parser::Parse () {
 
         check = TokenizeLine (&line, tokens, &ntokens, MAX_TOKENS);
         if (!check) {
-            cerr << "Line " << nlines << 
-                ": Too many tokens." << endl;
+            cerr << "Line " << nlines << ": Too many tokens." << endl;
             config.close ();
             return;
         }
-        /* DEBUG 
-        cout << nlines << ", " << ntokens << ": ";
-        for (i = 0; i < ntokens; i++) {
-            cout << "\"" << tokens[i] << "\" ";
-        }
-        cout << endl; */
 
         if (ntokens > 0) {
             /*
@@ -510,8 +466,9 @@ void Parser::Parse () {
             }
             if (mode == modeRead) {
                 mode = modeOpen;
+                entry = new Entry ();
 
-                code = CreateEntry (&item, collect, sizes, npar, &entry);
+                code = CreateEntry (&item, collect, sizes, npar, entry);
                 if (code != codeOK) {
                     cerr << "In entry at line " << start << ": ";
                     if (code == codeUnknown) {
@@ -541,8 +498,8 @@ void Parser::Parse () {
                     config.close ();
                     return;
                 }
-                AddEntry (&entry);
-                entry.Clear ();
+                entries_.push_back (entry);
+                nentries_++;
             }
         }
     }
@@ -561,137 +518,51 @@ void Parser::Parse () {
         return;
     }
     status_ = statusOK;
-
-    /* DEBUG
-    Entry *ep = entries_;
-    if (nentries_ > 0) {
-        do {
-            ep->Print ();
-            ep = ep->Next ();
-        } while (ep != NULL);
-    } */
 }
 
 
 /**** Entry. ****/
 
-Entry::Entry (string *label) {
-    label_ = (*label);
-    next_  = NULL;
-    npar_  = 0;
-}
-
 Entry::Entry () {
-    label_ = "default";
-    next_  = NULL;
-    npar_  = 0;
+    npar_ = 0;
 }
 
 Entry::~Entry () {
 }
 
-void Entry::Clear () {
-    npar_ = 0;
-}
-
-Entry *Entry::Next () {
-    return next_;
-}
-
-void Entry::SetNext (Entry *next) {
-    next_ = next;
-}
-
-void Entry::GetLabel (string *label) {
-    (*label) = label_;
+bool Entry::CheckLabel (string label) {
+    return (label == label_) ? true : false;
 }
 
 void Entry::SetLabel (string *label) {
     label_ = (*label);
 }
 
-void Entry::CopyTo (Entry *other) {
-    unsigned int i, j;
-
-    other->label_ = label_;
-    other->npar_ = npar_;
-
-    for (i = 0; i < npar_; i++) {
-        other->keys_[i] = keys_[i];
-        other->type_[i] = type_[i];
-
-        for (j = 0; j < MAX_COMPONENTS; j++) {
-            if (type_[i] == parameterReal) {
-                other->real_[i][j] = real_[i][j];
-            }
-            else {  /* if (type[i] == parameterText) */
-                other->text_[i][j] = text_[i][j];
-            }
-        }
-    }
-}
-
-void Entry::Print () {
-    unsigned int i, j;
-
-    cout << "** Entry: " << label_ << endl;
-    cout << "npar=" << npar_ << endl;
-
-    if (npar_ > 0) {
-        for (i = 0; i < npar_; i++) {
-            cout << "Key " << keys_[i] << ": ";
-        
-            for (j = 0; j < MAX_COMPONENTS; j++) {
-                if (type_[i] == parameterText) {
-                    if (text_[i][j] != "") {
-                        cout << "\"" << text_[i][j] << "\" ";
-                    }
-                    else {
-                        cout << "\"\" ";
-                    }
-                }
-                else {  /* if (type[i] == parameterReal) */
-                    cout << real_[i][j] << " ";
-                }
-            }
-            cout << endl;
-        }
-    }
-}
-
-bool Entry::AddText (const string *key, const string *text, 
-        unsigned int ntext) {
+void Entry::AddTextual (const string *key, const string *text, 
+                        unsigned int ntext) {
     unsigned int i;
 
     for (i = 0; i < ntext; i++) {
         text_[npar_][i] = text[i];
     }
-    type_[npar_] = parameterText;
-    keys_[npar_] = (*key);
-    npar_++;
-
-    return true;
+    keys_[npar_++] = (*key);
 }
 
-bool Entry::AddReal (const string *key, double *real, 
-        unsigned int nreal) {
+void Entry::AddNumerical (const string *key, double *real, 
+                          unsigned int nreal) {
     unsigned int i;
 
     for (i = 0; i < nreal; i++) {
         real_[npar_][i] = real[i];
     }
-    type_[npar_] = parameterReal;
-    keys_[npar_] = (*key);
-    npar_++;
-
-    return true;
+    keys_[npar_++] = (*key);
 }
 
 void Entry::StartQuery () {
     /*
      * Method must be called before calling Query().
      */
-    current_ = npar_;
+    current_ = 0;
 }
 
 bool Entry::Query (string *key, double **numerical, string **textual) {
@@ -703,14 +574,14 @@ bool Entry::Query (string *key, double **numerical, string **textual) {
      * in a while type of loop, until false is returned.
      *
      */
-    if (current_ < 1) {
+    if (current_ == npar_) {
         return false;
     }
-    current_--;
-
     *key = keys_[current_];
     *textual = &text_[current_][0];
     *numerical = &real_[current_][0];
+
+    current_++;
 
     return true;
 }
@@ -719,7 +590,7 @@ bool Entry::Query (string *key, double **numerical, string **textual) {
 /**** Utility functions. ****/
 
 bool TokenizeLine (const string *line, string *tokens,
-            unsigned int *ntokens, unsigned int maxtokens) {
+                   unsigned int *ntokens, unsigned int maxtokens) {
     /*
      * Split a line to tokens.
      *
@@ -767,7 +638,7 @@ bool TokenizeLine (const string *line, string *tokens,
 }
 
 bool ConvertTokens (const string *tokens, unsigned int ntokens, 
-        double *out) {
+                    double *out) {
     /*
      * Convert tokens to real numbers.
      */

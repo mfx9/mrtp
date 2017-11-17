@@ -369,14 +369,15 @@ int main (int argc, char **argv) {
     /*
      * Parse the input file.
      */
+    unsigned int nentries;
+
     Parser parser (&input);
     parser.Parse ();
-    if (parser.Status () != statusOK) {
+    if (parser.Check (&nentries) != statusOK) {
         return exitFail;
     }
     if (!quiet) {
-        i = parser.NumberEntries ();
-        cout << "Parsing OK, created " << i << 
+        cout << "Parsing OK, created " << nentries << 
             " entries." << endl;
     }
 

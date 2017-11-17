@@ -17,7 +17,6 @@
 /* NULL pointer. */
 #include <cstddef>
 
-#include <list>
 #include <string>
 #include <iostream>
 
@@ -44,7 +43,7 @@ class World {
      * Private methods.
      */
     void CreateCamera (Entry *entry);
-    void CreateLight (Entry *light);
+    void CreateLight (Entry *entry);
     void CreatePlane (Entry *entry);
     void CreateSphere (Entry *entry);
     void CreateCylinder (Entry *entry);
@@ -58,8 +57,8 @@ class World {
 public:
     World (Parser *parser);
     ~World ();
-    void Initialize ();
 
+    void Initialize ();
     void AssignCamera (Camera **camera);
     void AssignLightActors (Light **light, Actor **actors);
 };
