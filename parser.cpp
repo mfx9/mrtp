@@ -596,44 +596,43 @@ bool TokenizeLine (const string *line, string *tokens,
      *
      * Remove redundant blank characters and comments.
      */
-    char    c, pc;
-    string  accu;
-    unsigned int i, ti, len;
+    size_t  i, ti;
+    bool    stop;
+    string  chars, token;
 
-    ti  = 0;
-    len = line->length ();
+    chars = (*line);
+    i = chars.find ("#");
 
-    if (len > 0) {
-        accu = "";
-        pc   = line->at (0);
-        for (i = 0; i < len; i++) {
-            c = line->at (i);
-            if (c == '#') {
-                /* Open a comment. */
-                break;
-            }
-            if ((c != ' ') && (c != '\t')) {
-                /* Not a white character. */
-                accu += c;
-            }
-            if (((c == ' ') || (c == '\t')) && 
-                    ((pc != ' ') && (pc != '\t')) ||
-                    (i == (len - 1))) {
-                /* Current character is white, previous character 
-                        is not. */
-                if (ti == maxtokens) {
-                    return false;
-                }
-                tokens[ti++] = accu;
-                accu = "";
-            }
-            pc = c;
+    if (i != string::npos) {
+        chars.resize (i);
+    }
+    ti = 0;
+    stop = false;
+
+    while (!stop) {
+        i = chars.find (" ");
+        if (i == string::npos) {
+            i = chars.find ("\t");
         }
-        if (accu != "") {
-            tokens[ti++] = accu;
+        token = "";
+        if (i != string::npos) {
+            if (i > 0) {
+                token = chars.substr (0, i);
+            }
+            chars = chars.substr (i + 1);
+        }
+        else {
+            token = chars;
+            stop = true;
+        }
+        if (token != "") {
+            tokens[ti] = token;
+            if (++ti > (size_t) maxtokens) {
+                return false;
+            }
         }
     }
-    (*ntokens) = ti;
+    *ntokens = (unsigned int) ti;
     return true;
 }
 
