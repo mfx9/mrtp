@@ -16,40 +16,41 @@
 using namespace std;
 
 
-/**** Local functions. ****/
-
-static bool TokenizeLine (const string *line, string *tokens,
-                          unsigned int *ntokens, unsigned int maxtokens);
-static bool ConvertTokens (const string *tokens, unsigned int ntokens, 
-                           double *out);
-static bool CheckFilename (string *in, string *ext, string *out);
-
-
 /**** Tables. ****/
 
-struct TemplateParameter {
-    char       id, replace;
-    string     label, defaults;
+struct MotifParameter {
+    char       id;
+    char       replace;
+    string     label;
+    string     defaults;
     Bitmask_t  flags;
 };
 
-struct TemplateItem {
-    string  id;
-    const TemplateParameter *templ;
-    unsigned int ntempl;
+struct MotifActor {
+    string        id;
+    bool          mandatory;
+    unsigned int  nallowed;
+    unsigned int  nmotif;
+
+    const MotifParameter *motif;
 };
 
-const TemplateParameter kCamera[] = {
+struct MotifMessage {
+    ParserCode_t  code;
+    string        message;
+};
+
+const MotifParameter kCamera[] = {
     { 1,  0,  "position",  "", BIT_VECTOR },
     { 2,  0,  "target",  "", BIT_VECTOR },
     { 3,  0,  "roll",  "0.0", BIT_REAL | BIT_OPTIONAL },
     };
 
-const TemplateParameter kLight[] = {
+const MotifParameter kLight[] = {
     { 1,  0,  "position",  "", BIT_VECTOR},
     };
 
-const TemplateParameter kPlane[] = {
+const MotifParameter kPlane[] = {
     { 1,  0,  "center",  "", BIT_VECTOR },
     { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
     { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
@@ -58,7 +59,7 @@ const TemplateParameter kPlane[] = {
     { 6,  5,  "texture",  "", BIT_TEXT },
     };
 
-const TemplateParameter kSphere[] = {
+const MotifParameter kSphere[] = {
     { 1,  0, "position",  "", BIT_VECTOR },
     { 2,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
     { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
@@ -67,7 +68,7 @@ const TemplateParameter kSphere[] = {
     { 6,  5, "texture",  "", BIT_TEXT },
     };
 
-const TemplateParameter kCylinder[] = {
+const MotifParameter kCylinder[] = {
     { 1,  0, "center",  "", BIT_VECTOR },
     { 2,  0, "direction",  "", BIT_VECTOR | BIT_CHECK_ZERO },
     { 3,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
@@ -77,25 +78,43 @@ const TemplateParameter kCylinder[] = {
     { 7,  6, "texture",  "", BIT_TEXT },
     };
 
-const TemplateItem kItems[] = {
-    {"camera", kCamera,
-        (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])) },
+const MotifActor kActors[] = {
+    {"camera", true, 1, (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])), kCamera },
 
-    {"light", kLight,
-        (unsigned int) (sizeof (kLight) / sizeof (kLight[0])) },
+    {"light", true, 1, (unsigned int) (sizeof (kLight) / sizeof (kLight[0])), kLight },
 
-    {"plane", kPlane,
-        (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])) },
+    {"plane", false, 0, (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])), kPlane },
 
-    {"sphere", kSphere,
-        (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])) },
+    {"sphere", false, 0, (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])), kSphere },
 
-    {"cylinder", kCylinder,
-        (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])) },
+    {"cylinder", false, 0, (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])), kCylinder },
     };
 
-const unsigned int kSizeItems =
-        (unsigned int) sizeof (kItems) / sizeof (kItems[0]);
+const unsigned int kSizeActors =
+        (unsigned int) sizeof (kActors) / sizeof (kActors[0]);
+
+const MotifMessage kErrorMessages[] = {
+    { codeUnknown, "Unrecognized parameter." }, 
+    { codeType, "Wrong type of component(s)." }, 
+    { codeSize, "Wrong number of components." },
+    { codeMissing, "Missing parameter." }, 
+    { codeRepeated, "Repeated parameter." }, 
+    { codeFilename, "File not found or invalid filename." }, 
+    { codeValue, "Invalid value(s)." }, 
+    { codeConflict, "Conflicting parameters." } ,
+};
+
+const unsigned int kSizeMessages =
+        (unsigned int) sizeof (kErrorMessages) / sizeof (kErrorMessages[0]);
+
+
+/**** Local functions. ****/
+
+static bool TokenizeLine (const string *line, string *tokens,
+                          unsigned int *ntokens, unsigned int maxtokens);
+static bool ConvertTokens (const string *tokens, unsigned int ntokens, 
+                           double *out);
+static bool CheckFilename (string *in, string *ext, string *out);
 
 
 /**** Parser. ****/
@@ -159,8 +178,8 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     unsigned int  i, j, k, ntokens;
     Bitmask_t     checklist;
 
-    const TemplateParameter *templ, *othertempl;
-    const TemplateItem      *item;
+    const MotifParameter *motif, *othermotif;
+    const MotifActor      *item;
 
     string  tokens[MAX_COMPONENTS];
     /*
@@ -169,10 +188,10 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     entry->SetLabel (id);
 
     /*
-     * Find a template for the current item.
+     * Find a motifate for the current item.
      */
-    item = kItems;
-    for (i = 0; i < kSizeItems; i++, item++) {
+    item = kActors;
+    for (i = 0; i < kSizeActors; i++, item++) {
         if (item->id == (*id)) {
             break;
         }
@@ -185,12 +204,12 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     for (i = 0; i < ncol; i++) {
         label = collect[i][0];
         /*
-         * Find a template for the current collectible.
+         * Find a motifate for the current collectible.
          */
         found = false;
-        templ = item->templ;
-        for (j = 0; j < item->ntempl; j++, templ++) {
-            if (templ->label == label) {
+        motif = item->motif;
+        for (j = 0; j < item->nmotif; j++, motif++) {
+            if (motif->label == label) {
                 found = true;
                 break;
             }
@@ -211,10 +230,10 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
         /*
          * Check for conflicting parameters.
          */
-        othertempl = item->templ;
-        for (k = 0; k < item->ntempl; k++, othertempl++) {
+        othermotif = item->motif;
+        for (k = 0; k < item->nmotif; k++, othermotif++) {
             if (j != k) {
-                if (templ->replace == othertempl->id) {
+                if (motif->replace == othermotif->id) {
                     if (CHECK_BIT (checklist, k)) {
                         return codeConflict;
                     }
@@ -226,14 +245,14 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
          * Parameters are usually 3D vectors (including colors).
          */
         ntokens = 2;
-        if (CHECK_BIT (templ->flags, flagVector)) {
+        if (CHECK_BIT (motif->flags, flagVector)) {
             ntokens = 4;
         }
         if (sizes[i] != ntokens) {
             return codeSize;
         }
 
-        if (!CHECK_BIT (templ->flags, flagText)) {
+        if (!CHECK_BIT (motif->flags, flagText)) {
             /*
              * Parameter is a vector or real number.
              */
@@ -244,7 +263,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             /*
              * Check for invalid values.
              */
-            if (CHECK_BIT (templ->flags, flagCheckZero)) {
+            if (CHECK_BIT (motif->flags, flagCheckZero)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if (output[j] != 0.0f) {
@@ -256,7 +275,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     return codeValue;
                 }
             }
-            else if (CHECK_BIT (templ->flags, flagCheckPositive)) {
+            else if (CHECK_BIT (motif->flags, flagCheckPositive)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if (output[j] > 0.0f) {
@@ -268,7 +287,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     return codeValue;
                 }
             }
-            else if (CHECK_BIT (templ->flags, flagCheckZeroOne)) {
+            else if (CHECK_BIT (motif->flags, flagCheckZeroOne)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if ((output[j] >= 0.0f) && (output[j] <= 1.0f)) {
@@ -298,38 +317,38 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     /*
      * Check if all parameters or their alternatives are present.
      */
-    templ = item->templ;
-    for (i = 0; i < item->ntempl; i++, templ++) {
+    motif = item->motif;
+    for (i = 0; i < item->nmotif; i++, motif++) {
         if (!CHECK_BIT (checklist, i)) {
             /*
              * Parameter is not present.
              */
-            if (CHECK_BIT (templ->flags, flagOptional)) {
+            if (CHECK_BIT (motif->flags, flagOptional)) {
                 /*
                  * Parameter is optional, load defaults.
                  */
-                TokenizeLine (&templ->defaults, tokens, &ntokens, MAX_COMPONENTS);
+                TokenizeLine (&motif->defaults, tokens, &ntokens, MAX_COMPONENTS);
 
-                if (!CHECK_BIT (templ->flags, flagText)) {
+                if (!CHECK_BIT (motif->flags, flagText)) {
                     ConvertTokens (tokens, ntokens, output);
-                    entry->AddNumerical (&templ->label, output, ntokens);
+                    entry->AddNumerical (&motif->label, output, ntokens);
                 }
                 else {
-                    entry->AddTextual (&templ->label, tokens, ntokens);
+                    entry->AddTextual (&motif->label, tokens, ntokens);
                 }
             }
             else {
                 /*
                  * Parameter is not optional, check if it is replaceable.
                  */
-                if (templ->replace) {
+                if (motif->replace) {
                     /*
                      * Check if the alternative parameter is present.
                      */
-                    othertempl = item->templ;
-                    for (j = 0; j < item->ntempl; j++, othertempl++) {
+                    othermotif = item->motif;
+                    for (j = 0; j < item->nmotif; j++, othermotif++) {
                         if (i != j) {
-                            if (templ->replace == othertempl->id) {
+                            if (motif->replace == othermotif->id) {
                                 break;
                             }
                         }
@@ -358,9 +377,10 @@ void Parser::Parse () {
     string        collect[MAX_LINES][MAX_TOKENS];
     string        line, item;
 
-    unsigned int  i, nlines, start, ncam, nlig, nact;
+    unsigned int  i, nlines, start;
     unsigned int  npar, sizes[MAX_LINES];
     unsigned int  ntokens;
+    unsigned int  counters[kSizeActors], nallowed, total;
 
     ParserMode_t  mode;
     ParserCode_t  code;
@@ -370,12 +390,12 @@ void Parser::Parse () {
     /*
      * Initialize.
      */
+    for (i = 0; i < kSizeActors; i++) {
+        counters[i] = 0;
+    }
     status_ = statusFail;
     mode    = modeOpen;
     nlines  = 0;
-    ncam    = 0;
-    nlig    = 0;
-    nact    = 0;
 
     /*
      * Open the input file.
@@ -400,47 +420,39 @@ void Parser::Parse () {
         }
 
         if (ntokens > 0) {
-            /*
-             * Not a blank line.
-             *
-             */
+             /* Not a blank line. */
+
             if (mode == modeOpen) {
                 item = tokens[0];
-                if ((item == "camera") || (item == "light")
-                        || (item == "plane") || (item == "sphere")
-                        || (item == "cylinder")) {
-                    mode  = modeRead;
-                    npar  = 0;
-                    start = nlines;
 
-                    if (item == "camera") {
-                        if ((++ncam) > 1) {
-                            cerr << "Line " << nlines 
-                                << ": Multiple camera entries." << endl;
+                check = false;
+                for (i = 0; i < kSizeActors; i++) {
+                    if (kActors[i].id == item) {
+                        check = true;
+                        npar  = 0;
+                        start = nlines;
+                        mode  = modeRead;
+
+                        nallowed = kActors[i].nallowed;
+                        counters[i]++;
+
+                        if (nallowed && (counters[i] > nallowed)) {
+                            cerr << "Line " << nlines << 
+                                ": Too many entries of " << item << "." << endl;
                             config.close ();
                             return;
                         }
-                    }
-                    else if (item == "light") {
-                        if ((++nlig) > 1) {
-                            cerr << "Line " << nlines 
-                                << ": Multiple light entries." << endl;
-                            config.close ();
-                            return;
-                        }
-                    }
-                    else {
-                        nact++;
+                        break;
                     }
                 }
-                else {
+                if (!check) {
                     cerr << "Line " << nlines << ": Unrecognized item \"" 
                         << item << "\"." << endl;
                     config.close ();
                     return;
                 }
             }
-            else {
+            else {  /* if (mode == modeRead) */
                 if (npar == MAX_LINES) {
                     cerr << "Line " << nlines << 
                         ": Too many parameter lines." << endl;
@@ -471,29 +483,12 @@ void Parser::Parse () {
                 code = CreateEntry (&item, collect, sizes, npar, entry);
                 if (code != codeOK) {
                     cerr << "In entry at line " << start << ": ";
-                    if (code == codeUnknown) {
-                        cerr << "Unrecognized parameter." << endl;
-                    }
-                    else if (code == codeType) {
-                        cerr << "Wrong type of component(s)." << endl;
-                    }
-                    else if (code == codeSize) {
-                        cerr << "Wrong number of components." << endl;
-                    }
-                    else if (code == codeMissing) {
-                        cerr << "Missing parameter." << endl;
-                    }
-                    else if (code == codeRepeated) {
-                        cerr << "Repeated parameter." << endl;
-                    }
-                    else if (code == codeFilename) {
-                        cerr << "File not found or invalid filename." << endl;
-                    }
-                    else if (code == codeValue) {
-                        cerr << "Invalid value(s)." << endl;
-                    }
-                    else {  /* if (code == codeConflict) */
-                        cerr << "Conflicting parameters." << endl;
+
+                    for (i = 0; i < kSizeMessages; i++) {
+                        if (kErrorMessages[i].code == code) {
+                            cerr << kErrorMessages[i].message << endl;
+                            break;
+                        }
                     }
                     config.close ();
                     return;
@@ -505,15 +500,20 @@ void Parser::Parse () {
     }
     config.close ();
 
-    if (ncam < 1) {
-        cerr << "Camera not found." << endl;
-        return;
+    for (i = 0; i < kSizeActors; i++) {
+        if (kActors[i].mandatory && (counters[i] < 1)) {
+            cerr << "No entries found for " << kActors[i].id << "." << endl;
+            return;
+        }
     }
-    if (nlig < 1) {
-        cerr << "Light not found." << endl;
-        return;
+
+    total = 0;
+    for (i = 0; i < kSizeActors; i++) {
+        if (!kActors[i].mandatory) {
+            total += counters[i];
+        }
     }
-    if (nact < 1) {
+    if (total < 1) {
         cerr << "Scene contains no actors." << endl;
         return;
     }
