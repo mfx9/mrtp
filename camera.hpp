@@ -16,24 +16,26 @@
 
 #include <cmath>
 #include <cstdio>
-#include "vector.hpp"
 
-/*
- * Macros.
- */
-#define DEG_TO_RAD(angle) (angle * M_PI / 180.0f)
+#include "vector.hpp"
 
 
 class Camera {
-    Vector  eye_, lookat_;
-    double rotation_;
+    Vector  eye_;
+    Vector  lookat_;
+    Vector  wo_;
+    Vector  wh_;
+    Vector  wv_;
+    double  rotation_;
 
 public:
-    Camera (Vector *origin, Vector *target, double roll);
+    Camera (Vector *origin, Vector *target, const double roll);
     ~Camera ();
-    void CalculateVectors (double width, double height, 
-            double perspective, Vector *vw, Vector *vh, Vector *vo);
-    void GetEye (Vector *vector);
+
+    void CalculateWindow (const unsigned int width, const unsigned int height, 
+                          const double perspective);
+    void CalculateRay (const unsigned int windowx, const unsigned int windowy, 
+                       Vector *origin, Vector *direction) const;
 };
 
 #endif /* _CAMERA_H */

@@ -13,23 +13,21 @@
  */
 #include "camera.hpp"
 
+const double kDegreeToRadian = M_PI / 180.0f;
 
-Camera::Camera (Vector *origin, Vector *target, 
-        double roll) {
+
+Camera::Camera (Vector *origin, Vector *target, const double roll) {
     origin->CopyTo (&eye_);
     target->CopyTo (&lookat_);
-    rotation_  = DEG_TO_RAD (roll);
+
+    rotation_ = kDegreeToRadian * roll;
 }
 
 Camera::~Camera () {
 }
 
-void Camera::GetEye (Vector *vector) {
-    eye_.CopyTo (vector);
-}
-
-void Camera::CalculateVectors (double width, double height, 
-        double perspective, Vector *vw, Vector *vh, Vector *vo) {
+void Camera::CalculateWindow (const unsigned int width, const unsigned int height, 
+                              const double perspective) {
     /*
      * Calculate vectors that span the window.
      */
@@ -89,18 +87,26 @@ void Camera::CalculateVectors (double width, double height,
     /*
      * Find three corners of the window.
      */
-    Vector wo = center + j + k;
+    wo_ = center + j + k;
+
     Vector ww = center - j + k;
     Vector wh = center + j - k;
 
     /*
      * Find vectors spanning the window.
      */
-    wo.CopyTo (vo);
+    wh_ = (ww - wo_) * (1.0f / (double) width);
+    wv_ = (wh - wo_) * (1.0f / (double) height);
+}
 
-    Vector horiz = (ww - wo) * (1.0f / width);
-    horiz.CopyTo (vw);
+void Camera::CalculateRay (const unsigned int windowx, const unsigned int windowy, 
+                           Vector *origin, Vector *direction) const {
+    Vector horizontal, vertical;
 
-    Vector verti = (wh - wo) * (1.0f / height);
-    verti.CopyTo (vh);
+    horizontal = wh_ * (double) windowx;
+    vertical = wv_ * (double) windowy;
+
+    (*origin) = wo_ + horizontal + vertical;
+    (*direction) = (*origin) - eye_;
+    direction->Normalize_InPlace ();
 }

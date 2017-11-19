@@ -379,10 +379,10 @@ int main (int argc, char **argv) {
      */
 #ifdef _OPENMP
     Renderer renderer (&world, width, height, fov, distance, 
-        shadow, model, reflect, reflshadow, threads);
+        model, shadow, reflect, reflshadow, threads);
 #else
     Renderer renderer (&world, width, height, fov, distance, 
-        shadow, model, reflect, reflshadow, 1);
+        model, shadow, reflect, reflshadow, 1);
 #endif /* _OPENMP */
     renderer.Initialize ();
     if (!quiet) {

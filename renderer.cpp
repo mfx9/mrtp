@@ -12,26 +12,34 @@
  *
  */
 #include "renderer.hpp"
-
 using namespace std;
 
+const double kDegreeToRadian = M_PI / 180.0f;
 
-Renderer::Renderer (World *world, unsigned int width,
-        unsigned int height, double fov,
-        double distance, double shadowfactor, 
-        LightModel_t lightmodel, unsigned int maxdepth, 
-        bool reflshadow, unsigned int nthreads) {
-    world_ = world;
+
+Renderer::Renderer (World *world, 
+        unsigned int width, unsigned int height, double fov, 
+        double distance, LightModel_t lightmodel, 
+        double shadowfactor, 
+        unsigned int maxdepth, bool reflshadow, 
+        unsigned int nthreads) {
     buffer_ = NULL;
     width_ = width;
     height_ = height;
     fov_ = fov;
+
     maxdist_ = distance;
-    shadow_ = shadowfactor;
     model_ = lightmodel;
+    shadow_ = shadowfactor;
+
     maxdepth_ = maxdepth;
     reflshadow_ = reflshadow;
     nthreads_ = nthreads;
+
+    /* Assign pointers. */
+    world->AssignCamera (&camera_);
+
+    world->AssignLightActors (&light_, &actors_);
 }
 
 Renderer::~Renderer () {
@@ -47,7 +55,7 @@ void Renderer::Initialize () {
     }
 
     ratio_ = (double) width_ / (double) height_;
-    perspective_ = ratio_ / (2.0f * tan (DEG_TO_RAD (fov_ / 2.0f)));
+    perspective_ = ratio_ / (2.0f * tan (kDegreeToRadian * (fov_ / 2.0f)));
 }
 
 void Renderer::SaveFrame (string *path) {
@@ -92,17 +100,14 @@ bool Renderer::SolveHits (Vector *origin, Vector *direction, Actor *actor,
 void Renderer::TraceRay_r (Vector *origin, Vector *direction, 
                            unsigned int depth, 
                            double mixing, Color *color) {
-    Light     *light;
-    Actor     *actors, *hitactor;
-    double     currd, raylen, intensity, shadow, ambient, factor;
-    Vector     inter, ray, normal, reflected;
-    Color      objcol;
-    bool       hit, isshadow;
-
-    world_->AssignLightActors (&light, &actors);
+    Actor   *hitactor;
+    double   currd, raylen, intensity, shadow, ambient, factor;
+    Vector   inter, ray, normal, reflected;
+    Color    objcol;
+    bool     hit, isshadow;
 
     currd = maxdist_;
-    hit = SolveHits (origin, direction, actors, &hitactor, &currd);
+    hit = SolveHits (origin, direction, actors_, &hitactor, &currd);
 
     if (hit) {
         /* Found an intersection. */
@@ -112,10 +117,10 @@ void Renderer::TraceRay_r (Vector *origin, Vector *direction,
         hitactor->DetermineColor (&inter, &normal, &objcol);
 
         /* Calculate the intensity of light. */
-        intensity = light->Intensity (&inter, &normal, &ray, &raylen);
+        intensity = light_->Intensity (&inter, &normal, &ray, &raylen);
 
         /* Check if the intersection is in a shadow. */
-        isshadow = SolveShadows (&inter, &ray, raylen, actors);
+        isshadow = SolveShadows (&inter, &ray, raylen, actors_);
         shadow = (isshadow) ? shadow_ : 1.0f;
 
         /* Decrease light intensity for actors away from the light. */
@@ -154,21 +159,15 @@ void Renderer::TraceRay_r (Vector *origin, Vector *direction,
     /* No intersections found, quit. */
 }
 
-void Renderer::RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
-                            unsigned int block, unsigned int nlines) {
+void Renderer::RenderBlock (unsigned int block, unsigned int nlines) {
     unsigned int i, j;
-    Vector  horizontal, vertical, origin, direction;
-    Color  *color;
+    Vector   origin, direction;
+    Color   *color;
 
     color = buffer_->Pointer (block * nlines);
     for (j = 0; j < nlines; j++) {
         for (i = 0; i < width_; i++, color++) {
-            horizontal = (*vw) * (double) i;
-            vertical   = (*vh) * (double) (j + block * nlines);
-
-            origin     = (*vo) + horizontal + vertical;
-            direction  = origin - (*eye);
-            direction.Normalize_InPlace ();
+            camera_->CalculateRay (i, (j + block * nlines), &origin, &direction);
 
             color->Zero ();
             TraceRay_r (&origin, &direction, 0, 1.0f, color);
@@ -177,21 +176,14 @@ void Renderer::RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
 }
 
 void Renderer::Render () {
-    Vector   vw, vh, vo, eye;
-    Camera  *camera;
-
-    world_->AssignCamera (&camera);
-
-    camera->CalculateVectors ((double) width_, (double) height_, 
-        perspective_, &vw, &vh, &vo);
-    camera->GetEye (&eye);
+    camera_->CalculateWindow (width_, height_, perspective_);
 
 #ifdef _OPENMP
     if (nthreads_ == 1) {
         /*
          * Serial execution.
          */
-        RenderBlock (&vw, &vh, &vo, &eye, 0, height_);
+        RenderBlock (0, height_);
     }
     else {
         /* 
@@ -217,17 +209,17 @@ void Renderer::Render () {
 
         #pragma omp parallel for
         for (block = 0; block < nthreads_; block++) {
-            RenderBlock (&vw, &vh, &vo, &eye, block, nlines);
+            RenderBlock (block, nlines);
         }
         nfill = height_ % nthreads_;
         if (nfill) {
-            RenderBlock (&vw, &vh, &vo, &eye, block + 1, nfill);
+            RenderBlock (block + 1, nfill);
         }
     }
 #else
     /*
      * No OpenMP compiled in, always do serial execution.
      */
-    RenderBlock (&vw, &vh, &vo, &eye, 0, height_);
+    RenderBlock (0, height_);
 #endif /* _OPENMP */
 }

@@ -25,20 +25,18 @@
 
 #include "color.hpp"
 #include "vector.hpp"
-#include "actors.hpp"
 #include "world.hpp"
+#include "actors.hpp"
+#include "camera.hpp"
 #include "buffer.hpp"
-
-/*
- * Macros.
- */
-#define DEG_TO_RAD(angle) (angle * M_PI / 180.0f)
 
 enum LightModel_t {lightNone, lightLinear, lightQuadratic};
 
 
 class Renderer {
-    World   *world_;
+    Light   *light_;
+    Actor   *actors_;
+    Camera  *camera_;
     Buffer  *buffer_;
 
     /*
@@ -75,15 +73,15 @@ class Renderer {
                     Actor **hitactor, double *currd);
     void TraceRay_r (Vector *origin, Vector *direction, 
                      unsigned int depth, double mixing, Color *color);
-    void RenderBlock (Vector *vw, Vector *vh, Vector *vo, Vector *eye,
-                      unsigned int block, unsigned int nlines);
+    void RenderBlock (unsigned int block, unsigned int nlines);
 
 public:
-    Renderer (World *world, unsigned int width,
-              unsigned int height, double fov,
-              double distance, double shadowfactor, 
-              LightModel_t lightmodel, unsigned int maxdepth, 
-              bool reflshadow, unsigned int nthreads);
+    Renderer (World *world, 
+              unsigned int width, unsigned int height, double fov,
+              double distance, LightModel_t lightmodel, 
+              double shadowfactor, 
+              unsigned int maxdepth, bool reflshadow, 
+              unsigned int nthreads);
     ~Renderer ();
 
     void Render ();
