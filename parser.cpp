@@ -26,13 +26,14 @@ struct MotifParameter {
     Bitmask_t  flags;
 };
 
-struct MotifActor {
-    string        id;
+struct MotifEntry {
+    EntryID_t     id;
+    string        label;
     bool          mandatory;
     unsigned int  nallowed;
-    unsigned int  nmotif;
-
-    const MotifParameter *motif;
+    unsigned int  nparameters;
+ 
+   const MotifParameter *parameters;
 };
 
 struct MotifMessage {
@@ -78,20 +79,20 @@ const MotifParameter kCylinder[] = {
     { 7,  6, "texture",  "", BIT_TEXT },
     };
 
-const MotifActor kActors[] = {
-    {"camera", true, 1, (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])), kCamera },
+const MotifEntry kEntries[] = {
+    {entryCamera, "camera", true, 1, (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])), kCamera },
 
-    {"light", true, 1, (unsigned int) (sizeof (kLight) / sizeof (kLight[0])), kLight },
+    {entryLight, "light", true, 1, (unsigned int) (sizeof (kLight) / sizeof (kLight[0])), kLight },
 
-    {"plane", false, 0, (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])), kPlane },
+    {entryPlane, "plane", false, 0, (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])), kPlane },
 
-    {"sphere", false, 0, (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])), kSphere },
+    {entrySphere, "sphere", false, 0, (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])), kSphere },
 
-    {"cylinder", false, 0, (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])), kCylinder },
+    {entryCylinder, "cylinder", false, 0, (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])), kCylinder },
     };
 
-const unsigned int kSizeActors =
-        (unsigned int) sizeof (kActors) / sizeof (kActors[0]);
+const unsigned int kSizeEntries =
+        (unsigned int) sizeof (kEntries) / sizeof (kEntries[0]);
 
 const MotifMessage kErrorMessages[] = {
     { codeUnknown, "Unrecognized parameter." }, 
@@ -110,8 +111,8 @@ const unsigned int kSizeMessages =
 
 /**** Local functions. ****/
 
-static bool TokenizeLine (const string *line, string *tokens,
-                          unsigned int *ntokens, unsigned int maxtokens);
+static bool TokenizeLine (const string *line, unsigned int maxtokens,
+                          string *tokens, unsigned int *ntokens);
 static bool ConvertTokens (const string *tokens, unsigned int ntokens, 
                            double *out);
 static bool CheckFilename (string *in, string *ext, string *out);
@@ -120,56 +121,40 @@ static bool CheckFilename (string *in, string *ext, string *out);
 /**** Parser. ****/
 
 Parser::Parser (string *path) {
-    path_  = *path;
-    nentries_ = 0;
+    path_ = *path;
 }
 
 Parser::~Parser () {
-    if (nentries_ > 0) {
-        /* Destroy all entries. */
+    /* Destroy all entries. */
+    Entry *entry;
 
-        list<Entry *>::iterator  current, last;
-        Entry  *entry;
-
-        current = entries_.begin ();
-        last = entries_.end ();
-
-        do {
-            entry = *current;
-            delete entry;
-            nentries_--;
-        } while ((++current) != last);
+    if (!entries_.empty ()) {
+        entry = entries_.back ();
+        delete entry;
+        entries_.pop_back ();
     }
 }
 
 ParserStatus_t Parser::Check (unsigned int *nentries) {
-    *nentries = nentries_;
-
+    *nentries = entries_.size ();
     return status_;
 }
 
 void Parser::StartQuery () {
-    current_ = 0;
+    currentEntry_ = entries_.begin ();
 }
 
 bool Parser::Query (Entry **entry) {
-    if (current_ == nentries_) {
+    if (entries_.end () == currentEntry_) {
         return false;
     }
+    *entry = *currentEntry_;
+    currentEntry_++;
 
-    list<Entry *>::iterator  item;
-    unsigned int i;
-
-    item = entries_.begin ();
-    for (i = 0; i < current_; i++) {
-        item++;
-    }
-    *entry = *item;
-    current_++;
     return true;
 }
 
-ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
+ParserCode_t Parser::CreateEntry (string *entryLabel, string collect[][MAX_TOKENS],
                                   unsigned int sizes[], unsigned int ncol, 
                                   Entry *entry) {
     bool          check, found;
@@ -178,24 +163,21 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     unsigned int  i, j, k, ntokens;
     Bitmask_t     checklist;
 
-    const MotifParameter *motif, *othermotif;
-    const MotifActor      *item;
+    const MotifParameter *parameter, *otherParameter;
+    const MotifEntry      *motif;
 
     string  tokens[MAX_COMPONENTS];
-    /*
-     * Assign the label (camera, light, etc.)
-     */
-    entry->SetLabel (id);
 
     /*
-     * Find a motifate for the current item.
+     * Find a motif for the current actor, light, camera.
      */
-    item = kActors;
-    for (i = 0; i < kSizeActors; i++, item++) {
-        if (item->id == (*id)) {
+    motif = kEntries;
+    for (i = 0; i < kSizeEntries; i++, motif++) {
+        if (motif->label == (*entryLabel)) {
             break;
         }
     }
+    entry->SetID (motif->id);
 
     /*
      * Run over all collectibles.
@@ -207,9 +189,9 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
          * Find a motifate for the current collectible.
          */
         found = false;
-        motif = item->motif;
-        for (j = 0; j < item->nmotif; j++, motif++) {
-            if (motif->label == label) {
+        parameter = motif->parameters;
+        for (j = 0; j < motif->nparameters; j++, parameter++) {
+            if (parameter->label == label) {
                 found = true;
                 break;
             }
@@ -230,10 +212,10 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
         /*
          * Check for conflicting parameters.
          */
-        othermotif = item->motif;
-        for (k = 0; k < item->nmotif; k++, othermotif++) {
+        otherParameter = motif->parameters;
+        for (k = 0; k < motif->nparameters; k++, otherParameter++) {
             if (j != k) {
-                if (motif->replace == othermotif->id) {
+                if (parameter->replace == otherParameter->id) {
                     if (CHECK_BIT (checklist, k)) {
                         return codeConflict;
                     }
@@ -245,14 +227,14 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
          * Parameters are usually 3D vectors (including colors).
          */
         ntokens = 2;
-        if (CHECK_BIT (motif->flags, flagVector)) {
+        if (CHECK_BIT (parameter->flags, flagVector)) {
             ntokens = 4;
         }
         if (sizes[i] != ntokens) {
             return codeSize;
         }
 
-        if (!CHECK_BIT (motif->flags, flagText)) {
+        if (!CHECK_BIT (parameter->flags, flagText)) {
             /*
              * Parameter is a vector or real number.
              */
@@ -263,7 +245,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
             /*
              * Check for invalid values.
              */
-            if (CHECK_BIT (motif->flags, flagCheckZero)) {
+            if (CHECK_BIT (parameter->flags, flagCheckZero)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if (output[j] != 0.0f) {
@@ -275,7 +257,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     return codeValue;
                 }
             }
-            else if (CHECK_BIT (motif->flags, flagCheckPositive)) {
+            else if (CHECK_BIT (parameter->flags, flagCheckPositive)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if (output[j] > 0.0f) {
@@ -287,7 +269,7 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
                     return codeValue;
                 }
             }
-            else if (CHECK_BIT (motif->flags, flagCheckZeroOne)) {
+            else if (CHECK_BIT (parameter->flags, flagCheckZeroOne)) {
                 check = false;
                 for (j = 0; j < (ntokens - 1); j++) {
                     if ((output[j] >= 0.0f) && (output[j] <= 1.0f)) {
@@ -317,38 +299,38 @@ ParserCode_t Parser::CreateEntry (string *id, string collect[][MAX_TOKENS],
     /*
      * Check if all parameters or their alternatives are present.
      */
-    motif = item->motif;
-    for (i = 0; i < item->nmotif; i++, motif++) {
+    parameter = motif->parameters;
+    for (i = 0; i < motif->nparameters; i++, parameter++) {
         if (!CHECK_BIT (checklist, i)) {
             /*
              * Parameter is not present.
              */
-            if (CHECK_BIT (motif->flags, flagOptional)) {
+            if (CHECK_BIT (parameter->flags, flagOptional)) {
                 /*
                  * Parameter is optional, load defaults.
                  */
-                TokenizeLine (&motif->defaults, tokens, &ntokens, MAX_COMPONENTS);
+                TokenizeLine (&parameter->defaults, MAX_COMPONENTS, tokens, &ntokens);
 
-                if (!CHECK_BIT (motif->flags, flagText)) {
+                if (!CHECK_BIT (parameter->flags, flagText)) {
                     ConvertTokens (tokens, ntokens, output);
-                    entry->AddNumerical (&motif->label, output, ntokens);
+                    entry->AddNumerical (&parameter->label, output, ntokens);
                 }
                 else {
-                    entry->AddTextual (&motif->label, tokens, ntokens);
+                    entry->AddTextual (&parameter->label, tokens, ntokens);
                 }
             }
             else {
                 /*
                  * Parameter is not optional, check if it is replaceable.
                  */
-                if (motif->replace) {
+                if (parameter->replace) {
                     /*
                      * Check if the alternative parameter is present.
                      */
-                    othermotif = item->motif;
-                    for (j = 0; j < item->nmotif; j++, othermotif++) {
+                    otherParameter = motif->parameters;
+                    for (j = 0; j < motif->nparameters; j++, otherParameter++) {
                         if (i != j) {
-                            if (motif->replace == othermotif->id) {
+                            if (parameter->replace == otherParameter->id) {
                                 break;
                             }
                         }
@@ -380,7 +362,7 @@ void Parser::Parse () {
     unsigned int  i, nlines, start;
     unsigned int  npar, sizes[MAX_LINES];
     unsigned int  ntokens;
-    unsigned int  counters[kSizeActors], nallowed, total;
+    unsigned int  counters[kSizeEntries], nallowed, total;
 
     ParserMode_t  mode;
     ParserCode_t  code;
@@ -390,7 +372,7 @@ void Parser::Parse () {
     /*
      * Initialize.
      */
-    for (i = 0; i < kSizeActors; i++) {
+    for (i = 0; i < kSizeEntries; i++) {
         counters[i] = 0;
     }
     status_ = statusFail;
@@ -412,7 +394,7 @@ void Parser::Parse () {
     while (getline (config, line)) {
         nlines++;
 
-        check = TokenizeLine (&line, tokens, &ntokens, MAX_TOKENS);
+        check = TokenizeLine (&line, MAX_TOKENS, tokens, &ntokens);
         if (!check) {
             cerr << "Line " << nlines << ": Too many tokens." << endl;
             config.close ();
@@ -426,14 +408,14 @@ void Parser::Parse () {
                 item = tokens[0];
 
                 check = false;
-                for (i = 0; i < kSizeActors; i++) {
-                    if (kActors[i].id == item) {
+                for (i = 0; i < kSizeEntries; i++) {
+                    if (kEntries[i].label == item) {
                         check = true;
                         npar  = 0;
                         start = nlines;
                         mode  = modeRead;
 
-                        nallowed = kActors[i].nallowed;
+                        nallowed = kEntries[i].nallowed;
                         counters[i]++;
 
                         if (nallowed && (counters[i] > nallowed)) {
@@ -494,22 +476,21 @@ void Parser::Parse () {
                     return;
                 }
                 entries_.push_back (entry);
-                nentries_++;
             }
         }
     }
     config.close ();
 
-    for (i = 0; i < kSizeActors; i++) {
-        if (kActors[i].mandatory && (counters[i] < 1)) {
-            cerr << "No entries found for " << kActors[i].id << "." << endl;
+    for (i = 0; i < kSizeEntries; i++) {
+        if (kEntries[i].mandatory && (counters[i] < 1)) {
+            cerr << "No entries found for " << kEntries[i].id << "." << endl;
             return;
         }
     }
 
     total = 0;
-    for (i = 0; i < kSizeActors; i++) {
-        if (!kActors[i].mandatory) {
+    for (i = 0; i < kSizeEntries; i++) {
+        if (!kEntries[i].mandatory) {
             total += counters[i];
         }
     }
@@ -530,12 +511,12 @@ Entry::Entry () {
 Entry::~Entry () {
 }
 
-bool Entry::CheckLabel (string label) {
-    return (label == label_) ? true : false;
+bool Entry::CheckID (EntryID_t id) {
+    return (id == id_) ? true : false;
 }
 
-void Entry::SetLabel (string *label) {
-    label_ = (*label);
+void Entry::SetID (EntryID_t id) {
+    id_ = id;
 }
 
 void Entry::AddTextual (const string *key, const string *text, 
@@ -589,8 +570,8 @@ bool Entry::Query (string *key, double **numerical, string **textual) {
 
 /**** Utility functions. ****/
 
-bool TokenizeLine (const string *line, string *tokens,
-                   unsigned int *ntokens, unsigned int maxtokens) {
+bool TokenizeLine (const string *line, unsigned int maxtokens, 
+                   string *tokens, unsigned int *ntokens) {
     /*
      * Split a line to tokens.
      *

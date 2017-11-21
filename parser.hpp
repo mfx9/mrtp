@@ -36,7 +36,10 @@
 /*
  * Custom data types.
  */
-enum ParserFlag_t {flagText, flagReal, flagVector, flagOptional,
+enum EntryID_t {entryCamera, entryLight, entryPlane, 
+    entrySphere, entryCylinder};
+
+enum ParameterFlag_t {flagText, flagReal, flagVector, flagOptional,
     flagCheckZero, flagCheckPositive, flagCheckZeroOne};
 
 enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
@@ -60,7 +63,7 @@ typedef unsigned int Bitmask_t;
 
 
 class Entry {
-    std::string  label_;
+    EntryID_t  id_;
     unsigned int npar_, current_;
 
     /*
@@ -79,14 +82,14 @@ public:
     Entry ();
     ~Entry ();
 
-    void SetLabel (std::string *label);
+    void SetID (EntryID_t id);
     void AddTextual (const std::string *key, const std::string *text, 
                      unsigned int ntext);
     void AddNumerical (const std::string *key, double *real, 
                        unsigned int nreal);
 
     void StartQuery ();
-    bool CheckLabel (std::string label);
+    bool CheckID (EntryID_t id);
     bool Query (std::string *key, double **numerical, std::string **textual);
 };
 
@@ -96,11 +99,13 @@ class Parser {
     ParserStatus_t  status_;
 
     std::list<Entry *> entries_;
-    unsigned int  nentries_, current_;
+    std::list<Entry *>::iterator currentEntry_; 
 
     /* Private methods. */
-    ParserCode_t CreateEntry (std::string *id, std::string collect[][MAX_TOKENS],
-                              unsigned int sizes[], unsigned int ncol, Entry *entry);
+    ParserCode_t CreateEntry (std::string *entryLabel, 
+                              std::string collect[][MAX_TOKENS],
+                              unsigned int sizes[], unsigned int ncol, 
+                              Entry *entry);
 
 public:
     Parser (std::string *path);

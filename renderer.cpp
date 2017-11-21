@@ -62,10 +62,11 @@ void Renderer::SaveFrame (string *path) {
     buffer_->WriteToPNG (path);
 }
 
-bool Renderer::SolveShadows (Vector *origin, Vector *direction, double maxdist, 
-                             Actor *actor) {
-    double distance;
-    bool   hit = false;
+bool Renderer::SolveShadows (Vector *origin, Vector *direction, 
+                             double maxdist) {
+    double  distance;
+    bool    hit = false;
+    Actor  *actor = actors_;
 
     while (actor != NULL) {
         if (actor->HasShadow ()) {
@@ -80,17 +81,18 @@ bool Renderer::SolveShadows (Vector *origin, Vector *direction, double maxdist,
     return hit;
 }
 
-bool Renderer::SolveHits (Vector *origin, Vector *direction, Actor *actor, 
-                          Actor **hitactor, double *currd) {
-    double distance;
-    bool   hit = false;
+bool Renderer::SolveHits (Vector *origin, Vector *direction, Actor **hitactor, 
+                          double *currd) {
+    double  distance;
+    bool    hit = false;
+    Actor  *actor = actors_;
 
     while (actor != NULL) {
         distance = actor->Solve (origin, direction, 0.0f, maxdist_);
         if ((distance > 0.0f) && (distance < (*currd))) {
-            (*currd)    = distance;
-            (*hitactor) = actor;
-            hit         = true;
+            *currd    = distance;
+            *hitactor = actor;
+            hit       = true;
         }
         actor = actor->Next ();
     }
@@ -107,7 +109,7 @@ void Renderer::TraceRay_r (Vector *origin, Vector *direction,
     bool     hit, isshadow;
 
     currd = maxdist_;
-    hit = SolveHits (origin, direction, actors_, &hitactor, &currd);
+    hit = SolveHits (origin, direction, &hitactor, &currd);
 
     if (hit) {
         /* Found an intersection. */
@@ -120,7 +122,7 @@ void Renderer::TraceRay_r (Vector *origin, Vector *direction,
         intensity = light_->Intensity (&inter, &normal, &ray, &raylen);
 
         /* Check if the intersection is in a shadow. */
-        isshadow = SolveShadows (&inter, &ray, raylen, actors_);
+        isshadow = SolveShadows (&inter, &ray, raylen);
         shadow = (isshadow) ? shadow_ : 1.0f;
 
         /* Decrease light intensity for actors away from the light. */

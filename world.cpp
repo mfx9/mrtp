@@ -35,19 +35,19 @@ void World::Initialize () {
 
         entry->StartQuery ();
 
-        if (entry->CheckLabel ("camera")) {
+        if (entry->CheckID (entryCamera)) {
             CreateCamera (entry);
         }
-        else if (entry->CheckLabel ("light")) {
+        else if (entry->CheckID (entryLight)) {
             CreateLight (entry);
         }
-        else if (entry->CheckLabel ("plane")) {
+        else if (entry->CheckID (entryPlane)) {
             CreatePlane (entry);
         }
-        else if (entry->CheckLabel ("sphere")) {
+        else if (entry->CheckID (entrySphere)) {
             CreateSphere (entry);
         }
-        else if (entry->CheckLabel ("cylinder")) {
+        else if (entry->CheckID (entryCylinder)) {
             CreateCylinder (entry);
         }
     }

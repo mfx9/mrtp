@@ -34,10 +34,8 @@ enum LightModel_t {lightNone, lightLinear, lightQuadratic};
 
 
 class Renderer {
-    Light   *light_;
     Actor   *actors_;
     Camera  *camera_;
-    Buffer  *buffer_;
 
     /*
      * model: selects the light model (quenching of light with
@@ -56,21 +54,22 @@ class Renderer {
      *
      * relfshadow: if true, reflect shadows from shadowed surfaces.
      */
+    Light        *light_;
     LightModel_t  model_;
     double        maxdist_, shadow_, cutoff_;
     unsigned int  maxdepth_;
     bool          reflshadow_;
 
+    Buffer  *buffer_;
     double  fov_, ratio_, perspective_;
     unsigned int width_, height_, nthreads_;
 
     /* 
      * Private methods. 
      */
-    bool SolveShadows (Vector *origin, Vector *direction, double maxdist, 
-                       Actor *actor);
-    bool SolveHits (Vector *origin, Vector *direction, Actor *actor, 
-                    Actor **hitactor, double *currd);
+    bool SolveShadows (Vector *origin, Vector *direction, double maxdist);
+    bool SolveHits (Vector *origin, Vector *direction, Actor **hitactor, 
+                    double *currd);
     void TraceRay_r (Vector *origin, Vector *direction, 
                      unsigned int depth, double mixing, Color *color);
     void RenderBlock (unsigned int block, unsigned int nlines);
