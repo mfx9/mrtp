@@ -154,28 +154,93 @@ bool Parser::Query (Entry **entry) {
     return true;
 }
 
+ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS], 
+                                    unsigned int size, Entry *entry) {
+    unsigned int  j, ntokens;
+    double        output[MAX_COMPONENTS];
+    string        extension, path;
+    bool          check;
+
+    ntokens = (CHECK_BIT (flags, flagVector)) ? 4 : 2;
+    if (size != ntokens) {
+        return codeSize;
+    }
+
+    if (!CHECK_BIT (flags, flagText)) {
+        /* Parameter is a vector or real number. */
+
+        check = ConvertTokens (&tokens[1], (ntokens - 1), output);
+        if (!check) {
+            return codeType;
+        }
+        /* Check for invalid values. */
+        check = true;
+
+        if (CHECK_BIT (flags, flagCheckZero)) {
+            check = false;
+            for (j = 0; j < (ntokens - 1); j++) {
+                if (output[j] != 0.0f) {
+                    check = true;
+                    break;
+                }
+            }
+        }
+        else if (CHECK_BIT (flags, flagCheckPositive)) {
+            check = false;
+            for (j = 0; j < (ntokens - 1); j++) {
+                if (output[j] > 0.0f) {
+                    check = true;
+                    break;
+                }
+            }
+        }
+        else if (CHECK_BIT (flags, flagCheckZeroOne)) {
+            check = false;
+            for (j = 0; j < (ntokens - 1); j++) {
+                if ((output[j] >= 0.0f) && (output[j] <= 1.0f)) {
+                    check = true;
+                    break;
+                }
+            }
+        }
+        if (!check) {
+            return codeValue;
+        }
+        entry->AddNumerical (&tokens[0], output, (ntokens - 1));
+    }
+    else {
+        /* Parameter is a texture. */
+
+        extension = "png";
+        check = CheckFilename (&tokens[1], &path, &extension);
+        if (!check) {
+            return codeFilename;
+        }
+        entry->AddTextual (&tokens[0], &path, 1);
+    }
+    return codeOK;
+}
+
 ParserCode_t Parser::CreateEntry (string *entryLabel, string collect[][MAX_TOKENS],
                                   unsigned int sizes[], unsigned int ncol, 
                                   Entry *entry) {
-    bool          check, found;
+    bool          found;
     string        label, filename, extension;
     double        output[MAX_COMPONENTS];
     unsigned int  i, j, k, ntokens;
     Bitmask_t     checklist;
+    ParserCode_t  code;
 
     const MotifParameter *parameter, *otherParameter;
     const MotifEntry      *motif;
 
     string  tokens[MAX_COMPONENTS];
 
-    /*
-     * Find a motif for the current actor, light, camera.
-     */
+    /* Find a motif for the current actor, camera, light. */
     motif = kEntries;
-    for (i = 0; i < kSizeEntries; i++, motif++) {
-        if (motif->label == (*entryLabel)) {
-            break;
-        }
+
+    while (motif->label != (*entryLabel)) {
+        motif++;
     }
     entry->SetID (motif->id);
 
@@ -223,76 +288,9 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collect[][MAX_TOKEN
             }
         }
 
-        /*
-         * Parameters are usually 3D vectors (including colors).
-         */
-        ntokens = 2;
-        if (CHECK_BIT (parameter->flags, flagVector)) {
-            ntokens = 4;
-        }
-        if (sizes[i] != ntokens) {
-            return codeSize;
-        }
-
-        if (!CHECK_BIT (parameter->flags, flagText)) {
-            /*
-             * Parameter is a vector or real number.
-             */
-            check = ConvertTokens (&collect[i][1], (ntokens - 1), output);
-            if (!check) {
-                return codeType;
-            }
-            /*
-             * Check for invalid values.
-             */
-            if (CHECK_BIT (parameter->flags, flagCheckZero)) {
-                check = false;
-                for (j = 0; j < (ntokens - 1); j++) {
-                    if (output[j] != 0.0f) {
-                        check = true;
-                        break;
-                    }
-                }
-                if (!check) {
-                    return codeValue;
-                }
-            }
-            else if (CHECK_BIT (parameter->flags, flagCheckPositive)) {
-                check = false;
-                for (j = 0; j < (ntokens - 1); j++) {
-                    if (output[j] > 0.0f) {
-                        check = true;
-                        break;
-                    }
-                }
-                if (!check) {
-                    return codeValue;
-                }
-            }
-            else if (CHECK_BIT (parameter->flags, flagCheckZeroOne)) {
-                check = false;
-                for (j = 0; j < (ntokens - 1); j++) {
-                    if ((output[j] >= 0.0f) && (output[j] <= 1.0f)) {
-                        check = true;
-                        break;
-                    }
-                }
-                if (!check) {
-                    return codeValue;
-                }
-            }
-            entry->AddNumerical (&label, output, (ntokens - 1));
-        }
-        else {
-            /*
-             * Parameter is a texture.
-             */
-            extension = "png";
-            check = CheckFilename (&collect[i][1], &filename, &extension);
-            if (!check) {
-                return codeFilename;
-            }
-            entry->AddTextual (&label, &filename, 1);
+        code = PushParameter (parameter->flags, collect[i], sizes[i], entry);
+        if (code != codeOK) {
+            return code;
         }
     }
 

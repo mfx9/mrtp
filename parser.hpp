@@ -88,6 +88,7 @@ public:
     void AddNumerical (const std::string *key, double *real, 
                        unsigned int nreal);
 
+    //void Print ();
     void StartQuery ();
     bool CheckID (EntryID_t id);
     bool Query (std::string *key, double **numerical, std::string **textual);
@@ -106,6 +107,8 @@ class Parser {
                               std::string collect[][MAX_TOKENS],
                               unsigned int sizes[], unsigned int ncol, 
                               Entry *entry);
+    ParserCode_t PushParameter (Bitmask_t flags, std::string tokens[MAX_TOKENS], 
+                                unsigned int size, Entry *entry);
 
 public:
     Parser (std::string *path);

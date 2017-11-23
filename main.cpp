@@ -73,9 +73,9 @@ void HelpScreen (string program) {
             "    -S, --no-shadows   do not reflect rays from shadowed surfaces\n"
             "    -s, --shadow       shadow factor (default is 0.25)\n"
 #ifdef _OPENMP
-            "    -t, --threads      rendering threads: 0 (auto), 1 (default), 2, 4, etc.\n\n"
+            "    -t, --threads      rendering threads: 0 (auto), 1 (default), 2, 4, etc.\n"
 #endif /* _OPENMP */
-            "Example:\n";
+            "\nExample:\n";
     cout << "    " << program << " -r 1024x768 -o test.png test.inp" << endl;
 }
 
