@@ -48,14 +48,10 @@ class Entry {
     unsigned int npar_, current_;
 
     /*
-     * keys: parameter keys (position, center, etc).
-     *
      * real: real numbers (components of 3D vectors, etc).
      *
      * text: strings (usually filenames of texture files).
      */
-    std::string keys_[MAX_LINES];
-
     std::string text_[MAX_LINES][MAX_COMPONENTS];
     double real_[MAX_LINES][MAX_COMPONENTS];
 
@@ -64,14 +60,12 @@ public:
     ~Entry ();
 
     void SetID (EntryID_t id);
-    void AddTextual (const std::string *key, const std::string *text, 
-                     unsigned int ntext);
-    void AddNumerical (const std::string *key, double *real, 
-                       unsigned int nreal);
+    void AddTextual (const std::string *text, unsigned int ntext);
+    void AddNumerical (double *real, unsigned int nreal);
 
     void StartQuery ();
     bool CheckID (EntryID_t id);
-    bool Query (std::string *key, double **numerical, std::string **textual);
+    bool Query (double **numerical, std::string **textual);
 };
 
 

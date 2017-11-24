@@ -135,7 +135,7 @@ ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS],
         if (!check) {
             return codeValue;
         }
-        entry->AddNumerical (&tokens[0], output, (ntokens - 1));
+        entry->AddNumerical (output, (ntokens - 1));
     }
     else {
         /* Parameter is a texture. */
@@ -145,7 +145,7 @@ ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS],
         if (!check) {
             return codeFilename;
         }
-        entry->AddTextual (&tokens[0], &path, 1);
+        entry->AddTextual (&path, 1);
     }
     return codeOK;
 }
@@ -425,24 +425,22 @@ void Entry::SetID (EntryID_t id) {
     id_ = id;
 }
 
-void Entry::AddTextual (const string *key, const string *text, 
-                        unsigned int ntext) {
+void Entry::AddTextual (const string *text, unsigned int ntext) {
     unsigned int i;
 
     for (i = 0; i < ntext; i++) {
         text_[npar_][i] = text[i];
     }
-    keys_[npar_++] = (*key);
+    npar_++;
 }
 
-void Entry::AddNumerical (const string *key, double *real, 
-                          unsigned int nreal) {
+void Entry::AddNumerical (double *real, unsigned int nreal) {
     unsigned int i;
 
     for (i = 0; i < nreal; i++) {
         real_[npar_][i] = real[i];
     }
-    keys_[npar_++] = (*key);
+    npar_++;
 }
 
 void Entry::StartQuery () {
@@ -452,7 +450,7 @@ void Entry::StartQuery () {
     current_ = 0;
 }
 
-bool Entry::Query (string *key, double **numerical, string **textual) {
+bool Entry::Query (double **numerical, string **textual) {
     /*
      * Connect the parser with the actual initialization 
      * of actors.
@@ -464,7 +462,6 @@ bool Entry::Query (string *key, double **numerical, string **textual) {
     if (current_ == npar_) {
         return false;
     }
-    *key = keys_[current_];
     *textual = &text_[current_][0];
     *numerical = &real_[current_][0];
 

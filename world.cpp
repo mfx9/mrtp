@@ -65,51 +65,51 @@ World::~World () {
 }
 
 void World::CreateCamera (Entry *entry) {
-    string   key, *textual;
+    string  *textual;
     double  *numerical;
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector position (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector target (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double roll = numerical[0];
 
     camera_ = new Camera (&position, &target, roll);
 }
 
 void World::CreateLight (Entry *entry) {
-    string   key, *textual;
+    string  *textual;
     double  *numerical;
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector position (numerical);
 
     light_ = new Light (&position);
 }
 
 void World::CreatePlane (Entry *entry) {
-    string   key, *textual;
+    string  *textual;
     double  *numerical;
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector center (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector normal (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double scale = numerical[0];
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double reflect = numerical[0];
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Color color ((real_t) numerical[0], (real_t) numerical[1], (real_t) numerical[2]);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Texture *texture = PushTexture (&textual[0]);
 
     Plane *plane = new Plane (&center, &normal, scale, reflect, &color, texture);
@@ -117,25 +117,25 @@ void World::CreatePlane (Entry *entry) {
 }
 
 void World::CreateSphere (Entry *entry) {
-    string   key, *textual;
+    string  *textual;
     double  *numerical;
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector position (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double radius = numerical[0];
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector axis (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double reflect = numerical[0];
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Color color ((real_t) numerical[0], (real_t) numerical[1], (real_t) numerical[2]);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Texture *texture = PushTexture (&textual[0]);
 
     Sphere *sphere = new Sphere (&position, radius, &axis, reflect, &color, texture);
@@ -143,28 +143,28 @@ void World::CreateSphere (Entry *entry) {
 }
 
 void World::CreateCylinder (Entry *entry) {
-    string   key, *textual;
+    string  *textual;
     double  *numerical;
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector center (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Vector direction (numerical);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double radius = numerical[0];
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double span = numerical[0];
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     double reflect = numerical[0];
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Color color ((real_t) numerical[0], (real_t) numerical[1], (real_t) numerical[2]);
 
-    entry->Query (&key, &numerical, &textual);
+    entry->Query (&numerical, &textual);
     Texture *texture = PushTexture (&textual[0]);
 
     Cylinder *cylinder = new Cylinder (&center, &direction, radius, span, reflect, &color, texture);
