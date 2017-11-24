@@ -14,20 +14,18 @@
 #ifndef _PARSER_H
 #define _PARSER_H
 
-#include <cstddef>  /* NULL pointer. */
+/* NULL pointer. */
+#include <cstddef>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <list>
 
-/*
- * Macros.
- */
-#define MAKE_MASK(bit) (1 << bit)
+#include "motifs.hpp"
+
 
 #define CHECK_BIT(flags, bit) ((flags >> bit) & 1)
-
 
 #define MAX_LINES       8
 #define MAX_TOKENS      4
@@ -36,30 +34,13 @@
 /*
  * Custom data types.
  */
-enum EntryID_t {entryCamera, entryLight, entryPlane, 
-    entrySphere, entryCylinder};
-
-enum ParameterFlag_t {flagText, flagReal, flagVector, flagOptional,
-    flagCheckZero, flagCheckPositive, flagCheckZeroOne};
-
 enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
     codeRepeated, codeFilename, codeValue, codeConflict};
 
 enum ParserStatus_t {statusOK, statusFail};
 enum ParserMode_t {modeOpen, modeRead};
 
-typedef unsigned int Bitmask_t;
-
-/*
- * Bit masks.
- */
-#define BIT_TEXT            MAKE_MASK (flagText)
-#define BIT_REAL            MAKE_MASK (flagReal)
-#define BIT_VECTOR          MAKE_MASK (flagVector)
-#define BIT_OPTIONAL        MAKE_MASK (flagOptional)
-#define BIT_CHECK_ZERO      MAKE_MASK (flagCheckZero)
-#define BIT_CHECK_POSITIVE  MAKE_MASK (flagCheckPositive)
-#define BIT_CHECK_ZERO_ONE  MAKE_MASK (flagCheckZeroOne)
+/* typedef unsigned int Bitmask_t; */
 
 
 class Entry {
@@ -88,7 +69,6 @@ public:
     void AddNumerical (const std::string *key, double *real, 
                        unsigned int nreal);
 
-    //void Print ();
     void StartQuery ();
     bool CheckID (EntryID_t id);
     bool Query (std::string *key, double **numerical, std::string **textual);

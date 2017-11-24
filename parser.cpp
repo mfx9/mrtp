@@ -18,81 +18,10 @@ using namespace std;
 
 /**** Tables. ****/
 
-struct MotifParameter {
-    char       id;
-    char       replace;
-    string     label;
-    string     defaults;
-    Bitmask_t  flags;
-};
-
-struct MotifEntry {
-    EntryID_t     id;
-    string        label;
-    bool          mandatory;
-    unsigned int  nallowed;
-    unsigned int  nparameters;
- 
-   const MotifParameter *parameters;
-};
-
 struct MotifMessage {
     ParserCode_t  code;
     string        message;
 };
-
-const MotifParameter kCamera[] = {
-    { 1,  0,  "position",  "", BIT_VECTOR },
-    { 2,  0,  "target",  "", BIT_VECTOR },
-    { 3,  0,  "roll",  "0.0", BIT_REAL | BIT_OPTIONAL },
-    };
-
-const MotifParameter kLight[] = {
-    { 1,  0,  "position",  "", BIT_VECTOR},
-    };
-
-const MotifParameter kPlane[] = {
-    { 1,  0,  "center",  "", BIT_VECTOR },
-    { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
-    { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 4,  0,  "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
-    { 5,  6,  "color",  "0.0  1.0  0.0", BIT_VECTOR },
-    { 6,  5,  "texture",  "", BIT_TEXT },
-    };
-
-const MotifParameter kSphere[] = {
-    { 1,  0, "position",  "", BIT_VECTOR },
-    { 2,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
-    { 4,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
-    { 5,  6, "color",  "0.0  1.0  0.0", BIT_VECTOR },
-    { 6,  5, "texture",  "", BIT_TEXT },
-    };
-
-const MotifParameter kCylinder[] = {
-    { 1,  0, "center",  "", BIT_VECTOR },
-    { 2,  0, "direction",  "", BIT_VECTOR | BIT_CHECK_ZERO },
-    { 3,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 4,  0, "span",  "-1.0", BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
-    { 5,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
-    { 6,  7, "color",  "0.0  1.0  0.0", BIT_VECTOR },
-    { 7,  6, "texture",  "", BIT_TEXT },
-    };
-
-const MotifEntry kEntries[] = {
-    {entryCamera, "camera", true, 1, (unsigned int) (sizeof (kCamera) / sizeof (kCamera[0])), kCamera },
-
-    {entryLight, "light", true, 1, (unsigned int) (sizeof (kLight) / sizeof (kLight[0])), kLight },
-
-    {entryPlane, "plane", false, 0, (unsigned int) (sizeof (kPlane) / sizeof (kPlane[0])), kPlane },
-
-    {entrySphere, "sphere", false, 0, (unsigned int) (sizeof (kSphere) / sizeof (kSphere[0])), kSphere },
-
-    {entryCylinder, "cylinder", false, 0, (unsigned int) (sizeof (kCylinder) / sizeof (kCylinder[0])), kCylinder },
-    };
-
-const unsigned int kSizeEntries =
-        (unsigned int) sizeof (kEntries) / sizeof (kEntries[0]);
 
 const MotifMessage kErrorMessages[] = {
     { codeUnknown, "Unrecognized parameter." }, 

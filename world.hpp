@@ -24,9 +24,11 @@
 #include "vector.hpp"
 #include "actors.hpp"
 #include "camera.hpp"
-#include "parser.hpp"
 #include "color.hpp"
 #include "texture.hpp"
+
+#include "motifs.hpp"
+#include "parser.hpp"
 
 
 class World {
