@@ -26,12 +26,12 @@ class Buffer {
     unsigned int width_, height_;
 
 public:
-    Buffer (unsigned int width, unsigned int height);
+    Buffer (const unsigned int width, const unsigned int height);
     ~Buffer ();
-    void   Allocate ();
-    void   Clear ();
-    Color *Pointer (unsigned int vline);
-    void   WriteToPNG (std::string *filename);
+
+    void Allocate ();
+    void Write (std::string *filename);
+    Color *Pointer (const unsigned int vline) const;
 };
 
 #endif /* _BUFFER_H */

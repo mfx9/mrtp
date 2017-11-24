@@ -37,9 +37,7 @@ Renderer::Renderer (World *world,
     nthreads_ = nthreads;
 
     /* Assign pointers. */
-    world->AssignCamera (&camera_);
-
-    world->AssignLightActors (&light_, &actors_);
+    world->Bind (&camera_, &light_, &actors_);
 }
 
 Renderer::~Renderer () {
@@ -59,7 +57,7 @@ void Renderer::Initialize () {
 }
 
 void Renderer::SaveFrame (string *path) {
-    buffer_->WriteToPNG (path);
+    buffer_->Write (path);
 }
 
 bool Renderer::SolveShadows (Vector *origin, Vector *direction, 

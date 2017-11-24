@@ -18,27 +18,20 @@ using namespace png;
 
 
 Texture::Texture (string *filename) {
-    /*
-     * Constructor.
-     */
     filename_ = (*filename);
     data_     =  NULL;
-    next_     =  NULL;
     width_    =  -1;
     height_   =  -1;
 }
 
 Texture::~Texture () {
-    /*
-     * Deallocate.
-     */
     if (data_ != NULL) {
         delete[] data_;
     }
 }
 
-Color *Texture::GetColor (double fracx, double fracy, 
-        double scale) {
+Color *Texture::GetColor (const double fracx, const double fracy, 
+                          const double scale) const {
     unsigned int u, v;
     /*
      * fracx, fracy are within a range of <0..1> and
@@ -54,15 +47,7 @@ Color *Texture::GetColor (double fracx, double fracy,
     return &data_[(size_t) (u + v * width_)];
 }
 
-Texture *Texture::Next () {
-    return next_;
-}
-
-void Texture::SetNext (Texture *next) {
-    next_ = next;
-}
-
-bool Texture::CheckFilename (string *filename) {
+bool Texture::CheckFilename (string *filename) const {
     return ((*filename) == filename_);
 }
 
@@ -75,7 +60,7 @@ void Texture::Allocate () {
      *
      */
     const char *fn = (filename_).c_str ();
-    image< rgb_pixel >  image (fn);
+    image<rgb_pixel>  image (fn);
 
     width_  = image.get_width ();
     height_ = image.get_height ();

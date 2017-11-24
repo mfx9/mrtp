@@ -17,8 +17,7 @@ using namespace std;
 using namespace png;
 
 
-Buffer::Buffer (unsigned int width, 
-        unsigned int height) {
+Buffer::Buffer (const unsigned int width, const unsigned int height) {
     data_   =  NULL;
     width_  =  width;
     height_ =  height;
@@ -34,20 +33,11 @@ Buffer::~Buffer () {
     }
 }
 
-Color *Buffer::Pointer (unsigned int vline) {
+Color *Buffer::Pointer (const unsigned int vline) const {
     return &data_[(size_t) (vline * width_)];
 }
 
-void Buffer::Clear () {
-    unsigned int i = 0;
-    Color  *bp = &data_[0];
-
-    for (; i < (width_ * height_); i++, bp++) {
-        bp->Zero ();
-    }
-}
-
-void Buffer::WriteToPNG (string *filename) {
+void Buffer::Write (string *filename) {
     unsigned char red, green, blue;
     unsigned int  i, j;
     Color *bp;

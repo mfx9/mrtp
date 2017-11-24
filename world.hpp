@@ -61,8 +61,7 @@ public:
     ~World ();
 
     void Initialize ();
-    void AssignCamera (Camera **camera);
-    void AssignLightActors (Light **light, Actor **actors);
+    void Bind (Camera **camera, Light **light, Actor **actors);
 };
 
 #endif /* _WORLD_H */

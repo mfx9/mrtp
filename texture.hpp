@@ -14,7 +14,8 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 
-#include <cstddef>  /* NULL pointer. */
+/* NULL pointer. */
+#include <cstddef>
 #include <string>
 
 #include "png.hpp"
@@ -24,17 +25,16 @@
 class Texture {
     unsigned int width_, height_;
     std::string  filename_;
-    Color    *data_;
-    Texture  *next_;
+    Color  *data_;
 
 public:
     Texture (std::string *filename);
     ~Texture ();
-    void     Allocate ();
-    bool     CheckFilename (std::string *filename);
-    Color   *GetColor (double fracx, double fracy, double scale);
-    Texture *Next ();
-    void     SetNext (Texture *next);
+
+    void Allocate ();
+    Color *GetColor (const double fracx, const double fracy, 
+                     const double scale) const;
+    bool CheckFilename (std::string *filename) const;
 };
 
 #endif /* _TEXTURE_H */

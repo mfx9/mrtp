@@ -233,11 +233,8 @@ Texture *World::PopTexture () {
     return texture;
 }
 
-void World::AssignCamera (Camera **camera) {
+void World::Bind (Camera **camera, Light **light, Actor **actors) {
     *camera = camera_;
-}
-
-void World::AssignLightActors (Light **light, Actor **actors) {
     *light = light_;
     *actors = actorsHead_;
 }
