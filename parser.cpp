@@ -55,7 +55,7 @@ const MotifParameter kPlane[] = {
     { 1,  0,  "center",  "", BIT_VECTOR },
     { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
     { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
-    { 4,  0,  "reflect",  "0.0", BIT_REAL | BIT_CHECK_POSITIVE | BIT_OPTIONAL },
+    { 4,  0,  "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
     { 5,  6,  "color",  "", BIT_VECTOR },
     { 6,  5,  "texture",  "", BIT_TEXT },
     };
@@ -221,42 +221,37 @@ ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS],
     return codeOK;
 }
 
-ParserCode_t Parser::CreateEntry (string *entryLabel, string collect[][MAX_TOKENS],
+ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOKENS],
                                   unsigned int sizes[], unsigned int ncol, 
                                   Entry *entry) {
-    bool          found;
-    string        label, filename, extension;
-    double        output[MAX_COMPONENTS];
     unsigned int  i, j, k, ntokens;
-    Bitmask_t     checklist;
+    bool          found, foundOther;
+    bool          checklist[MAX_LINES];
+
+    string        tokens[MAX_TOKENS];
     ParserCode_t  code;
 
-    const MotifParameter *parameter, *otherParameter;
-    const MotifEntry      *motif;
+    const MotifEntry     *motif;
+    const MotifParameter *motifParameter, *motifParameterOther;
 
-    string  tokens[MAX_COMPONENTS];
 
     /* Find a motif for the current actor, camera, light. */
     motif = kEntries;
-
     while (motif->label != (*entryLabel)) {
         motif++;
     }
     entry->SetID (motif->id);
 
-    /*
-     * Run over all collectibles.
-     */
-    checklist = 0;
+    /* Check for unknown or repeated parameters. */
+    for (i = 0; i < MAX_LINES; i++) {
+        checklist[i] = false;
+    }
+
     for (i = 0; i < ncol; i++) {
-        label = collect[i][0];
-        /*
-         * Find a motifate for the current collectible.
-         */
+        motifParameter = motif->parameters;
         found = false;
-        parameter = motif->parameters;
-        for (j = 0; j < motif->nparameters; j++, parameter++) {
-            if (parameter->label == label) {
+        for (j = 0; j < motif->nparameters; j++, motifParameter++) {
+            if (collected[i][0] == motifParameter->label) {
                 found = true;
                 break;
             }
@@ -264,88 +259,72 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collect[][MAX_TOKEN
         if (!found) {
             return codeUnknown;
         }
-        /*
-         * Check if the parameter has been processed.
-         *
-         * Otherwise, mark it as processed.
-         */
-        if (CHECK_BIT (checklist, j)) {
+        if (checklist[j]) {
             return codeRepeated;
         }
-        checklist |= MAKE_MASK (j);
-
-        /*
-         * Check for conflicting parameters.
-         */
-        otherParameter = motif->parameters;
-        for (k = 0; k < motif->nparameters; k++, otherParameter++) {
-            if (j != k) {
-                if (parameter->replace == otherParameter->id) {
-                    if (CHECK_BIT (checklist, k)) {
-                        return codeConflict;
-                    }
-                }
-            }
-        }
-
-        code = PushParameter (parameter->flags, collect[i], sizes[i], entry);
-        if (code != codeOK) {
-            return code;
-        }
+        checklist[j] = true;
     }
 
-    /*
-     * Check if all parameters or their alternatives are present.
-     */
-    parameter = motif->parameters;
-    for (i = 0; i < motif->nparameters; i++, parameter++) {
-        if (!CHECK_BIT (checklist, i)) {
-            /*
-             * Parameter is not present.
-             */
-            if (CHECK_BIT (parameter->flags, flagOptional)) {
-                /*
-                 * Parameter is optional, load defaults.
-                 */
-                TokenizeLine (&parameter->defaults, MAX_COMPONENTS, tokens, &ntokens);
+    /* Go over all parameters in the motif. */
+    motifParameter = motif->parameters;
 
-                if (!CHECK_BIT (parameter->flags, flagText)) {
-                    ConvertTokens (tokens, ntokens, output);
-                    entry->AddNumerical (&parameter->label, output, ntokens);
-                }
-                else {
-                    entry->AddTextual (&parameter->label, tokens, ntokens);
+    for (i = 0; i < motif->nparameters; i++, motifParameter++) {
+        found = false;
+        for (j = 0; j < ncol; j++) {
+            if (collected[j][0] == motifParameter->label) {
+                found = true;
+                break;
+            }
+        }
+
+        if (motifParameter->replace) {
+            /* Check if the alternative parameter is also present. */
+            motifParameterOther = motif->parameters;
+            
+            for (k = 0; k < motif->nparameters; k++, motifParameterOther++) {
+                if (k != i) {
+                    if (motifParameter->replace == motifParameterOther->id) {
+                        break;
+                    }
                 }
             }
-            else {
-                /*
-                 * Parameter is not optional, check if it is replaceable.
-                 */
-                if (parameter->replace) {
-                    /*
-                     * Check if the alternative parameter is present.
-                     */
-                    otherParameter = motif->parameters;
-                    for (j = 0; j < motif->nparameters; j++, otherParameter++) {
-                        if (i != j) {
-                            if (parameter->replace == otherParameter->id) {
-                                break;
-                            }
-                        }
-                    }
-                    if (!CHECK_BIT (checklist, j)) {
-                        /*
-                         * Alternative parameter is needed, but it is also missing.
-                         */
-                        return codeMissing;
+            foundOther = false;
+            for (k = 0; k < ncol; k++) {
+                if (k != j) {
+                    if (collected[k][0] == motifParameterOther->label) {
+                        foundOther = true;
+                        break;
                     }
                 }
-                else {
-                    /*
-                     * Parameter is not present, not optional and not replaceable.
-                     */
+            }
+        }
+
+        if (found) {
+            /* Check for conflicting parameters. */
+            if (motifParameter->replace && foundOther) {
+                return codeConflict;
+            }
+            code = PushParameter (motifParameter->flags, collected[j], sizes[j], entry);
+            if (code != codeOK) {
+                return code;
+            }
+            /* Parameter pushed. */
+        }
+        else {
+            if (motifParameter->replace) {
+                if (!foundOther) {
                     return codeMissing;
                 }
+            }
+            else if (CHECK_BIT (motifParameter->flags, flagOptional)) {
+                /* Push defaults. */
+
+                tokens[0] = motifParameter->label;
+                TokenizeLine (&motifParameter->defaults, MAX_COMPONENTS, &tokens[1], &ntokens);
+                PushParameter (motifParameter->flags, tokens, (ntokens + 1), entry);
+            }
+            else {
+                return codeMissing;
             }
         }
     }
