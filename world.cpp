@@ -79,21 +79,15 @@ void World::CreateCamera (Entry *entry) {
     string   key, *textual;
     double  *numerical;
 
-    Vector  position;
-    Vector  target;
-    double  roll;
+    entry->Query (&key, &numerical, &textual);
+    Vector position (numerical);
 
-    while (entry->Query (&key, &numerical, &textual)) {
-        if (key == "position") {
-            position.Set (numerical);
-        }
-        else if (key == "target") {
-            target.Set (numerical);
-        }
-        else {  /* if (key == "roll") */
-            roll = numerical[0];
-        }
-    }
+    entry->Query (&key, &numerical, &textual);
+    Vector target (numerical);
+
+    entry->Query (&key, &numerical, &textual);
+    double roll = numerical[0];
+
     camera_ = new Camera (&position, &target, roll);
 }
 
@@ -101,10 +95,9 @@ void World::CreateLight (Entry *entry) {
     string   key, *textual;
     double  *numerical;
 
-    Vector position;
-
     entry->Query (&key, &numerical, &textual);
-    position.Set (numerical);
+    Vector position (numerical);
+
     light_ = new Light (&position);
 }
 
@@ -112,36 +105,27 @@ void World::CreatePlane (Entry *entry) {
     string   key, *textual;
     double  *numerical;
 
-    double    scale;
-    double    reflect;
-    Vector    center;
-    Vector    normal;
-    Color     color;
-    Actor    *plane;
-    Texture  *texture = NULL;
+    entry->Query (&key, &numerical, &textual);
+    Vector center (numerical);
 
-    while (entry->Query (&key, &numerical, &textual)) {
-        if (key == "center") {
-            center.Set (numerical);
-        }
-        else if (key == "normal") {
-            normal.Set (numerical);
-        }
-        else if (key == "scale") {
-            scale = numerical[0];
-        }
-        else if (key == "color") {
-            color.Set ((real_t *) numerical);
-        }
-        else if (key == "reflect") {
-            reflect = numerical[0];
-        }
-        else {  /* if (key == "texture") */
-            texture = PushTexture (&textual[0]);
-        }
-    }
-    plane = new Plane (&center, &normal, scale, reflect, &color, 
-                       texture);
+    entry->Query (&key, &numerical, &textual);
+    Vector normal (numerical);
+
+    entry->Query (&key, &numerical, &textual);
+    double scale = numerical[0];
+
+    entry->Query (&key, &numerical, &textual);
+    double reflect = numerical[0];
+
+    entry->Query (&key, &numerical, &textual);
+    Color color ((real_t) numerical[0], (real_t) numerical[1], 
+        (real_t) numerical[2]);
+
+    entry->Query (&key, &numerical, &textual);
+    Texture *texture = PushTexture (&textual[0]);
+
+    Plane *plane = new Plane (&center, &normal, scale, reflect, 
+            &color, texture);
     PushActor (plane);
 }
 
@@ -149,36 +133,27 @@ void World::CreateSphere (Entry *entry) {
     string   key, *textual;
     double  *numerical;
 
-    Vector   position;
-    Vector   axis;
-    double   radius;
-    double   reflect;
-    Color    color;
-    Actor   *sphere;
-    Texture *texture = NULL;
+    entry->Query (&key, &numerical, &textual);
+    Vector position (numerical);
 
-    while (entry->Query (&key, &numerical, &textual)) {
-        if (key == "position") {
-            position.Set (numerical);
-        }
-        else if (key == "radius") {
-            radius = numerical[0];
-        }
-        else if (key == "axis") {
-            axis.Set (numerical);
-        }
-        else if (key == "color") {
-            color.Set ((real_t *) numerical);
-        }
-        else if (key == "reflect") {
-            reflect = numerical[0];
-        }
-        else {  /* if (key == "texture") */
-            texture = PushTexture (&textual[0]);
-        }
-    }
-    sphere = new Sphere (&position, radius, &axis, reflect, &color, 
-                         texture);
+    entry->Query (&key, &numerical, &textual);
+    double radius = numerical[0];
+
+    entry->Query (&key, &numerical, &textual);
+    Vector axis (numerical);
+
+    entry->Query (&key, &numerical, &textual);
+    double reflect = numerical[0];
+
+    entry->Query (&key, &numerical, &textual);
+    Color color ((real_t) numerical[0], (real_t) numerical[1], 
+        (real_t) numerical[2]);
+
+    entry->Query (&key, &numerical, &textual);
+    Texture *texture = PushTexture (&textual[0]);
+
+    Sphere *sphere = new Sphere (&position, radius, &axis, reflect, 
+            &color, texture);
     PushActor (sphere);
 }
 
@@ -186,40 +161,30 @@ void World::CreateCylinder (Entry *entry) {
     string   key, *textual;
     double  *numerical;
 
-    Vector    center;
-    Vector    direction;
-    double    radius;
-    double    span;
-    double    reflect;
-    Color     color;
-    Actor    *cylinder;
-    Texture  *texture = NULL;
+    entry->Query (&key, &numerical, &textual);
+    Vector center (numerical);
 
-    while (entry->Query (&key, &numerical, &textual)) {
-        if (key == "center") {
-            center.Set (numerical);
-        }
-        else if (key == "direction") {
-            direction.Set (numerical);
-        }
-        else if (key == "radius") {
-            radius = numerical[0];
-        }
-        else if (key == "span") {
-            span = numerical[0];
-        }
-        else if (key == "color") {
-            color.Set ((real_t *) numerical);
-        }
-        else if (key == "reflect") {
-            reflect = numerical[0];
-        }
-        else {  /* if (key == "texture") */
-            texture = PushTexture (&textual[0]);
-        }
-    }
-    cylinder = new Cylinder (&center, &direction, radius, span, reflect, 
-            &color, texture);
+    entry->Query (&key, &numerical, &textual);
+    Vector direction (numerical);
+
+    entry->Query (&key, &numerical, &textual);
+    double radius = numerical[0];
+
+    entry->Query (&key, &numerical, &textual);
+    double span = numerical[0];
+
+    entry->Query (&key, &numerical, &textual);
+    double reflect = numerical[0];
+
+    entry->Query (&key, &numerical, &textual);
+    Color color ((real_t) numerical[0], (real_t) numerical[1], 
+        (real_t) numerical[2]);
+
+    entry->Query (&key, &numerical, &textual);
+    Texture *texture = PushTexture (&textual[0]);
+
+    Cylinder *cylinder = new Cylinder (&center, &direction, radius, 
+            span, reflect, &color, texture);
     PushActor (cylinder);
 }
 
@@ -263,9 +228,12 @@ Texture *World::PushTexture (string *filename) {
     Texture *next, *last, *texture;
     bool found;
 
-    /* 
-     * Do not add a texture that already exists. 
-     */
+    /* Do not add an empty texture. */
+    if (*filename == "") {
+        return NULL;
+    }
+
+    /* Check if the texture already exists. */
     if (ntextures_ > 0) {
         next  = textures_;
         found = false;
@@ -281,9 +249,8 @@ Texture *World::PushTexture (string *filename) {
             return last;
         }
     }
-    /* 
-     * Create a new texture. 
-     */
+
+    /* Create a new texture. */
     texture = new Texture (filename);
     texture->Allocate ();
 

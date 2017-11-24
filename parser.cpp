@@ -56,7 +56,7 @@ const MotifParameter kPlane[] = {
     { 2,  0,  "normal",  "", BIT_VECTOR | BIT_CHECK_ZERO },
     { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
     { 4,  0,  "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
-    { 5,  6,  "color",  "", BIT_VECTOR },
+    { 5,  6,  "color",  "0.0  1.0  0.0", BIT_VECTOR },
     { 6,  5,  "texture",  "", BIT_TEXT },
     };
 
@@ -65,7 +65,7 @@ const MotifParameter kSphere[] = {
     { 2,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
     { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
     { 4,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
-    { 5,  6, "color",  "", BIT_VECTOR },
+    { 5,  6, "color",  "0.0  1.0  0.0", BIT_VECTOR },
     { 6,  5, "texture",  "", BIT_TEXT },
     };
 
@@ -75,7 +75,7 @@ const MotifParameter kCylinder[] = {
     { 3,  0, "radius",  "", BIT_REAL | BIT_CHECK_POSITIVE },
     { 4,  0, "span",  "-1.0", BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
     { 5,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
-    { 6,  7, "color",  "", BIT_VECTOR },
+    { 6,  7, "color",  "0.0  1.0  0.0", BIT_VECTOR },
     { 7,  6, "texture",  "", BIT_TEXT },
     };
 
@@ -316,16 +316,16 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOK
                     return codeMissing;
                 }
             }
-            else if (CHECK_BIT (motifParameter->flags, flagOptional)) {
-                /* Push defaults. */
-
-                tokens[0] = motifParameter->label;
-                TokenizeLine (&motifParameter->defaults, MAX_COMPONENTS, &tokens[1], &ntokens);
-                PushParameter (motifParameter->flags, tokens, (ntokens + 1), entry);
-            }
             else {
-                return codeMissing;
+                if (!CHECK_BIT (motifParameter->flags, flagOptional)) {
+                    return codeMissing;
+                }
             }
+            /* Push defaults. */
+
+            tokens[0] = motifParameter->label;
+            TokenizeLine (&motifParameter->defaults, MAX_COMPONENTS, &tokens[1], &ntokens);
+            PushParameter (motifParameter->flags, tokens, (ntokens + 1), entry);
         }
     }
     return codeOK;
