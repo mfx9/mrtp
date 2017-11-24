@@ -17,14 +17,7 @@ using namespace std;
 
 
 World::World (Parser *parser) {
-    parser_     = parser;
-    camera_     = NULL;
-    light_      = NULL;
-    actors_     = NULL;
-    textures_   = NULL;
-
-    nactors_    = 0;
-    ntextures_  = 0;
+    parser_ = parser;
 }
 
 void World::Initialize () {
@@ -54,25 +47,21 @@ void World::Initialize () {
 }
 
 World::~World () {
-    Actor    *actor;
-    Texture  *texture;
+    /* Destroy all textures and actors. */
+    Texture *texture;
 
-    /* Destroy textures, actors, camera, light. */
-    while (ntextures_ > 0) {
-        texture = PopTexture ();
+    while ((texture = PopTexture ()) != NULL) {
         delete texture;
     }
-    while (nactors_ > 0) {
-        actor = PopActor ();
+
+    Actor *actor;
+    while ((actor = PopActor ()) != NULL) {
         delete actor;
     }
 
-    if (camera_ != NULL) {
-        delete camera_;
-    }
-    if (light_  != NULL) {
-        delete light_;
-    }
+    /* Destroy camera and light. */
+    delete camera_;
+    delete light_;
 }
 
 void World::CreateCamera (Entry *entry) {
@@ -118,14 +107,12 @@ void World::CreatePlane (Entry *entry) {
     double reflect = numerical[0];
 
     entry->Query (&key, &numerical, &textual);
-    Color color ((real_t) numerical[0], (real_t) numerical[1], 
-        (real_t) numerical[2]);
+    Color color ((real_t) numerical[0], (real_t) numerical[1], (real_t) numerical[2]);
 
     entry->Query (&key, &numerical, &textual);
     Texture *texture = PushTexture (&textual[0]);
 
-    Plane *plane = new Plane (&center, &normal, scale, reflect, 
-            &color, texture);
+    Plane *plane = new Plane (&center, &normal, scale, reflect, &color, texture);
     PushActor (plane);
 }
 
@@ -146,14 +133,12 @@ void World::CreateSphere (Entry *entry) {
     double reflect = numerical[0];
 
     entry->Query (&key, &numerical, &textual);
-    Color color ((real_t) numerical[0], (real_t) numerical[1], 
-        (real_t) numerical[2]);
+    Color color ((real_t) numerical[0], (real_t) numerical[1], (real_t) numerical[2]);
 
     entry->Query (&key, &numerical, &textual);
     Texture *texture = PushTexture (&textual[0]);
 
-    Sphere *sphere = new Sphere (&position, radius, &axis, reflect, 
-            &color, texture);
+    Sphere *sphere = new Sphere (&position, radius, &axis, reflect, &color, texture);
     PushActor (sphere);
 }
 
@@ -177,115 +162,75 @@ void World::CreateCylinder (Entry *entry) {
     double reflect = numerical[0];
 
     entry->Query (&key, &numerical, &textual);
-    Color color ((real_t) numerical[0], (real_t) numerical[1], 
-        (real_t) numerical[2]);
+    Color color ((real_t) numerical[0], (real_t) numerical[1], (real_t) numerical[2]);
 
     entry->Query (&key, &numerical, &textual);
     Texture *texture = PushTexture (&textual[0]);
 
-    Cylinder *cylinder = new Cylinder (&center, &direction, radius, 
-            span, reflect, &color, texture);
+    Cylinder *cylinder = new Cylinder (&center, &direction, radius, span, reflect, &color, texture);
     PushActor (cylinder);
 }
 
 void World::PushActor (Actor *actor) {
-    Actor *next, *last;
+    Actor *last;
 
-    if (nactors_ < 1) {
-        actors_ = actor;
+    if (actors_.empty ()) {
+        actorsHead_ = actor;
     }
-    else {
-        next = actors_;
-        do {
-            last = next;
-            next = last->Next ();
-        } while (next != NULL);
-        last->SetNext (actor);
-    }
-    nactors_++;
+    last = actors_.back ();
+    last->SetNext (actor);
+    actors_.push_back (actor);
 }
 
 Actor *World::PopActor () {
-    Actor *prev, *next, *last, *pop = NULL;
+    Actor *actor = NULL;
 
-    if (nactors_ > 0) {
-        last = actors_;
-        prev = NULL;
-        while ((next = last->Next ()) != NULL) {
-            prev = last;
-            last = next;
-        }
-        if (prev != NULL) {
-            prev->SetNext (NULL);
-        }
-        pop = last;
-        nactors_--;
+    while (!actors_.empty ()) {
+        actor = actors_.back ();
+        actors_.pop_back ();
     }
-    return pop;
+    return actor;
 }
 
 Texture *World::PushTexture (string *filename) {
-    Texture *next, *last, *texture;
-    bool found;
+    Texture  *texture;
 
     /* Do not add an empty texture. */
     if (*filename == "") {
         return NULL;
     }
 
-    /* Check if the texture already exists. */
-    if (ntextures_ > 0) {
-        next  = textures_;
-        found = false;
-        do {
-            last = next;
-            if (last->CheckFilename (filename)) {
-                found = true;
-                break;
+    /* Do not add a texture that already exists. */
+    if (!textures_.empty ()) {
+        list<Texture *>::iterator  current, last;
+
+        current = textures_.begin ();
+        last = textures_.end ();
+
+        while (current != last) {
+            texture = (*current);
+            if (texture->CheckFilename (filename)) {
+                return texture;
             }
-            next = last->Next ();
-        } while (next != NULL);
-        if (found) {
-            return last;
+            current++;
         }
     }
-
     /* Create a new texture. */
     texture = new Texture (filename);
     texture->Allocate ();
+    textures_.push_back (texture);
 
-    if (ntextures_ < 1) {
-        textures_ = texture;
-    }
-    else {
-        next = textures_;
-        do {
-            last = next;
-            next = last->Next ();
-        } while (next != NULL);
-        last->SetNext (texture);
-    }
-    ntextures_++;
     return texture;
 }
 
 Texture *World::PopTexture () {
-    Texture *prev, *next, *last, *pop = NULL;
+    Texture *texture = NULL;
 
-    if (ntextures_ > 0) {
-        last = textures_;
-        prev = NULL;
-        while ((next = last->Next ()) != NULL) {
-            prev = last;
-            last = next;
-        }
-        if (prev != NULL) {
-            prev->SetNext (NULL);
-        }
-        pop = last;
-        ntextures_--;
+    if (!textures_.empty ()) {
+        texture = textures_.back ();
+        textures_.pop_back ();
     }
-    return pop;
+    return texture;
 }
 
 void World::AssignCamera (Camera **camera) {
@@ -294,5 +239,5 @@ void World::AssignCamera (Camera **camera) {
 
 void World::AssignLightActors (Light **light, Actor **actors) {
     *light = light_;
-    *actors = actors_;
+    *actors = actorsHead_;
 }

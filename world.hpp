@@ -17,6 +17,7 @@
 /* NULL pointer. */
 #include <cstddef>
 
+#include <list>
 #include <string>
 #include <iostream>
 
@@ -33,11 +34,10 @@ class World {
     Camera  *camera_;
     Light   *light_;
 
-    Actor *actors_;
-    unsigned int nactors_;
+    std::list<Actor *> actors_;
+    Actor *actorsHead_;
 
-    Texture *textures_;
-    unsigned int ntextures_;
+    std::list<Texture *> textures_;
 
     /*
      * Private methods.
