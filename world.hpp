@@ -14,20 +14,13 @@
 #ifndef _WORLD_H
 #define _WORLD_H
 
-/* NULL pointer. */
-#include <cstddef>
-
 #include <list>
 #include <string>
-#include <iostream>
 
-#include "vector.hpp"
 #include "actors.hpp"
 #include "camera.hpp"
 #include "color.hpp"
 #include "texture.hpp"
-
-#include "motifs.hpp"
 #include "parser.hpp"
 
 

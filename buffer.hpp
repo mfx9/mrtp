@@ -14,10 +14,7 @@
 #ifndef _BUFFER_H
 #define _BUFFER_H
 
-#include <cstddef>  /* NULL pointer. */
 #include <string>
-
-#include "png.hpp"
 #include "color.hpp"
 
 

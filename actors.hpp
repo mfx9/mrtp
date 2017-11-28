@@ -14,10 +14,6 @@
 #ifndef _ACTORS_H
 #define _ACTORS_H
 
-/* NULL pointer. */
-#include <cstddef>
-#include <cmath>
-
 #include "vector.hpp"
 #include "color.hpp"
 #include "texture.hpp"

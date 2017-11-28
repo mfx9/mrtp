@@ -12,8 +12,6 @@
  *
  */
 #include <iostream>
-using namespace std;
-
 #include <sstream>
 #include <iomanip>
 #include <string>
@@ -22,6 +20,8 @@ using namespace std;
 #include "parser.hpp"
 #include "world.hpp"
 #include "renderer.hpp"
+
+using namespace std;
 
 /*
  * Default settings.

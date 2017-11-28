@@ -14,12 +14,6 @@
 #ifndef _VECTOR_H
 #define _VECTOR_H
 
-#include <cmath>
-/*
-#include <iomanip>
-#include <iostream>
-*/
-
 
 class Vector {
     double  x_, y_, z_;

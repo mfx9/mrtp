@@ -11,7 +11,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <cstddef>
+#include <cmath>
 #include "renderer.hpp"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif /* _OPENMP */
+
 using namespace std;
 
 const double kDegreeToRadian = M_PI / 180.0f;

@@ -14,11 +14,7 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 
-/* NULL pointer. */
-#include <cstddef>
 #include <string>
-
-#include "png.hpp"
 #include "color.hpp"
 
 

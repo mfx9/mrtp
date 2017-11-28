@@ -14,9 +14,6 @@
 #ifndef _CAMERA_H
 #define _CAMERA_H
 
-#include <cmath>
-#include <cstdio>
-
 #include "vector.hpp"
 
 

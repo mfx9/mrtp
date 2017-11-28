@@ -14,14 +14,8 @@
 #ifndef _PARSER_H
 #define _PARSER_H
 
-/* NULL pointer. */
-#include <cstddef>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <list>
-
 #include "motifs.hpp"
 
 

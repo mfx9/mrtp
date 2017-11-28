@@ -11,6 +11,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <cstddef>
+#include "vector.hpp"
+#include "motifs.hpp"
 #include "world.hpp"
 
 using namespace std;

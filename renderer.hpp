@@ -14,15 +14,7 @@
 #ifndef _RENDERER_H
 #define _RENDERER_H
 
-
-#include <cstddef>  /* NULL pointer. */
 #include <string>
-#include <cmath>
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif /* _OPENMP */
-
 #include "color.hpp"
 #include "vector.hpp"
 #include "world.hpp"

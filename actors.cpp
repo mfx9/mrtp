@@ -11,7 +11,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <cstddef>
+#include <cmath>
 #include "actors.hpp"
+
 
 /**** Local functions. ****/
 static double SolveQuadratic (double a, double b, double c, double mint, 
