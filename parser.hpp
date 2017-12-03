@@ -15,6 +15,7 @@
 #define _PARSER_H
 
 #include <string>
+#include <vector>
 #include <list>
 #include "motifs.hpp"
 
@@ -25,38 +26,38 @@
 #define MAX_TOKENS      4
 #define MAX_COMPONENTS  (MAX_TOKENS - 1)
 
-/*
- * Custom data types.
- */
+/* Custom data types. */
 enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing, 
     codeRepeated, codeFilename, codeValue, codeConflict};
 
 enum ParserStatus_t {statusOK, statusFail};
 enum ParserMode_t {modeOpen, modeRead};
 
-/* typedef unsigned int Bitmask_t; */
+enum ItemType_t {itemNumerical, itemTextual};
 
 
 class Entry {
     EntryID_t  id_;
-    unsigned int npar_, current_;
 
-    /*
-     * real: real numbers (components of 3D vectors, etc).
-     *
-     * text: strings (usually filenames of texture files).
-     */
-    std::string text_[MAX_LINES][MAX_COMPONENTS];
-    double real_[MAX_LINES][MAX_COMPONENTS];
+    std::vector<ItemType_t> items_;
+    unsigned int            nitems_;
+    unsigned int            currentItem_;
+
+    std::vector<std::string>  textual_;
+    std::vector<unsigned int> sizesTextual_;
+    unsigned int              currentTextual_;
+
+    std::vector<double>       numerical_;
+    std::vector<unsigned int> sizesNumerical_;
+    unsigned int              currentNumerical_;
 
 public:
     Entry ();
     ~Entry ();
 
     void SetID (EntryID_t id);
-    void AddTextual (const std::string *text, unsigned int ntext);
-    void AddNumerical (double *real, unsigned int nreal);
-
+    void AddTextual (const std::string text[], unsigned int ntext);
+    void AddNumerical (double real[], unsigned int nreal);
     void StartQuery ();
     bool CheckID (EntryID_t id);
     bool Query (double **numerical, std::string **textual);
@@ -81,11 +82,11 @@ class Parser {
 public:
     Parser (std::string *path);
     ~Parser ();
-    ParserStatus_t Check (unsigned int *nentries);
 
     void Parse ();
     void StartQuery ();
     bool Query (Entry **entry);
+    ParserStatus_t Check (unsigned int *nentries);
 };
 
 #endif /* _PARSER_H */

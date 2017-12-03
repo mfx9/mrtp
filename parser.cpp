@@ -415,7 +415,7 @@ void Parser::Parse () {
 /**** Entry. ****/
 
 Entry::Entry () {
-    npar_ = 0;
+    nitems_ = 0;
 }
 
 Entry::~Entry () {
@@ -429,29 +429,32 @@ void Entry::SetID (EntryID_t id) {
     id_ = id;
 }
 
-void Entry::AddTextual (const string *text, unsigned int ntext) {
-    unsigned int i;
-
-    for (i = 0; i < ntext; i++) {
-        text_[npar_][i] = text[i];
+void Entry::AddTextual (const string text[], unsigned int ntext) {
+    for (unsigned int i = 0; i < ntext; i++) {
+        textual_.push_back (text[i]);
     }
-    npar_++;
+    sizesTextual_.push_back (ntext);
+
+    items_.push_back (itemTextual);
+    nitems_++;
 }
 
-void Entry::AddNumerical (double *real, unsigned int nreal) {
-    unsigned int i;
-
-    for (i = 0; i < nreal; i++) {
-        real_[npar_][i] = real[i];
+void Entry::AddNumerical (double real[], unsigned int nreal) {
+    for (unsigned int i = 0; i < nreal; i++) {
+        numerical_.push_back (real[i]);
     }
-    npar_++;
+    sizesNumerical_.push_back (nreal);
+
+    items_.push_back (itemNumerical);
+    nitems_++;
 }
 
 void Entry::StartQuery () {
-    /*
-     * Method must be called before calling Query().
-     */
-    current_ = 0;
+    /* Method must be called before calling Query(). */
+
+    currentItem_ = 0;
+    currentTextual_ = 0;
+    currentNumerical_ = 0;
 }
 
 bool Entry::Query (double **numerical, string **textual) {
@@ -463,13 +466,26 @@ bool Entry::Query (double **numerical, string **textual) {
      * in a while type of loop, until false is returned.
      *
      */
-    if (current_ == npar_) {
+    unsigned int index = 0, i;
+
+    if (currentItem_ == nitems_) {
         return false;
     }
-    *textual = &text_[current_][0];
-    *numerical = &real_[current_][0];
-
-    current_++;
+    if (items_[currentItem_] == itemNumerical) {
+        for (i = 0; i < currentNumerical_; i++) {
+            index += sizesNumerical_[i];
+        }
+        *numerical = &numerical_[index];
+        currentNumerical_++;
+    }
+    else {
+        for (i = 0; i < currentTextual_; i++) {
+            index += sizesTextual_[i];
+        }
+        *textual = &textual_[index];
+        currentTextual_++;
+    }
+    currentItem_++;
 
     return true;
 }
