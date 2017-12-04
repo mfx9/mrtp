@@ -33,4 +33,4 @@ public:
     bool CheckFilename (std::string *filename) const;
 };
 
-#endif /* _TEXTURE_H */
+#endif /* !_TEXTURE_H */

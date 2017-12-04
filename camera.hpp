@@ -35,4 +35,4 @@ public:
                        Vector *origin, Vector *direction) const;
 };
 
-#endif /* _CAMERA_H */
+#endif /* !_CAMERA_H */

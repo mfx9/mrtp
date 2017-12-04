@@ -47,4 +47,4 @@ public:
     Vector operator^ (const Vector &other) const;
 };
 
-#endif /* _VECTOR_H */
+#endif /* !_VECTOR_H */

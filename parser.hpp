@@ -15,9 +15,9 @@
 #define _PARSER_H
 
 #include <string>
-#include <vector>
 #include <list>
 #include "motifs.hpp"
+#include "entry.hpp"
 
 
 #define CHECK_BIT(flags, bit) ((flags >> bit) & 1)
@@ -32,36 +32,6 @@ enum ParserCode_t {codeOK, codeUnknown, codeType, codeSize, codeMissing,
 
 enum ParserStatus_t {statusOK, statusFail};
 enum ParserMode_t {modeOpen, modeRead};
-
-enum ItemType_t {itemNumerical, itemTextual};
-
-
-class Entry {
-    EntryID_t  id_;
-
-    std::vector<ItemType_t> items_;
-    unsigned int            nitems_;
-    unsigned int            currentItem_;
-
-    std::vector<std::string>  textual_;
-    std::vector<unsigned int> sizesTextual_;
-    unsigned int              currentTextual_;
-
-    std::vector<double>       numerical_;
-    std::vector<unsigned int> sizesNumerical_;
-    unsigned int              currentNumerical_;
-
-public:
-    Entry ();
-    ~Entry ();
-
-    void SetID (EntryID_t id);
-    void AddTextual (const std::string text[], unsigned int ntext);
-    void AddNumerical (double real[], unsigned int nreal);
-    void StartQuery ();
-    bool CheckID (EntryID_t id);
-    bool Query (double **numerical, std::string **textual);
-};
 
 
 class Parser {
@@ -89,4 +59,4 @@ public:
     ParserStatus_t Check (unsigned int *nentries);
 };
 
-#endif /* _PARSER_H */
+#endif /* !_PARSER_H */

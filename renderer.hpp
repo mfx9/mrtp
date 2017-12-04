@@ -80,4 +80,4 @@ public:
     void SaveFrame (std::string *path);
 };
 
-#endif /* _RENDERER_H */
+#endif /* !_RENDERER_H */

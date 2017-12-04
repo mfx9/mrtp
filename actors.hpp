@@ -112,4 +112,4 @@ public:
     void DetermineColor (Vector *hit, Vector *normal, Color *color);
 };
 
-#endif /* _ACTORS_H */
+#endif /* !_ACTORS_H */

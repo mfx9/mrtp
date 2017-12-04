@@ -39,4 +39,4 @@ public:
     void Zero ();
 };
 
-#endif /* _COLOR_H */
+#endif /* !_COLOR_H */

@@ -31,4 +31,4 @@ public:
     Color *Pointer (const unsigned int vline) const;
 };
 
-#endif /* _BUFFER_H */
+#endif /* !_BUFFER_H */

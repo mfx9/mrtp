@@ -57,4 +57,4 @@ struct MotifEntry {
 extern const MotifEntry kEntries[];
 extern const unsigned int kSizeEntries;
 
-#endif /* _MOTIFS_H */
+#endif /* !_MOTIFS_H */

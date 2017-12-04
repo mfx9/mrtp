@@ -21,6 +21,7 @@
 #include "camera.hpp"
 #include "color.hpp"
 #include "texture.hpp"
+#include "entry.hpp"
 #include "parser.hpp"
 
 
@@ -57,4 +58,4 @@ public:
     void Bind (Camera **camera, Light **light, Actor **actors);
 };
 
-#endif /* _WORLD_H */
+#endif /* !_WORLD_H */
