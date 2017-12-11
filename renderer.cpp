@@ -21,7 +21,7 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
 
 using namespace std;
 
@@ -232,5 +232,5 @@ void Renderer::Render () {
      * No OpenMP compiled in, always do serial execution.
      */
     RenderBlock (0, height_);
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
 }

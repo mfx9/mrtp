@@ -31,7 +31,6 @@ enum LightModel_t {lightNone, lightLinear, lightQuadratic};
 
 class Renderer {
     Actor   *actors_;
-    Camera  *camera_;
 
     /*
      * model: selects the light model (quenching of light with
@@ -56,6 +55,7 @@ class Renderer {
     unsigned int  maxdepth_;
     bool          reflshadow_;
 
+    Camera  *camera_;
     Buffer  *buffer_;
     double  fov_, ratio_, perspective_;
     unsigned int width_, height_, nthreads_;

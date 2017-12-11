@@ -55,7 +55,7 @@ using namespace std;
     #define DEFAULT_THREADS   1
     #define MIN_THREADS       0
     #define MAX_THREADS      64
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
 
 /*
  * Exit codes.
@@ -78,7 +78,7 @@ void HelpScreen (string program) {
             "    -s, --shadow       shadow factor (default is 0.25)\n"
 #ifdef _OPENMP
             "    -t, --threads      rendering threads: 0 (auto), 1 (default), 2, 4, etc.\n"
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
             "\nExample:\n";
     cout << "    " << program << " -r 1024x768 -o test.png test.inp" << endl;
 }
@@ -106,7 +106,7 @@ int main (int argc, char **argv) {
     unsigned int height     =  DEFAULT_HEIGHT;
 #ifdef _OPENMP
     unsigned int threads    =  DEFAULT_THREADS;
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
 
 
     if (argc < 2) {
@@ -325,7 +325,7 @@ int main (int argc, char **argv) {
                 return exitFail;
             }
         }
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
 
         /*
          * Get the input file.
@@ -387,7 +387,7 @@ int main (int argc, char **argv) {
 #else
     Renderer renderer (&world, width, height, fov, distance, 
         model, shadow, reflect, reflshadow, 1);
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
     renderer.Initialize ();
     if (!quiet) {
         cout << "Setting up renderer OK." << endl;
@@ -417,7 +417,7 @@ int main (int argc, char **argv) {
             /* Correct the CPU time for the number of threads. */
             timeUsed /= double (threads);
         }
-#endif /* _OPENMP */
+#endif /* !_OPENMP */
         cout << "Done. Elapsed time: " << setprecision (2) << 
             timeUsed << " sec" << endl;
     }

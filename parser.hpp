@@ -19,12 +19,11 @@
 #define _PARSER_H
 
 #include <string>
+#include <bitset>
 #include <list>
 #include "motifs.hpp"
 #include "entry.hpp"
 
-
-#define CHECK_BIT(flags, bit) ((flags >> bit) & 1)
 
 #define MAX_LINES       8
 #define MAX_TOKENS      4
@@ -48,10 +47,14 @@ class Parser {
     /* Private methods. */
     ParserCode_t CreateEntry (std::string *entryLabel, 
                               std::string collect[][MAX_TOKENS],
-                              unsigned int sizes[], unsigned int ncol, 
+                              unsigned int sizes[], 
+                              unsigned int ncol, 
                               Entry *entry);
-    ParserCode_t PushParameter (Bitmask_t flags, std::string tokens[MAX_TOKENS], 
-                                unsigned int size, Entry *entry);
+
+    ParserCode_t PushParameter (std::bitset<MAX_BITS> flags, 
+                                std::string tokens[MAX_TOKENS], 
+                                unsigned int size, 
+                                Entry *entry);
 
 public:
     Parser (std::string *path);

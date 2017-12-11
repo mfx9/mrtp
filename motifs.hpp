@@ -19,44 +19,33 @@
 #define _MOTIFS_H
 
 #include <string>
+#include <bitset>
+
+#define MAX_BITS 16
 
 
-typedef unsigned int Bitmask_t;
+enum EntryID_t {entryCamera, entryLight, entryPlane, entrySphere, entryCylinder};
 
-enum EntryID_t {entryCamera, entryLight, entryPlane, 
-    entrySphere, entryCylinder};
-
-enum ParameterFlag_t {flagText, flagReal, flagVector, flagOptional,
-    flagCheckZero, flagCheckPositive, flagCheckZeroOne};
-
-#define MAKE_MASK(bit) (1 << bit)
-
-#define BIT_TEXT            MAKE_MASK (flagText)
-#define BIT_REAL            MAKE_MASK (flagReal)
-#define BIT_VECTOR          MAKE_MASK (flagVector)
-#define BIT_OPTIONAL        MAKE_MASK (flagOptional)
-#define BIT_CHECK_ZERO      MAKE_MASK (flagCheckZero)
-#define BIT_CHECK_POSITIVE  MAKE_MASK (flagCheckPositive)
-#define BIT_CHECK_ZERO_ONE  MAKE_MASK (flagCheckZeroOne)
-
+enum ParameterFlag_t {flagText, flagReal, flagVector, flagOptional, flagCheckZero, 
+                      flagCheckPositive, flagCheckZeroOne};
 
 struct MotifParameter {
-    char         id;
-    char         replace;
-    std::string  label;
-    std::string  defaults;
-    Bitmask_t    flags;
+    int             id;
+    int             replace;
+    std::string     label;
+    std::string     defaults;
+    std::bitset<MAX_BITS> flags;
 };
 
 struct MotifEntry {
     EntryID_t     id;
     std::string   label;
     bool          mandatory;
-    unsigned int  nallowed;
-    unsigned int  nparameters;
-
+    int           nallowed;
+    int           nparameters;
     const MotifParameter *parameters;
 };
+
 
 extern const MotifEntry kEntries[];
 extern const unsigned int kSizeEntries;

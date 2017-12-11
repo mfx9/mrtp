@@ -17,6 +17,17 @@
  */
 #include "motifs.hpp"
 
+
+#define MAKE_MASK(bit) (1 << bit)
+
+#define BIT_TEXT            MAKE_MASK (flagText)
+#define BIT_REAL            MAKE_MASK (flagReal)
+#define BIT_VECTOR          MAKE_MASK (flagVector)
+#define BIT_OPTIONAL        MAKE_MASK (flagOptional)
+#define BIT_CHECK_ZERO      MAKE_MASK (flagCheckZero)
+#define BIT_CHECK_POSITIVE  MAKE_MASK (flagCheckPositive)
+#define BIT_CHECK_ZERO_ONE  MAKE_MASK (flagCheckZeroOne)
+
 using namespace std;
 
 

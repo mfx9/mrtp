@@ -91,19 +91,19 @@ bool Parser::Query (Entry **entry) {
     return true;
 }
 
-ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS], 
+ParserCode_t Parser::PushParameter (bitset<MAX_BITS> flags, string tokens[MAX_TOKENS], 
                                     unsigned int size, Entry *entry) {
     unsigned int  j, ntokens;
     double        output[MAX_COMPONENTS];
     string        extension, path;
     bool          check;
 
-    ntokens = (CHECK_BIT (flags, flagVector)) ? 4 : 2;
+    ntokens = (flags[flagVector]) ? 4 : 2;
     if (size != ntokens) {
         return codeSize;
     }
 
-    if (!CHECK_BIT (flags, flagText)) {
+    if (!flags[flagText]) {
         /* Parameter is a vector or real number. */
 
         check = ConvertTokens (&tokens[1], (ntokens - 1), output);
@@ -113,7 +113,7 @@ ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS],
         /* Check for invalid values. */
         check = true;
 
-        if (CHECK_BIT (flags, flagCheckZero)) {
+        if (flags[flagCheckZero]) {
             check = false;
             for (j = 0; j < (ntokens - 1); j++) {
                 if (output[j] != 0.0f) {
@@ -122,7 +122,7 @@ ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS],
                 }
             }
         }
-        else if (CHECK_BIT (flags, flagCheckPositive)) {
+        else if (flags[flagCheckPositive]) {
             check = false;
             for (j = 0; j < (ntokens - 1); j++) {
                 if (output[j] > 0.0f) {
@@ -131,7 +131,7 @@ ParserCode_t Parser::PushParameter (Bitmask_t flags, string tokens[MAX_TOKENS],
                 }
             }
         }
-        else if (CHECK_BIT (flags, flagCheckZeroOne)) {
+        else if (flags[flagCheckZeroOne]) {
             check = false;
             for (j = 0; j < (ntokens - 1); j++) {
                 if ((output[j] >= 0.0f) && (output[j] <= 1.0f)) {
@@ -254,7 +254,7 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOK
                 }
             }
             else {
-                if (!CHECK_BIT (motifParameter->flags, flagOptional)) {
+                if (!motifParameter->flags[flagOptional]) {
                     return codeMissing;
                 }
             }
