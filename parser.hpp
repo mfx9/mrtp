@@ -19,6 +19,7 @@
 #define _PARSER_H
 
 #include <string>
+#include <vector>
 #include <bitset>
 #include <list>
 #include "motifs.hpp"
@@ -45,15 +46,9 @@ class Parser {
     std::list<Entry *>::iterator currentEntry_; 
 
     /* Private methods. */
-    ParserCode_t CreateEntry (std::string *entryLabel, 
-                              std::string collect[][MAX_TOKENS],
-                              unsigned int sizes[], 
-                              unsigned int ncol, 
-                              Entry *entry);
-
-    ParserCode_t PushParameter (std::bitset<MAX_BITS> flags, 
-                                std::string tokens[MAX_TOKENS], 
-                                unsigned int size, 
+    ParserCode_t CreateEntry (std::string *label, std::vector<std::string> *collect, 
+                              std::vector<unsigned int> *sizes, Entry *entry);
+    ParserCode_t PushParameter (std::bitset<MAX_FLAGS> flags, std::vector<std::string> *tokens, 
                                 Entry *entry);
 
 public:

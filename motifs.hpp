@@ -21,7 +21,7 @@
 #include <string>
 #include <bitset>
 
-#define MAX_BITS 16
+#define MAX_FLAGS 16
 
 
 enum EntryID_t {entryCamera, entryLight, entryPlane, entrySphere, entryCylinder};
@@ -34,7 +34,7 @@ struct MotifParameter {
     int             replace;
     std::string     label;
     std::string     defaults;
-    std::bitset<MAX_BITS> flags;
+    std::bitset<MAX_FLAGS> flags;
 };
 
 struct MotifEntry {

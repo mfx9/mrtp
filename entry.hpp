@@ -44,9 +44,10 @@ public:
     ~Entry ();
 
     void SetID (EntryID_t id);
+    void AddTextual (std::vector<std::string> *tokens);
+    void AddNumerical (std::vector<double> *tokens);
+
     bool CheckID (EntryID_t id);
-    void AddTextual (const std::string text[], unsigned int ntext);
-    void AddNumerical (double real[], unsigned int nreal);
     void StartQuery ();
     bool Query (double **numerical, std::string **textual);
 };

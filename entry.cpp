@@ -28,28 +28,32 @@ Entry::~Entry () {
 }
 
 bool Entry::CheckID (EntryID_t id) {
-    return (id == id_) ? true : false;
+    return (id == id_);
 }
 
 void Entry::SetID (EntryID_t id) {
     id_ = id;
 }
 
-void Entry::AddTextual (const string text[], unsigned int ntext) {
-    for (unsigned int i = 0; i < ntext; i++) {
-        textual_.push_back (text[i]);
+void Entry::AddTextual (vector<string> *tokens) {
+    unsigned int size = tokens->size ();
+
+    for (unsigned int i = 0; i < size; i++) {
+        textual_.push_back (tokens->at (i));
     }
-    sizesTextual_.push_back (ntext);
+    sizesTextual_.push_back (size);
 
     items_.push_back (itemTextual);
     nitems_++;
 }
 
-void Entry::AddNumerical (double real[], unsigned int nreal) {
-    for (unsigned int i = 0; i < nreal; i++) {
-        numerical_.push_back (real[i]);
+void Entry::AddNumerical (vector<double> *tokens) {
+    unsigned int size = tokens->size ();
+
+    for (unsigned int i = 0; i < size; i++) {
+        numerical_.push_back (tokens->at (i));
     }
-    sizesNumerical_.push_back (nreal);
+    sizesNumerical_.push_back (size);
 
     items_.push_back (itemNumerical);
     nitems_++;

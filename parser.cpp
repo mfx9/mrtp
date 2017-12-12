@@ -48,10 +48,8 @@ const unsigned int kSizeMessages =
 
 /**** Local functions. ****/
 
-static bool TokenizeLine (const string *line, unsigned int maxtokens,
-                          string *tokens, unsigned int *ntokens);
-static bool ConvertTokens (const string *tokens, unsigned int ntokens, 
-                           double *out);
+static unsigned int TokenizeLine (const string *line, vector<string> *tokens);
+static bool ConvertTokens (vector<string> *tokens, vector<double> *output);
 static bool CheckFilename (string *in, string *ext, string *out);
 
 
@@ -91,22 +89,38 @@ bool Parser::Query (Entry **entry) {
     return true;
 }
 
-ParserCode_t Parser::PushParameter (bitset<MAX_BITS> flags, string tokens[MAX_TOKENS], 
-                                    unsigned int size, Entry *entry) {
-    unsigned int  j, ntokens;
-    double        output[MAX_COMPONENTS];
-    string        extension, path;
-    bool          check;
+ParserCode_t Parser::PushParameter (bitset<MAX_FLAGS> flags, vector<string> *tokens, 
+                                    Entry *entry) {
+    /* DEBUG
+    cout << "Tokens: ";
+    unsigned int size = tokens->size ();
 
-    ntokens = (flags[flagVector]) ? 4 : 2;
-    if (size != ntokens) {
+    for (unsigned int i=0; i< size; i++) {
+        cout << (*tokens)[i] << "   ";
+    }
+    cout << endl; */
+
+    unsigned int   j, ntokens;
+    string         extension, pathin, pathout;
+    bool           check;
+    vector<double> output;
+    vector<string> text;
+
+
+    if (flags[flagVector]) {
+        ntokens = 3;
+    }
+    else {  /* if (flags[flagReal] || flags[flagText]) */
+        ntokens = 1;
+    }
+    if (tokens->size () != ntokens) {
         return codeSize;
     }
 
     if (!flags[flagText]) {
         /* Parameter is a vector or real number. */
 
-        check = ConvertTokens (&tokens[1], (ntokens - 1), output);
+        check = ConvertTokens (tokens, &output);
         if (!check) {
             return codeType;
         }
@@ -115,7 +129,7 @@ ParserCode_t Parser::PushParameter (bitset<MAX_BITS> flags, string tokens[MAX_TO
 
         if (flags[flagCheckZero]) {
             check = false;
-            for (j = 0; j < (ntokens - 1); j++) {
+            for (j = 0; j < ntokens; j++) {
                 if (output[j] != 0.0f) {
                     check = true;
                     break;
@@ -124,7 +138,7 @@ ParserCode_t Parser::PushParameter (bitset<MAX_BITS> flags, string tokens[MAX_TO
         }
         else if (flags[flagCheckPositive]) {
             check = false;
-            for (j = 0; j < (ntokens - 1); j++) {
+            for (j = 0; j < ntokens; j++) {
                 if (output[j] > 0.0f) {
                     check = true;
                     break;
@@ -133,7 +147,7 @@ ParserCode_t Parser::PushParameter (bitset<MAX_BITS> flags, string tokens[MAX_TO
         }
         else if (flags[flagCheckZeroOne]) {
             check = false;
-            for (j = 0; j < (ntokens - 1); j++) {
+            for (j = 0; j < ntokens; j++) {
                 if ((output[j] >= 0.0f) && (output[j] <= 1.0f)) {
                     check = true;
                     break;
@@ -143,52 +157,55 @@ ParserCode_t Parser::PushParameter (bitset<MAX_BITS> flags, string tokens[MAX_TO
         if (!check) {
             return codeValue;
         }
-        entry->AddNumerical (output, (ntokens - 1));
+        entry->AddNumerical (&output);
     }
     else {
         /* Parameter is a texture. */
-
         extension = "png";
-        check = CheckFilename (&tokens[1], &path, &extension);
+        pathin = tokens->at (0);
+
+        check = CheckFilename (&pathin, &pathout, &extension);
         if (!check) {
             return codeFilename;
         }
-        entry->AddTextual (&path, 1);
+        text.push_back (pathout);
+        entry->AddTextual (&text);
     }
     return codeOK;
 }
 
-ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOKENS],
-                                  unsigned int sizes[], unsigned int ncol, 
-                                  Entry *entry) {
-    unsigned int  i, j, k, ntokens;
-    bool          found, foundOther;
-    bool          checklist[MAX_LINES];
-
-    string        tokens[MAX_TOKENS];
-    ParserCode_t  code;
+ParserCode_t Parser::CreateEntry (string *label, vector<string> *collected, 
+                                  vector<unsigned int> *sizes, Entry *entry) {
+    unsigned int   i, j, k, ci, cj, ncol;
+    bool           found, foundOther;
+    vector<bool>   checklist;
+    vector<string> tokens;
+    ParserCode_t   code;
 
     const MotifEntry     *motif;
     const MotifParameter *motifParameter, *motifParameterOther;
 
 
-    /* Find a motif for the current actor, camera, light. */
     motif = kEntries;
-    while (motif->label != (*entryLabel)) {
+    ncol = sizes->size ();
+
+    /* Find a motif for the current actor, camera, light. */
+    while (motif->label != (*label)) {
         motif++;
     }
     entry->SetID (motif->id);
 
+
     /* Check for unknown or repeated parameters. */
-    for (i = 0; i < MAX_LINES; i++) {
-        checklist[i] = false;
+    for (i = 0; i < motif->nparameters; i++) {
+        checklist.push_back (false);
     }
 
-    for (i = 0; i < ncol; i++) {
+    for (ci = 0, i = 0; i < ncol; ci += sizes->at (i), i++) {
         motifParameter = motif->parameters;
         found = false;
         for (j = 0; j < motif->nparameters; j++, motifParameter++) {
-            if (collected[i][0] == motifParameter->label) {
+            if (collected->at (ci) == motifParameter->label) {
                 found = true;
                 break;
             }
@@ -207,8 +224,8 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOK
 
     for (i = 0; i < motif->nparameters; i++, motifParameter++) {
         found = false;
-        for (j = 0; j < ncol; j++) {
-            if (collected[j][0] == motifParameter->label) {
+        for (ci = 0, j = 0; j < ncol; ci += sizes->at (j), j++) {
+            if (collected->at (ci) == motifParameter->label) {
                 found = true;
                 break;
             }
@@ -226,9 +243,9 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOK
                 }
             }
             foundOther = false;
-            for (k = 0; k < ncol; k++) {
+            for (cj = 0, k = 0; k < ncol; cj += sizes->at (k), k++) {
                 if (k != j) {
-                    if (collected[k][0] == motifParameterOther->label) {
+                    if (collected->at (cj) == motifParameterOther->label) {
                         foundOther = true;
                         break;
                     }
@@ -241,7 +258,12 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOK
             if (motifParameter->replace && foundOther) {
                 return codeConflict;
             }
-            code = PushParameter (motifParameter->flags, collected[j], sizes[j], entry);
+
+            tokens.clear ();
+            for (k = 1; k < sizes->at (j); k++) {
+                tokens.push_back (collected->at (ci + k));
+            }
+            code = PushParameter (motifParameter->flags, &tokens, entry);
             if (code != codeOK) {
                 return code;
             }
@@ -260,42 +282,41 @@ ParserCode_t Parser::CreateEntry (string *entryLabel, string collected[][MAX_TOK
             }
             /* Push defaults. */
 
-            tokens[0] = motifParameter->label;
-            TokenizeLine (&motifParameter->defaults, MAX_COMPONENTS, &tokens[1], &ntokens);
-            PushParameter (motifParameter->flags, tokens, (ntokens + 1), entry);
+            tokens.clear ();
+            TokenizeLine (&motifParameter->defaults, &tokens);
+            PushParameter (motifParameter->flags, &tokens, entry);
         }
     }
     return codeOK;
 }
 
 void Parser::Parse () {
-    string        tokens[MAX_TOKENS];
-    string        collect[MAX_LINES][MAX_TOKENS];
-    string        line, item;
+    vector<string>       tokens;
+    vector<string>       collect;
+    vector<unsigned int> sizes;
+    vector<unsigned int> counters;
 
+    string        line, item;
     unsigned int  i, nlines, start;
-    unsigned int  npar, sizes[MAX_LINES];
     unsigned int  ntokens;
-    unsigned int  counters[kSizeEntries], nallowed, total;
+    unsigned int  nallowed, total;
 
     ParserMode_t  mode;
     ParserCode_t  code;
     bool          check;
     Entry        *entry;
 
-    /*
-     * Initialize.
-     */
+
+    /* Initialize. */
     for (i = 0; i < kSizeEntries; i++) {
-        counters[i] = 0;
+        counters.push_back (0);
     }
+
     status_ = statusFail;
     mode    = modeOpen;
     nlines  = 0;
 
-    /*
-     * Open the input file.
-     */
+    /* Open the input file. */
     const char *fn = path_.c_str ();
     ifstream config (fn);
 
@@ -308,8 +329,9 @@ void Parser::Parse () {
     while (getline (config, line)) {
         nlines++;
 
-        check = TokenizeLine (&line, MAX_TOKENS, tokens, &ntokens);
-        if (!check) {
+        tokens.clear ();
+        ntokens = TokenizeLine (&line, &tokens);
+        if (ntokens > MAX_TOKENS) {
             cerr << "Line " << nlines << ": Too many tokens." << endl;
             config.close ();
             return;
@@ -325,9 +347,11 @@ void Parser::Parse () {
                 for (i = 0; i < kSizeEntries; i++) {
                     if (kEntries[i].label == item) {
                         check = true;
-                        npar  = 0;
                         start = nlines;
                         mode  = modeRead;
+
+                        collect.clear ();
+                        sizes.clear ();
 
                         nallowed = kEntries[i].nallowed;
                         counters[i]++;
@@ -342,23 +366,22 @@ void Parser::Parse () {
                     }
                 }
                 if (!check) {
-                    cerr << "Line " << nlines << ": Unrecognized item \"" 
-                        << item << "\"." << endl;
+                    cerr << "Line " << nlines << ": Unrecognized item \"" << 
+                        item << "\"." << endl;
                     config.close ();
                     return;
                 }
             }
             else {  /* if (mode == modeRead) */
-                if (npar == MAX_LINES) {
-                    cerr << "Line " << nlines << 
-                        ": Too many parameter lines." << endl;
+                if (sizes.size () == MAX_LINES) {
+                    cerr << "Line " << nlines << ": Too many parameter lines." << endl;
                     config.close ();
                     return;
                 }
                 for (i = 0; i < ntokens; i++) {
-                    collect[npar][i] = tokens[i];
+                    collect.push_back (tokens[i]);
                 }
-                sizes[npar++] = ntokens;
+                sizes.push_back (ntokens);
             }
         }
         else {
@@ -376,17 +399,18 @@ void Parser::Parse () {
                 mode = modeOpen;
                 entry = new Entry ();
 
-                code = CreateEntry (&item, collect, sizes, npar, entry);
+                code = CreateEntry (&item, &collect, &sizes, entry);
                 if (code != codeOK) {
-                    cerr << "In entry at line " << start << ": ";
+                    delete entry;
+                    config.close ();
 
+                    cerr << "In entry at line " << start << ": ";
                     for (i = 0; i < kSizeMessages; i++) {
                         if (kErrorMessages[i].code == code) {
                             cerr << kErrorMessages[i].message << endl;
                             break;
                         }
                     }
-                    config.close ();
                     return;
                 }
                 entries_.push_back (entry);
@@ -418,24 +442,17 @@ void Parser::Parse () {
 
 /**** Utility functions. ****/
 
-bool TokenizeLine (const string *line, unsigned int maxtokens, 
-                   string *tokens, unsigned int *ntokens) {
-    /*
-     * Split a line to tokens.
-     *
-     * Remove redundant blank characters and comments.
-     */
-    size_t  i, ti;
+unsigned int TokenizeLine (const string *line, 
+                           vector<string> *tokens) {
+    size_t  i;
     bool    stop;
     string  chars, token;
 
     chars = (*line);
     i = chars.find ("#");
-
     if (i != string::npos) {
         chars.resize (i);
     }
-    ti = 0;
     stop = false;
 
     while (!stop) {
@@ -455,32 +472,24 @@ bool TokenizeLine (const string *line, unsigned int maxtokens,
             stop = true;
         }
         if (token != "") {
-            tokens[ti] = token;
-            if (++ti > (size_t) maxtokens) {
-                return false;
-            }
+            tokens->push_back (token);
         }
     }
-    *ntokens = (unsigned int) ti;
-    return true;
+    return tokens->size ();
 }
 
-bool ConvertTokens (const string *tokens, unsigned int ntokens, 
-                    double *out) {
-    /*
-     * Convert tokens to real numbers.
-     */
-    double        test;
-    unsigned int  i;
+bool ConvertTokens (vector<string> *tokens, vector<double> *output) {
     stringstream  convert;
+    size_t  i;
+    double  test;
 
-    for (i = 0; i < ntokens; i++) {
-        convert.str (tokens[i]);
+    for (i = 0; i < tokens->size (); i++) {
+        convert.str (tokens->at (i));
         convert >> test;
         if (!convert) {
             return false;
         }
-        out[i] = test;
+        output->push_back (test);
         convert.clear ();
     }
     return true;
