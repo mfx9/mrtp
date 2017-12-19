@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cstddef>
+#include <iostream>
 #include "vector.hpp"
 #include "motifs.hpp"
 #include "world.hpp"
@@ -183,9 +184,12 @@ void World::PushActor (Actor *actor) {
 
     if (actors_.empty ()) {
         actorsHead_ = actor;
+        last->SetNext ((Actor *) NULL);
     }
-    last = actors_.back ();
-    last->SetNext (actor);
+    else {
+        last = actors_.back ();
+        last->SetNext (actor);
+    }
     actors_.push_back (actor);
 }
 
