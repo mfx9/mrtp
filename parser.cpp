@@ -161,8 +161,8 @@ ParserCode_t Parser::PushParameter (bitset<MAX_FLAGS> flags, vector<string> *tok
     }
     else {
         /* Parameter is a texture. */
-        extension = "png";
         pathin = tokens->at (0);
+        extension = "png";
 
         check = CheckFilename (&pathin, &pathout, &extension);
         if (!check) {
@@ -194,6 +194,8 @@ ParserCode_t Parser::CreateEntry (string *label, vector<string> *collected,
         motif++;
     }
     entry->SetID (motif->id);
+    /* DEBUG
+    cout << "  ** Creating entry: " << motif->label << endl; */
 
 
     /* Check for unknown or repeated parameters. */
@@ -263,6 +265,9 @@ ParserCode_t Parser::CreateEntry (string *label, vector<string> *collected,
             for (k = 1; k < sizes->at (j); k++) {
                 tokens.push_back (collected->at (ci + k));
             }
+            /* DEBUG
+            cout << "Parameter: " << collected->at (ci) << "... "; */
+
             code = PushParameter (motifParameter->flags, &tokens, entry);
             if (code != codeOK) {
                 return code;
@@ -284,6 +289,8 @@ ParserCode_t Parser::CreateEntry (string *label, vector<string> *collected,
 
             tokens.clear ();
             TokenizeLine (&motifParameter->defaults, &tokens);
+            /* DEBUG
+            cout << "Default parameter: " << motifParameter->label << "... "; */
             PushParameter (motifParameter->flags, &tokens, entry);
         }
     }
@@ -496,29 +503,31 @@ bool ConvertTokens (vector<string> *tokens, vector<double> *output) {
 }
 
 bool CheckFilename (string *in, string *out, string *ext) {
-    /*
-     * Check for a valid filename.
-     */
+    /* Check for a valid filename. */
     string filename = (*in);
-    unsigned int position = filename.length () - 1;
 
+    /* Default empty filenames are OK. */
+    if (filename == "!") {
+        *out = filename;
+        return true;
+    }
+
+    unsigned int position = filename.length () - 1;
     if ((filename.at (0) != '"') || (filename.at (position) != '"')) {
         return false;
     }
     string trim = filename.substr (1, position - 1);
     (*out) = trim;
-    /*
-     * Check for a valid extension.
-     */
+
+    /* Check for a valid extension. */
     if (ext != NULL) {
         string extension = trim.substr (position - 4, 3);
         if (extension != (*ext)) {
             return false;
         }
     }
-    /*
-     * Check if the file exists.
-     */
+
+    /* Check if the file exists. */
     const char *text = trim.c_str ();
     ifstream file (text);
 

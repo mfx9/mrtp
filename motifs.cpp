@@ -47,7 +47,7 @@ const MotifParameter kPlane[] = {
     { 3,  0,  "scale",  "", BIT_REAL | BIT_CHECK_POSITIVE },
     { 4,  0,  "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
     { 5,  6,  "color",  "0.0  1.0  0.0", BIT_VECTOR },
-    { 6,  5,  "texture",  "", BIT_TEXT },
+    { 6,  5,  "texture",  "!", BIT_TEXT },
     };
 
 const MotifParameter kSphere[] = {
@@ -56,7 +56,7 @@ const MotifParameter kSphere[] = {
     { 3,  0, "axis",  "0.0  0.0  1.0", BIT_VECTOR | BIT_CHECK_ZERO | BIT_OPTIONAL },
     { 4,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
     { 5,  6, "color",  "0.0  1.0  0.0", BIT_VECTOR },
-    { 6,  5, "texture",  "", BIT_TEXT },
+    { 6,  5, "texture",  "!", BIT_TEXT },
     };
 
 const MotifParameter kCylinder[] = {
@@ -66,7 +66,7 @@ const MotifParameter kCylinder[] = {
     { 4,  0, "span",  "-1.0", BIT_REAL | BIT_CHECK_ZERO | BIT_OPTIONAL },
     { 5,  0, "reflect",  "0.0", BIT_REAL | BIT_CHECK_ZERO_ONE | BIT_OPTIONAL },
     { 6,  7, "color",  "0.0  1.0  0.0", BIT_VECTOR },
-    { 7,  6, "texture",  "", BIT_TEXT },
+    { 7,  6, "texture",  "!", BIT_TEXT },
     };
 
 const MotifEntry kEntries[] = {

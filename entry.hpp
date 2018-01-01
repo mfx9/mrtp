@@ -29,8 +29,10 @@ class Entry {
     EntryID_t  id_;
 
     std::vector<ItemType_t>   items_;
+
     std::vector<std::string>  textual_;
     std::vector<unsigned int> sizesTextual_;
+
     std::vector<double>       numerical_;
     std::vector<unsigned int> sizesNumerical_;
 

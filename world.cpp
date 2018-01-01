@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <cstddef>
-#include <iostream>
+#include <iostream>  /* DEBUG */
 #include "vector.hpp"
 #include "motifs.hpp"
 #include "world.hpp"
@@ -58,12 +58,12 @@ World::~World () {
     /* Destroy all textures and actors. */
     Texture *texture;
 
-    while ((texture = PopTexture ()) != NULL) {
+    while ((texture = PopTexture ()) != (Texture *) NULL) {
         delete texture;
     }
 
     Actor *actor;
-    while ((actor = PopActor ()) != NULL) {
+    while ((actor = PopActor ()) != (Actor *) NULL) {
         delete actor;
     }
 
@@ -184,7 +184,7 @@ void World::PushActor (Actor *actor) {
 
     if (actors_.empty ()) {
         actorsHead_ = actor;
-        last->SetNext ((Actor *) NULL);
+        actor->SetNext ((Actor *) NULL);
     }
     else {
         last = actors_.back ();
@@ -194,7 +194,7 @@ void World::PushActor (Actor *actor) {
 }
 
 Actor *World::PopActor () {
-    Actor *actor = NULL;
+    Actor *actor = (Actor *) NULL;
 
     while (!actors_.empty ()) {
         actor = actors_.back ();
@@ -206,11 +206,11 @@ Actor *World::PopActor () {
 Texture *World::PushTexture (string *filename) {
     Texture  *texture;
 
-    /* Do not add an empty texture. */
-    if (*filename == "") {
-        return NULL;
+    if (*filename == "!") {
+        /* DEBUG
+        cout << "Empty texture!" << endl; */
+        return (Texture *) NULL;
     }
-
     /* Do not add a texture that already exists. */
     if (!textures_.empty ()) {
         list<Texture *>::iterator  current, last;
@@ -235,7 +235,7 @@ Texture *World::PushTexture (string *filename) {
 }
 
 Texture *World::PopTexture () {
-    Texture *texture = NULL;
+    Texture *texture = (Texture *) NULL;
 
     if (!textures_.empty ()) {
         texture = textures_.back ();
