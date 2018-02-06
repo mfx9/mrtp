@@ -3,41 +3,26 @@
 
 
 A simple raytracing tool to explore programming in C++.
-
-Author: Mikolaj Feliks <mikolaj [dot] feliks [at] gmail [dot] com><br>
 Released as open source software under the GNU GPL v3.0 license (see COPYING).
 
-Mrtp builds up on the idea of my earlier program, mrt, 
-that I wrote back in 2005 in pure C. The "p" in the name indicates 
-"plus" or "progress".
+Mrtp builds up on the idea of my earlier program, mrt, that I wrote back in 
+2005 in pure C. The "p" in the name indicates "plus" or "progress".
 
-Essentially, the purpose of writing Mrtp was to refresh my knowledge 
-of C++, raytracing and 3D computer graphics. Also to experiment with 
-linking of a project to third-party libraries, for example png++.
-
-As of now, the program has only basic functionality and is under
-development.
+The purpose of writing Mrtp was to refresh my knowledge of C++, raytracing 
+and 3D computer graphics. Also to experiment with linking of a project to 
+third-party libraries, for example png++.
 
 
 ## Installation instructions
 
 For writing output files, Mrtp depends on the 
 [png++ library](http://www.nongnu.org/pngpp/), which is a C++ wrapper 
-for libpng. In the first step, go to the "png++" directory and type in:
+for libpng. In the first step, run "make" in the "png++" directory. This
+will automatically download and unpack all necessary files. png++ 
+is a header library and does not require compilation. 
 
-```
-make
-```
-
-It will automatically download and unpack all necessary files. png++ 
-is a header library and does not require compilation. In the next
-step, run "make" in the main directory of Mrtp. An executable 
-file "mrtp" will be generated that is ready to run. By typing in:
-
-```
-./mrtp -h
-```
-
+In the next step, run "make" in the main directory of Mrtp. An executable 
+file "mrtp" will be generated that is ready to run. By typing in "mrtp -h",
 you will get a list of available options and an example of use.
 
 
