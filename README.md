@@ -2,7 +2,7 @@
 <img src="./sample.png" alt="Sample image" width="400" />
 
 
-A simple raytracing tool to explore programming in C++.
+A simple raytracing tool to explore programming in C++.<br>
 Released as open source software under the GNU GPL license (see COPYING).
 
 Mrtp builds up on the idea of my earlier program, mrt, that I wrote back in 
@@ -16,13 +16,13 @@ third-party libraries, for example png++.
 ## Installation instructions
 
 For writing output files, Mrtp depends on the 
-[png++ library](http://www.nongnu.org/pngpp/), which is a C++ wrapper 
-for libpng. In the first step, run "make" in the "png++" folder. This will
-automatically download and unpack all necessary files. png++ is a header 
-library and does not require compilation. 
+[png++ library](http://www.nongnu.org/pngpp/), a C++ wrapper for libpng. 
+In the first step, run "make" in the "png++" folder. This will automatically 
+download and unpack all necessary files. png++ is a header library and does 
+not require compilation. 
 
-Then, run "make" in the main folder of Mrtp. An executable file "mrtp" will 
-be generated that is ready to run. Typing in "mrtp -h" will display a list of
+Then, run "make" in the main folder. An executable file "mrtp" will be 
+generated that is ready to run. Typing in "mrtp -h" will display a list of
 available options and an example of use.
 
 
