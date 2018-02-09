@@ -3,6 +3,7 @@
 
 
 A simple raytracing tool to explore programming in C++.<br>
+
 Released as open source software under the GNU GPL license (see COPYING).
 
 Mrtp builds up on the idea of my earlier program, mrt, that I wrote back in 
