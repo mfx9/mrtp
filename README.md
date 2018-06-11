@@ -4,9 +4,9 @@
 
 A simple raytracing tool to explore combining C++ with Python.<br>
 
-Released as open source software under the GNU GPL v3.0 license (s
+Released as open source software under the GNU GPL v3.0 license (see COPYING).
 
-Author: Mikolaj Feliks \<<mikolaj.feliks@gmail.com>\>ee COPYING).
+Author: Mikolaj Feliks \<<mikolaj.feliks@gmail.com>\>
 
 ## Installation instructions
 
