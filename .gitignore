@@ -1,5 +1,8 @@
 /png++/png++*
-/mrtp
-*.o
+Mrtp/Mrtp.cpp
+*~
+*.swp
 *.a
+*.o
 *.so
+*.pyc
