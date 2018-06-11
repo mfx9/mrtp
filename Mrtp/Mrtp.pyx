@@ -50,6 +50,38 @@ cdef class World:
         ctexture = texture if (texture) else ""
         self.cObject.AddPlane (ccenter, cnormal, scale, reflect, ctexture)
 
+    def AddCylinder (self, center=(0.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), float radius=1.0, float span=-1.0, float reflect=0.0, texture=None):
+        cdef float ccenter[3]
+        cdef float cdirection[3]
+        cdef char *ctexture
+
+        ccenter[0] = center[0]
+        ccenter[1] = center[1]
+        ccenter[2] = center[2]
+
+        cdirection[0] = direction[0]
+        cdirection[1] = direction[1]
+        cdirection[2] = direction[2]
+
+        ctexture = texture if (texture) else ""
+        self.cObject.AddCylinder (ccenter, cdirection, radius, span, reflect, ctexture)
+
+    def AddSphere (self, center=(0.0, 0.0, 0.0), float radius=1.0, axis=(0.0, 0.0, 1.0), float reflect=0.0, texture=None):
+        cdef float ccenter[3]
+        cdef float caxis[3]
+        cdef char *ctexture
+
+        ccenter[0] = center[0]
+        ccenter[1] = center[1]
+        ccenter[2] = center[2]
+
+        caxis[0] = axis[0]
+        caxis[1] = axis[1]
+        caxis[2] = axis[2]
+
+        ctexture = texture if (texture) else ""
+        self.cObject.AddSphere (ccenter, radius, caxis, reflect, ctexture)
+
 
 #===============================================================================
 cdef class Renderer:

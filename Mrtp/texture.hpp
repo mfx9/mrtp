@@ -22,7 +22,6 @@ class Texture {
 
 public:
     Texture (const std::string &filename);
-    Texture (const Texture &old);
     ~Texture ();
     void Load ();
     bool CheckFilename (const std::string &filename);

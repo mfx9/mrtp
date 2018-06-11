@@ -157,7 +157,8 @@ void CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth, fl
         ray *= (1.0f / raylen);
 
         Vector3f normal = hitactor->CalculateNormal (&inter);
-        float intensity = ray.dot (normal);
+        float dot = ray.dot (normal);
+        float intensity = (dot >= 0.0f) ? dot : 0.0f;
 
         //Check if the intersection is in a shadow
         bool isshadow = SolveShadows (&inter, &ray, raylen);

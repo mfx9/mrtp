@@ -38,7 +38,7 @@ public:
     void AddCamera (float *origin, float *target, float roll);
     void AddLight (float *origin);
     void AddPlane (float *center, float *normal, float scale, float reflect, char *path);
-    void AddSphere (float *center, float *axis, float radius, float reflect, char *path);
+    void AddSphere (float *center, float radius, float *axis, float reflect, char *path);
     void AddCylinder (float *center, float *direction, float radius, float span, float reflect, char *path);
 
     //Used for binding to renderer

@@ -26,20 +26,6 @@ Texture::Texture (const string &filename) {
 
 /*
 ================
-Texture
-
-Copy-constructor
-================
-*/
-Texture::Texture (const Texture &old) {
-    width_ = old.width_;
-    height_ = old.height_;
-    filename_ = old.filename_;
-    data_ = old.data_;
-}
-
-/*
-================
 ~Texture
 ================
 */

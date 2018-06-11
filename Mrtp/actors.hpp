@@ -55,7 +55,6 @@ class Plane : public Actor {
 
 public:
     Plane (Eigen::Vector3f *center, Eigen::Vector3f *normal, float scale, float reflect, Texture *texture);
-    Plane (const Plane& old);
     float Solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
     Pixel *PickPixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
     Eigen::Vector3f CalculateNormal (Eigen::Vector3f *hit);

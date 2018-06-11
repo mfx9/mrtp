@@ -50,8 +50,14 @@ void CWorld::AddPlane (float *center, float *normal, float scale, float reflect,
 AddSphere
 ================
 */
-void CWorld::AddSphere (float *center, float *axis, float radius, float reflect, char *path) {
-    //TODO
+void CWorld::AddSphere (float *center, float radius, float *axis, float reflect, char *path) {
+    Texture *texture = AddTexture (path);
+
+    Sphere sphere ((Vector3f *)center, radius, (Vector3f *)axis, reflect, texture);
+    spheres_.push_back (sphere);
+
+    Sphere *last = &spheres_.back ();
+    actors_.push_back (last);
 }
 
 /*
@@ -60,7 +66,13 @@ AddCylinder
 ================
 */
 void CWorld::AddCylinder (float *center, float *direction, float radius, float span, float reflect, char *path) {
-    //TODO
+    Texture *texture = AddTexture (path);
+
+    Cylinder cylinder ((Vector3f *)center, (Vector3f *)direction, radius, span, reflect, texture);
+    cylinders_.push_back (cylinder);
+
+    Cylinder *last = &cylinders_.back ();
+    actors_.push_back (last);
 }
 
 /*
