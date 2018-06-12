@@ -23,7 +23,7 @@ cdef extern from "renderer.hpp":
 
     cdef cppclass CRenderer:
         CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int reflshadow, int nthreads) except +
-        void Render ()
+        float Render ()
         void WriteScene (char *filename)
 
 cdef class Renderer:

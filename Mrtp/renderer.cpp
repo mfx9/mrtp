@@ -6,6 +6,7 @@
 #include <Eigen/Geometry>
 #include <iostream>
 #include <cmath>
+#include <ctime>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -233,9 +234,14 @@ After each thread has finished, there may still be
 some left-over lines to render.
 
 If nthreads=0, uses as many threads as available.
+
+Returns rendering time in seconds, corrected for 
+the number of threads.
 ================
 */
-void CRenderer::Render () {
+float CRenderer::Render () {
+    int timeStart = clock ();
+
     camera_->CalculateWindow (width_, height_, perspective_);
 
 #ifdef _OPENMP
@@ -265,4 +271,12 @@ void CRenderer::Render () {
     RenderBlock (0, height_);
 
 #endif /* !_OPENMP */
+
+    int timeStop = clock ();
+    float timeUsed = (float) (timeStop - timeStart) / CLOCKS_PER_SEC;
+
+    if (nthreads_ > 1) {
+        timeUsed *= (1.0f / (float) nthreads_);
+    }
+    return timeUsed;
 }

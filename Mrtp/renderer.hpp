@@ -46,7 +46,7 @@ class CRenderer {
 public:
     CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int reflshadow, int nthreads);
     ~CRenderer ();
-    void Render ();
+    float Render ();
     void WriteScene (char *filename);
 };
 

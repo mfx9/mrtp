@@ -22,6 +22,6 @@ world.AddSphere (center=(3.0, 5.0, 1.2), radius=1.2, axis=(0.0, 1.0, 0.5), textu
 world.AddSphere (center=(-3.0, 5.0, 1.2), radius=1.2, axis=(0.0, 1.0, 0.5), texture="textures/02camino.png")
 world.AddSphere (center=(-1.0, -5.0, 1.2), radius=1.2, axis=(0.0, 1.0, 0.5), texture="textures/02camino.png")
 
-renderer = Renderer (world, width=640, height=480)
+renderer = Renderer (world, width=1024, height=768)
 renderer.Render ()
 renderer.WriteScene ("test-scene.png")

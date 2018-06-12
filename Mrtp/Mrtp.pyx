@@ -4,6 +4,29 @@
 # . Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
 # . License   : LGPL v3            (http://www.gnu.org/licenses/gpl-3.0.en.html)
 #-------------------------------------------------------------------------------
+#define DEFAULT_WIDTH      640
+#define DEFAULT_HEIGHT     480
+#define DEFAULT_FOV         93.0
+#define DEFAULT_DISTANCE    60.0
+#define DEFAULT_SHADOW       0.25
+#define DEFAULT_MODEL        lightQuadratic
+#define DEFAULT_REFLECT      3
+#define DEFAULT_REF_SHADOW   true
+
+#define MIN_WIDTH     (DEFAULT_WIDTH  /  2)
+#define MAX_WIDTH     (DEFAULT_WIDTH  * 10)
+#define MIN_HEIGHT    (DEFAULT_HEIGHT /  2)
+#define MAX_HEIGHT    (DEFAULT_HEIGHT * 10)
+#define MIN_REFLECT       0
+#define MAX_REFLECT      10
+#define MIN_FOV          50.0
+#define MAX_FOV         170.0
+
+#define DEFAULT_THREADS   1
+#define MIN_THREADS       0
+#define MAX_THREADS      64
+
+
 cdef class World:
     def __cinit__ (self):
         self.cObject = new CWorld ()
@@ -103,6 +126,19 @@ cdef class Renderer:
                    int maxdepth=5, 
                    int reflshadow=0, 
                    int nthreads=1 ):
+        """Creates a renderer. 
+
+        Keyword arguments:
+            width         window width
+            heigth        window heigth
+            distance      distance to quench light (default is 60)
+            fov           field of vision, in degrees (default is 93)
+            model         light quenching model (none, linear, quadratic=default)
+            maxdepth      recursion depth for reflected rays (default is 3)
+            reflshadow    do (1) or do not (0) reflect rays from shadowed surfaces
+            shadowfactor  shadow factor (default is 0.25)
+            nthreads      rendering threads: 0 (auto), 1 (default), 2, 4, etc.
+        """
         self.cObject = new CRenderer (world.cObject, 
                                       width, 
                                       height, 
@@ -120,12 +156,16 @@ cdef class Renderer:
         print (" rndr> %s" % message)
 
     def Render (self):
-        self._Text ("Rendering scene...")
-        self.cObject.Render ()
+        """Renders a scene."""
+        cdef float seconds;
 
-        self._Text ("Done")
+        self._Text ("Rendering scene...")
+        seconds = self.cObject.Render ()
+
+        self._Text ("Done. Elapsed time: %.2f sec" % seconds)
 
     def WriteScene (self, filename="scene.png"):
+        """Write a scene to a PNG file."""
         cdef char *cfilename = filename
 
         self.cObject.WriteScene (cfilename)
