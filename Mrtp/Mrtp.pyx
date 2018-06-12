@@ -11,6 +11,9 @@ cdef class World:
     def __dealloc__ (self):
         del self.cObject
 
+    def _Text (self, message):
+        print (" wrld> %s" % message)
+
     def AddCamera (self, origin=(5.0, 5.0, 5.0), target=(0.0, 0.0, 0.0), float roll=0.0):
         cdef float corigin[3]
         cdef float ctarget[3]
@@ -24,6 +27,7 @@ cdef class World:
         ctarget[2] = target[2]
 
         self.cObject.AddCamera (corigin, ctarget, roll)
+        self._Text ("Added camera")
 
     def AddLight (self, origin=(0.0, 0.0, 0.0)):
         cdef float corigin[3]
@@ -33,6 +37,7 @@ cdef class World:
         corigin[2] = origin[2]
 
         self.cObject.AddLight (corigin)
+        self._Text ("Added light")
 
     def AddPlane (self, center=(0.0, 0.0, 0.0), normal=(0.0, 0.0, 1.0), float scale=0.15, float reflect=0.0, texture=None):
         cdef float ccenter[3]
@@ -49,6 +54,7 @@ cdef class World:
 
         ctexture = texture if (texture) else ""
         self.cObject.AddPlane (ccenter, cnormal, scale, reflect, ctexture)
+        self._Text ("Added plane")
 
     def AddCylinder (self, center=(0.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), float radius=1.0, float span=-1.0, float reflect=0.0, texture=None):
         cdef float ccenter[3]
@@ -65,6 +71,7 @@ cdef class World:
 
         ctexture = texture if (texture) else ""
         self.cObject.AddCylinder (ccenter, cdirection, radius, span, reflect, ctexture)
+        self._Text ("Added cylinder")
 
     def AddSphere (self, center=(0.0, 0.0, 0.0), float radius=1.0, axis=(0.0, 0.0, 1.0), float reflect=0.0, texture=None):
         cdef float ccenter[3]
@@ -81,6 +88,7 @@ cdef class World:
 
         ctexture = texture if (texture) else ""
         self.cObject.AddSphere (ccenter, radius, caxis, reflect, ctexture)
+        self._Text ("Added sphere")
 
 
 #===============================================================================
@@ -108,10 +116,17 @@ cdef class Renderer:
     def __dealloc__ (self):
         del self.cObject
 
+    def _Text (self, message):
+        print (" rndr> %s" % message)
+
     def Render (self):
+        self._Text ("Rendering scene...")
         self.cObject.Render ()
 
-    def WriteScene (self, filename):
+        self._Text ("Done")
+
+    def WriteScene (self, filename="scene.png"):
         cdef char *cfilename = filename
 
         self.cObject.WriteScene (cfilename)
+        self._Text ("Wrote file %s" % filename)
