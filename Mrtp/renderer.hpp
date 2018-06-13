@@ -10,15 +10,15 @@
 #include <vector>
 
 #include "pixel.hpp"
-#include "world.hpp"
-#include "camera.hpp"
 #include "light.hpp"
-#include "actors.hpp"
+#include "camera.hpp"
+#include "actor.hpp"
+#include "world.hpp"
 
 
 class CRenderer {
-    Camera  *camera_;
-    Light   *light_;
+    CCamera  *camera_;
+    CLight   *light_;
 
     std::vector<Actor *> *actors_;
 

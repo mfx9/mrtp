@@ -15,29 +15,21 @@ static float kDegreeToRadian = M_PI / 180.0f;
 
 /*
 ================
-Camera
+CCamera
 ================
 */
-Camera::Camera () {
-}
-
-/*
-================
-~Camera
-================
-*/
-Camera::~Camera () {
-}
-
-/*
-================
-Initialize
-================
-*/
-void Camera::Initialize (Vector3f *origin, Vector3f *target, float roll) {
-    eye_ = *origin;
-    lookat_ = *target;
+CCamera::CCamera (float *origin, float *target, float roll) {
+    eye_ = *(Vector3f *)origin;
+    lookat_ = *(Vector3f *)target;
     roll_ = kDegreeToRadian * roll;
+}
+
+/*
+================
+~CCamera
+================
+*/
+CCamera::~CCamera () {
 }
 
 /*
@@ -47,7 +39,7 @@ CalculateWindow
 Calculates vectors that span a window
 ================
 */
-void Camera::CalculateWindow (int width, int height, float perspective) {
+void CCamera::CalculateWindow (int width, int height, float perspective) {
     //i is a vector between the camera and the center of the window
     Vector3f i = lookat_ - eye_;
     i *= (1.0f / i.norm ());
@@ -90,7 +82,7 @@ void Camera::CalculateWindow (int width, int height, float perspective) {
 CalculateOrigin
 ================
 */
-Vector3f Camera::CalculateOrigin (int windowx, int windowy) {
+Vector3f CCamera::CalculateOrigin (int windowx, int windowy) {
     return (wo_ + (float) windowx * wh_ + (float) windowy * wv_);
 }
 
@@ -99,7 +91,7 @@ Vector3f Camera::CalculateOrigin (int windowx, int windowy) {
 CalculateDirection
 ================
 */
-Vector3f Camera::CalculateDirection (Vector3f *origin) {
+Vector3f CCamera::CalculateDirection (Vector3f *origin) {
     Vector3f direction = (*origin) - eye_;
 
     return (direction * (1.0f / direction.norm ()));

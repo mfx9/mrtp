@@ -5,11 +5,7 @@
  */
 #include "world.hpp"
 
-#include <iostream>
-#include <Eigen/Core>
-
 using namespace std;
-using namespace Eigen;
 
 
 /*
@@ -17,8 +13,8 @@ using namespace Eigen;
 AddCamera
 ================
 */
-void CWorld::AddCamera (float *origin, float *target, float roll) {
-    camera_.Initialize ((Vector3f *)origin, (Vector3f *)target, roll);
+void CWorld::AddCamera (CCamera *camera) {
+    camera_ = camera;
 }
 
 /*
@@ -26,8 +22,8 @@ void CWorld::AddCamera (float *origin, float *target, float roll) {
 AddLight
 ================
 */
-void CWorld::AddLight (float *origin) {
-    light_.Initialize ((Vector3f *)origin);
+void CWorld::AddLight (CLight *light) {
+    light_ = light;
 }
 
 /*
@@ -35,14 +31,8 @@ void CWorld::AddLight (float *origin) {
 AddPlane
 ================
 */
-void CWorld::AddPlane (float *center, float *normal, float scale, float reflect, char *path) {
-    Texture *texture = AddTexture (path);
-
-    Plane plane ((Vector3f *)center, (Vector3f *)normal, scale, reflect, texture);
-    planes_.push_back (plane);
-
-    Plane *last = &planes_.back ();
-    actors_.push_back (last);
+void CWorld::AddPlane (CPlane *plane) {
+    actors_.push_back (plane);
 }
 
 /*
@@ -50,14 +40,8 @@ void CWorld::AddPlane (float *center, float *normal, float scale, float reflect,
 AddSphere
 ================
 */
-void CWorld::AddSphere (float *center, float radius, float *axis, float reflect, char *path) {
-    Texture *texture = AddTexture (path);
-
-    Sphere sphere ((Vector3f *)center, radius, (Vector3f *)axis, reflect, texture);
-    spheres_.push_back (sphere);
-
-    Sphere *last = &spheres_.back ();
-    actors_.push_back (last);
+void CWorld::AddSphere (CSphere *sphere) {
+    actors_.push_back (sphere);
 }
 
 /*
@@ -65,51 +49,8 @@ void CWorld::AddSphere (float *center, float radius, float *axis, float reflect,
 AddCylinder
 ================
 */
-void CWorld::AddCylinder (float *center, float *direction, float radius, float span, float reflect, char *path) {
-    Texture *texture = AddTexture (path);
-
-    Cylinder cylinder ((Vector3f *)center, (Vector3f *)direction, radius, span, reflect, texture);
-    cylinders_.push_back (cylinder);
-
-    Cylinder *last = &cylinders_.back ();
-    actors_.push_back (last);
-}
-
-/*
-================
-AddTexture
-
-Adds a new texture or reuses one that already 
-exists in the memory
-================
-*/
-Texture *CWorld::AddTexture (char *path) {
-    string filename (path);
-
-    for (auto t=textures_.begin (); t!=textures_.end (); t++) {
-        Texture *texture = &(*t);
-
-        if (texture->CheckFilename (filename)) {
-            return texture;
-        }
-    }
-
-    Texture texture (filename);
-    texture.Load ();
-
-    textures_.push_back (texture);
-    Texture *last = &textures_.back ();
-
-    return last;
-}
-
-/*
-================
-GetCamera
-================
-*/
-Camera *CWorld::GetCamera () {
-    return &camera_;
+void CWorld::AddCylinder (CCylinder *cylinder) {
+    actors_.push_back (cylinder);
 }
 
 /*
@@ -117,8 +58,17 @@ Camera *CWorld::GetCamera () {
 GetLight
 ================
 */
-Light *CWorld::GetLight () {
-    return &light_;
+CLight *CWorld::GetLight () {
+    return light_;
+}
+
+/*
+================
+GetCamera
+================
+*/
+CCamera *CWorld::GetCamera () {
+    return camera_;
 }
 
 /*
@@ -126,6 +76,6 @@ Light *CWorld::GetLight () {
 GetActors
 ================
 */
-std::vector<Actor *> *CWorld::GetActors () {
+vector<Actor *> *CWorld::GetActors () {
     return &actors_;
 }

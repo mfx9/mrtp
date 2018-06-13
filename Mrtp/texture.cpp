@@ -4,6 +4,7 @@
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
 #include <iostream>
+#include <cstring>  //Needed for strcmp
 
 #include "texture.hpp"
 #include "png.hpp"
@@ -14,14 +15,16 @@ using namespace png;
 static const float kRealToByte = 255.0f;
 static const float kByteToReal = 1.0f / kRealToByte;
 
+TextureCollector textureCollector;
+
 
 /*
 ================
 Texture
 ================
 */
-Texture::Texture (const string &filename) {
-    filename_ = filename;
+Texture::Texture (const char *path) {
+    spath_ = path;
 }
 
 /*
@@ -43,11 +46,11 @@ of a texture.
 A reasonable scale for a 256x256 texture is 0.15.
 ================
 */
-Pixel *Texture::PickPixel (float fracx, float fracy, float scale) {
+Pixel Texture::PickPixel (float fracx, float fracy, float scale) {
     unsigned u = ((unsigned) (fracx * width_ * scale)) % width_;
     unsigned v = ((unsigned) (fracy * height_ * scale)) % height_;
 
-    return &data_[u+v*width_];
+    return data_[u+v*width_];
 }
 
 /*
@@ -55,8 +58,8 @@ Pixel *Texture::PickPixel (float fracx, float fracy, float scale) {
 CheckFilename
 ================
 */
-bool Texture::CheckFilename (const string &filename) {
-    return (filename == filename_);
+bool Texture::CheckPath (const char *path) {
+    return (strcmp (path, spath_.c_str ()) == 0) ? true : false;
 }
 
 /*
@@ -68,8 +71,7 @@ a PNG file
 ================
 */
 void Texture::Load () {
-    const char *filename = filename_.c_str ();
-    image<rgb_pixel> image (filename);
+    image<rgb_pixel> image (spath_.c_str ());
 
     width_ = image.get_width ();
     height_ = image.get_height ();
@@ -87,4 +89,32 @@ void Texture::Load () {
             data_.push_back (out);
         }
     }
+}
+
+/*
+================
+AddTexture
+
+Adds a texture to a texture collector or reuses 
+one that already exists in the memory.
+
+Returns a pointer to the texture.
+================
+*/
+Texture *TextureCollector::Add (const char *path) {
+    for (list<Texture>::iterator t=textures_.begin (); t!=textures_.end (); t++) {
+        Texture *texture = &(*t);
+
+        if (texture->CheckPath (path)) {
+            return texture;
+        }
+    }
+
+    Texture texture (path);
+    textures_.push_back (texture);
+
+    Texture *last = &textures_.back ();
+    last->Load ();
+
+    return last;
 }

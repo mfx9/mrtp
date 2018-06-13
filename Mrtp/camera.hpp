@@ -9,7 +9,7 @@
 #include <Eigen/Core>
 
 
-class Camera {
+class CCamera {
     Eigen::Vector3f  eye_;
     Eigen::Vector3f  lookat_;
     Eigen::Vector3f  wo_;
@@ -18,9 +18,8 @@ class Camera {
     float  roll_;
 
 public:
-    Camera ();
-    ~Camera ();
-    void Initialize (Eigen::Vector3f *origin, Eigen::Vector3f *target, float roll);
+    CCamera (float *origin, float *target, float roll);
+    ~CCamera ();
     void CalculateWindow (int width, int height, float perspective);
     Eigen::Vector3f CalculateOrigin (int windowx, int windowy);
     Eigen::Vector3f CalculateDirection (Eigen::Vector3f *origin);

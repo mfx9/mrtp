@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -31,7 +32,8 @@ Creates a renderer
 ================
 */
 CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float distance, 
-                    float shadowfactor, int maxdepth, int reflshadow, int nthreads) {
+                      float shadowfactor, int maxdepth, int reflshadow, 
+                      int nthreads) {
     width_ = width;
     height_ = height;
     fov_ = fov;
@@ -98,7 +100,7 @@ the hit actor and the source of light
 ================
 */
 bool CRenderer::SolveShadows (Vector3f *origin, Vector3f *direction, float maxdist) {
-    for (auto a=actors_->begin (); a!=actors_->end (); a++) {
+    for (vector<Actor *>::iterator a=actors_->begin (); a!=actors_->end (); a++) {
         Actor *actor = *a;
 
         if (actor->HasShadow ()) {
@@ -118,14 +120,13 @@ SolveHits
 Returns a pointer and a distance to the closest 
 actor with which the ray intersects.
 
-Returns a nullptr if there have been no 
-intersections.
+Returns NULL if there have been no intersections.
 ================
 */
 Actor *CRenderer::SolveHits (Vector3f *origin, Vector3f *direction, float *currd) {
-    Actor *hit = nullptr;
+    Actor *hit = NULL;
 
-    for (auto a=actors_->begin (); a!=actors_->end (); a++) {
+    for (vector<Actor *>::iterator a=actors_->begin (); a!=actors_->end (); a++) {
         Actor *actor = *a;
         float distance = actor->Solve (origin, direction, 0.0f, maxdist_);
 
@@ -171,8 +172,8 @@ void CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth, fl
         //Combine pixels
         float lambda = mixing * intensity * shadow * ambient;
 
-        Pixel *pick = hitactor->PickPixel (&inter, &normal);
-        *pixel = (1.0f - lambda) * (*pixel) + lambda * (*pick);
+        Pixel pick = hitactor->PickPixel (&inter, &normal);
+        *pixel = (1.0f - lambda) * (*pixel) + lambda * pick;
 
         /*
         //Quit if the surface is shadowed, but reflections are turned off

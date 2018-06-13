@@ -9,13 +9,12 @@
 #include <Eigen/Core>
 
 
-class Light {
+class CLight {
     Eigen::Vector3f origin_;
 
 public:
-    Light ();
-    ~Light ();
-    void Initialize (Eigen::Vector3f *origin);
+    CLight (float *origin);
+    ~CLight ();
     Eigen::Vector3f CalculateRay (Eigen::Vector3f *hit);
 };
 

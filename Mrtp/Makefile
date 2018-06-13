@@ -1,10 +1,10 @@
 # . Makefile
 
 INCLUDE=-I/usr/include/python2.7 -I/usr/include/eigen3 -I../png++/png++-0.2.9 -I.
-FLAGS=-W -Wall -pedantic -fPIC -std=c++11 -O2
+FLAGS=-W -Wall -pedantic -fPIC -O2
 
-Mrtp.so: Mrtp.o actors.o texture.o light.o camera.o world.o renderer.o
-	g++ -shared -o Mrtp.so Mrtp.o actors.o texture.o light.o camera.o world.o renderer.o -lm -lpng
+Mrtp.so: Mrtp.o actor.o plane.o sphere.o cylinder.o texture.o light.o camera.o world.o renderer.o
+	g++ -shared -o Mrtp.so Mrtp.o actor.o plane.o sphere.o cylinder.o texture.o light.o camera.o world.o renderer.o -lm -lpng
 
 Mrtp.o: Mrtp.cpp
 	g++ $(FLAGS) $(INCLUDE) -o Mrtp.o -c Mrtp.cpp
@@ -12,8 +12,17 @@ Mrtp.o: Mrtp.cpp
 Mrtp.cpp: Mrtp.pyx Mrtp.pxd
 	cython $(INCLUDE) -o Mrtp.cpp --cplus Mrtp.pyx
 
-actors.o: actors.cpp actors.hpp
-	g++ $(FLAGS) $(INCLUDE) -o actors.o -c actors.cpp
+actor.o: actor.cpp actor.hpp
+	g++ $(FLAGS) $(INCLUDE) -o actor.o -c actor.cpp
+
+plane.o: plane.cpp plane.hpp
+	g++ $(FLAGS) $(INCLUDE) -o plane.o -c plane.cpp
+
+sphere.o: sphere.cpp sphere.hpp
+	g++ $(FLAGS) $(INCLUDE) -o sphere.o -c sphere.cpp
+
+cylinder.o: cylinder.cpp cylinder.hpp
+	g++ $(FLAGS) $(INCLUDE) -o cylinder.o -c cylinder.cpp
 
 texture.o: texture.cpp texture.hpp
 	g++ $(FLAGS) $(INCLUDE) -o texture.o -c texture.cpp

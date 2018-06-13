@@ -6,8 +6,9 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 
-#include <string>
+#include <list>
 #include <vector>
+#include <string>
 
 #include "pixel.hpp"
 
@@ -16,16 +17,26 @@ class Texture {
     int width_;
     int height_;
 
-    std::string filename_;
-
     std::vector<Pixel> data_;
 
+    std::string spath_;
+
 public:
-    Texture (const std::string &filename);
+    Texture (const char *path);
     ~Texture ();
     void Load ();
-    bool CheckFilename (const std::string &filename);
-    Pixel *PickPixel (float fracx, float fracy, float scale);
+    bool CheckPath (const char *path);
+    Pixel PickPixel (float fracx, float fracy, float scale);
 };
+
+class TextureCollector {
+    std::list<Texture> textures_;
+
+public:
+    Texture *Add (const char *path);
+};
+
+
+extern TextureCollector textureCollector;
 
 #endif /* !_TEXTURE_H */

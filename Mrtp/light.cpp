@@ -7,29 +7,22 @@
 
 using namespace Eigen;
 
+
 /*
 ================
-Light
+CLight
 ================
 */
-Light::Light () {
+CLight::CLight (float *origin) {
+    origin_ = *(Vector3f *)origin;
 }
 
 /*
 ================
-~Light
+~CLight
 ================
 */
-Light::~Light () {
-}
-
-/*
-================
-Initialize
-================
-*/
-void Light::Initialize (Vector3f *origin) {
-    origin_ = *origin;
+CLight::~CLight () {
 }
 
 /*
@@ -40,6 +33,6 @@ Calculates a ray between a hit point and
 a source of light
 ================
 */
-Vector3f Light::CalculateRay (Vector3f *hit) {
+Vector3f CLight::CalculateRay (Vector3f *hit) {
     return (origin_ - (*hit));
 }
