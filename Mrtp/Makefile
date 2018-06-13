@@ -1,10 +1,13 @@
 # . Makefile
 
-INCLUDE=-I/usr/include/python2.7 -I/usr/include/eigen3 -I../png++/png++-0.2.9 -I.
+MRTP=./include
+INCLUDE=-I/usr/include/python2.7 -I/usr/include/eigen3 -I../png++/png++-0.2.9 -I$(MRTP)
+
 FLAGS=-W -Wall -pedantic -fPIC -O2
 
+
 Mrtp.so: Mrtp.o actor.o plane.o sphere.o cylinder.o texture.o light.o camera.o world.o renderer.o
-	g++ -shared -o Mrtp.so Mrtp.o actor.o plane.o sphere.o cylinder.o texture.o light.o camera.o world.o renderer.o -lm -lpng
+	g++ -shared $^ -o $@ -lm -lpng
 
 Mrtp.o: Mrtp.cpp
 	g++ $(FLAGS) $(INCLUDE) -o Mrtp.o -c Mrtp.cpp
@@ -12,32 +15,33 @@ Mrtp.o: Mrtp.cpp
 Mrtp.cpp: Mrtp.pyx Mrtp.pxd
 	cython $(INCLUDE) -o Mrtp.cpp --cplus Mrtp.pyx
 
-actor.o: actor.cpp actor.hpp
+actor.o: actor.cpp $(MRTP)/actor.hpp
 	g++ $(FLAGS) $(INCLUDE) -o actor.o -c actor.cpp
 
-plane.o: plane.cpp plane.hpp
+plane.o: plane.cpp $(MRTP)/plane.hpp
 	g++ $(FLAGS) $(INCLUDE) -o plane.o -c plane.cpp
 
-sphere.o: sphere.cpp sphere.hpp
+sphere.o: sphere.cpp $(MRTP)/sphere.hpp
 	g++ $(FLAGS) $(INCLUDE) -o sphere.o -c sphere.cpp
 
-cylinder.o: cylinder.cpp cylinder.hpp
+cylinder.o: cylinder.cpp $(MRTP)/cylinder.hpp
 	g++ $(FLAGS) $(INCLUDE) -o cylinder.o -c cylinder.cpp
 
-texture.o: texture.cpp texture.hpp
+texture.o: texture.cpp $(MRTP)/texture.hpp
 	g++ $(FLAGS) $(INCLUDE) -o texture.o -c texture.cpp
 
-light.o: light.cpp light.hpp
+light.o: light.cpp $(MRTP)/light.hpp
 	g++ $(FLAGS) $(INCLUDE) -o light.o -c light.cpp
 
-camera.o: camera.cpp camera.hpp
+camera.o: camera.cpp $(MRTP)/camera.hpp
 	g++ $(FLAGS) $(INCLUDE) -o camera.o -c camera.cpp
 
-world.o: world.cpp world.hpp
+world.o: world.cpp $(MRTP)/world.hpp
 	g++ $(FLAGS) $(INCLUDE) -o world.o -c world.cpp
 
-renderer.o: renderer.cpp renderer.hpp
+renderer.o: renderer.cpp $(MRTP)/renderer.hpp
 	g++ $(FLAGS) $(INCLUDE) -o renderer.o -c renderer.cpp
+
 
 .PHONY: clean
 clean:
