@@ -7,7 +7,7 @@ A minimalistic raytracing tool to explore combining C++ with Python.
 Author: Mikolaj Feliks \<<mikolaj.feliks@gmail.com>\><br>
 Released as open source software under the GNU GPL v3.0 license (see COPYING).
 
-_Installation instructions_
+### Installation instructions
 
 Mrtp depends on the following libraries and tools:
  * libpng-dev>=1.2
