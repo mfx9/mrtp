@@ -139,32 +139,26 @@ cdef class Camera:
     def __dealloc__ (self):
         del self.cObject
 
-    @property
-    def center (self):
+    def Center (self):
         return (self.x_, self.y_, self.z_)
 
-    @center.setter
-    def center (self, xyz):
+    def SetCenter (self, xyz):
         self.x_ = xyz[0]
         self.y_ = xyz[1]
         self.z_ = xyz[2]
 
-    @property
-    def target (self):
+    def Target (self):
         return (self.tx_, self.ty_, self.tz_)
 
-    @target.setter
-    def target (self, xyz):
+    def SetTarget (self, xyz):
         self.tx_ = xyz[0]
         self.ty_ = xyz[1]
         self.tz_ = xyz[2]
 
-    @property
-    def roll (self):
+    def Roll (self):
         return self.roll_
 
-    @roll.setter
-    def roll (self, value):
+    def SetRoll (self, float value):
         self.roll_ = value
 
 
@@ -178,12 +172,10 @@ cdef class Light:
     def __dealloc__ (self):
         del self.cObject
 
-    @property
-    def center (self):
+    def Center (self):
         return (self.x_, self.y_, self.z_)
 
-    @center.setter
-    def center (self, xyz):
+    def SetCenter (self, xyz):
         self.x_ = xyz[0]
         self.y_ = xyz[1]
         self.z_ = xyz[2]
