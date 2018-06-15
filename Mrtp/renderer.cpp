@@ -4,7 +4,6 @@
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
 #include <Eigen/Geometry>
-#include <iostream>
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
@@ -256,9 +255,10 @@ float CRenderer::Render () {
             omp_set_num_threads (nthreads_);
         }
         int nlines = height_ / nthreads_;
+        int block;
 
         #pragma omp parallel for
-        for (int block=0; block<nthreads_; block++) {
+        for (block=0; block<nthreads_; block++) {
             RenderBlock (block, nlines);
         }
 

@@ -91,15 +91,7 @@ cdef class Renderer:
         if ((maxdepth < MIN_REFLECT) or (maxdepth > MAX_REFLECT)):
             raise exceptions.StandardError ("Number of reflective rays is out of range.")
 
-        self.cObject = new CRenderer (world.cObject, 
-                                      width, 
-                                      height, 
-                                      fov, 
-                                      distance, 
-                                      shadowfactor, 
-                                      maxdepth, 
-                                      reflshadow, 
-                                      nthreads )
+        self.cObject = new CRenderer (world.cObject, width, height, fov, distance, shadowfactor, maxdepth, reflshadow, nthreads)
 
     def __dealloc__ (self):
         del self.cObject
