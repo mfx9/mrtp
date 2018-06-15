@@ -1,6 +1,4 @@
 # Mrtp
-<img src="./sample.png" alt="Sample image" width="400" />
-
 
 A minimalistic raytracing tool to explore combining C++ with Python.
 
@@ -27,3 +25,7 @@ In step 2, run *make* in the Mrtp/ folder. A Python library Mrtp.so
 will be generated that is ready to use in a Python script.
 
 See the attached scripts Draw.py and Draw2.py for examples of use.
+
+### Gallery
+
+<img src="./sample.png" alt="Sample image" width="400" />
