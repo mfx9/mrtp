@@ -127,66 +127,66 @@ cdef class Renderer:
 #===============================================================================
 cdef class Camera:
     def __cinit__ (self, center, target, float roll=0.0):
-        self.x = center[0]
-        self.y = center[1]
-        self.z = center[2]
-        self.tx = target[0]
-        self.ty = target[1]
-        self.tz = target[2]
-        self.roll = roll
-        self.cObject = new CCamera (&self.x, &self.tx, &roll)
+        self.x_ = center[0]
+        self.y_ = center[1]
+        self.z_ = center[2]
+        self.tx_ = target[0]
+        self.ty_ = target[1]
+        self.tz_ = target[2]
+        self.roll_ = roll
+        self.cObject = new CCamera (&self.x_, &self.tx_, &self.roll_)
 
     def __dealloc__ (self):
         del self.cObject
 
     @property
     def center (self):
-        return (self.center[0], self.center[1], self.center[2])
+        return (self.x_, self.y_, self.z_)
 
     @center.setter
     def center (self, xyz):
-        self.center[0] = xyz[0]
-        self.center[1] = xyz[1]
-        self.center[2] = xyz[2]
+        self.x_ = xyz[0]
+        self.y_ = xyz[1]
+        self.z_ = xyz[2]
 
     @property
     def target (self):
-        return (self.target[0], self.target[1], self.target[2])
+        return (self.tx_, self.ty_, self.tz_)
 
     @target.setter
     def target (self, xyz):
-        self.target[0] = xyz[0]
-        self.target[1] = xyz[1]
-        self.target[2] = xyz[2]
+        self.tx_ = xyz[0]
+        self.ty_ = xyz[1]
+        self.tz_ = xyz[2]
 
     @property
     def roll (self):
-        return self.roll
+        return self.roll_
 
     @roll.setter
     def roll (self, value):
-        self.roll = value
+        self.roll_ = value
 
 
 cdef class Light:
     def __cinit__ (self, center):
-        self.x = center[0]
-        self.y = center[1]
-        self.z = center[2]
-        self.cObject = new CLight (&self.x)
+        self.x_ = center[0]
+        self.y_ = center[1]
+        self.z_ = center[2]
+        self.cObject = new CLight (&self.x_)
 
     def __dealloc__ (self):
         del self.cObject
 
     @property
     def center (self):
-        return (self.center[0], self.center[1], self.center[2])
+        return (self.x_, self.y_, self.z_)
 
     @center.setter
     def center (self, xyz):
-        self.center[0] = xyz[0]
-        self.center[1] = xyz[1]
-        self.center[2] = xyz[2]
+        self.x_ = xyz[0]
+        self.y_ = xyz[1]
+        self.z_ = xyz[2]
 
 
 cdef class Plane:

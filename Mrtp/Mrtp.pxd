@@ -25,19 +25,19 @@ cdef extern from "cylinder.hpp":
         CCylinder (float *center, float *direction, float radius, float span, float reflect, char *texture)
 
 cdef class Camera:
-    cdef float x
-    cdef float y
-    cdef float z
-    cdef float tx
-    cdef float ty
-    cdef float tz
-    cdef float roll
+    cdef float x_
+    cdef float y_
+    cdef float z_
+    cdef float tx_
+    cdef float ty_
+    cdef float tz_
+    cdef float roll_
     cdef CCamera *cObject
 
 cdef class Light:
-    cdef float x
-    cdef float y
-    cdef float z
+    cdef float x_
+    cdef float y_
+    cdef float z_
     cdef CLight *cObject
 
 cdef class Plane:
