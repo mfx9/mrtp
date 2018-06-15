@@ -241,9 +241,9 @@ the number of threads.
 ================
 */
 float CRenderer::Render () {
-    int timeStart = clock ();
-
     camera_->CalculateWindow (width_, height_, perspective_);
+
+    int timeStart = clock ();
 
 #ifdef _OPENMP
     if (nthreads_ == 1) {

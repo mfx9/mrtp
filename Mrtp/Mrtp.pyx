@@ -4,6 +4,8 @@
 # . Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
 # . License   : LGPL v3            (http://www.gnu.org/licenses/gpl-3.0.en.html)
 #-------------------------------------------------------------------------------
+import exceptions
+
 DEF DEFAULT_WIDTH    =  640
 DEF DEFAULT_HEIGHT   =  480
 DEF DEFAULT_FOV      =   93.0
@@ -76,6 +78,18 @@ cdef class Renderer:
             reflshadow    do (1) or do not (0) reflect rays from shadowed surfaces
             nthreads      rendering threads: 0 (auto), 1 (default), 2, 4, etc.
         """
+        if ((width < MIN_WIDTH) or (width > MAX_WIDTH) or (height < MIN_HEIGHT) or (height > MAX_HEIGHT)):
+            raise exceptions.StandardError ("Resolution is out of range.")
+
+        if ((fov < MIN_FOV) or (fov > MAX_FOV)):
+            raise exceptions.StandardError ("Field of vision is out of range.")
+
+        if ((nthreads < MIN_THREADS) or (nthreads > MAX_THREADS)):
+            raise exceptions.StandardError ("Number of threads is out of range.")
+
+        if ((maxdepth < MIN_REFLECT) or (maxdepth > MAX_REFLECT)):
+            raise exceptions.StandardError ("Number of reflective rays is out of range.")
+
         self.cObject = new CRenderer (world.cObject, 
                                       width, 
                                       height, 
