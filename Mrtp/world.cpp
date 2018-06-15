@@ -14,7 +14,7 @@ AddCamera
 ================
 */
 void CWorld::AddCamera (CCamera *camera) {
-    camera_ = camera;
+    cameras_.push_back (camera);
 }
 
 /*
@@ -23,7 +23,7 @@ AddLight
 ================
 */
 void CWorld::AddLight (CLight *light) {
-    light_ = light;
+    lights_.push_back (light);
 }
 
 /*
@@ -59,7 +59,7 @@ GetLight
 ================
 */
 CLight *CWorld::GetLight () {
-    return light_;
+    return lights_.back ();
 }
 
 /*
@@ -68,7 +68,7 @@ GetCamera
 ================
 */
 CCamera *CWorld::GetCamera () {
-    return camera_;
+    return cameras_.back ();
 }
 
 /*

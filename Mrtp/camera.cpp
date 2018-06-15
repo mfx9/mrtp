@@ -18,10 +18,10 @@ static float kDegreeToRadian = M_PI / 180.0f;
 CCamera
 ================
 */
-CCamera::CCamera (float *origin, float *target, float roll) {
-    eye_ = *(Vector3f *)origin;
-    lookat_ = *(Vector3f *)target;
-    roll_ = kDegreeToRadian * roll;
+CCamera::CCamera (float *center, float *target, float *roll) {
+    eye_ = (Vector3f *)center;
+    lookat_ = (Vector3f *)target;
+    roll_ = roll;
 }
 
 /*
@@ -41,7 +41,7 @@ Calculates vectors that span a window
 */
 void CCamera::CalculateWindow (int width, int height, float perspective) {
     //i is a vector between the camera and the center of the window
-    Vector3f i = lookat_ - eye_;
+    Vector3f i = (*lookat_) - (*eye_);
     i *= (1.0f / i.norm ());
 
     Vector3f k;
@@ -54,8 +54,9 @@ void CCamera::CalculateWindow (int width, int height, float perspective) {
     k *= (1.0f / k.norm ());
 
     //Rotate camera around the i axis
-    float sina = sin (roll_);
-    float cosa = cos (roll_);
+    float roll = (*roll_) * kDegreeToRadian;
+    float sina = sin (roll);
+    float cosa = cos (roll);
 
     Vector3f jp = cosa * j + sina * k;
     Vector3f kp = -sina * j + cosa * k;
@@ -64,7 +65,7 @@ void CCamera::CalculateWindow (int width, int height, float perspective) {
     k = kp;
 
     //Calculate the central point of the window
-    Vector3f center = eye_ + perspective * i;
+    Vector3f center = (*eye_) + perspective * i;
 
     //Find three corners of the window
     wo_ = center - 0.5f * j + 0.5f * k;
@@ -92,7 +93,7 @@ CalculateDirection
 ================
 */
 Vector3f CCamera::CalculateDirection (Vector3f *origin) {
-    Vector3f direction = (*origin) - eye_;
+    Vector3f direction = (*origin) - (*eye_);
 
     return (direction * (1.0f / direction.norm ()));
 }

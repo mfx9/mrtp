@@ -13,8 +13,8 @@ using namespace Eigen;
 CLight
 ================
 */
-CLight::CLight (float *origin) {
-    origin_ = *(Vector3f *)origin;
+CLight::CLight (float *center) {
+    center_ = (Vector3f *)center;
 }
 
 /*
@@ -34,5 +34,5 @@ a source of light
 ================
 */
 Vector3f CLight::CalculateRay (Vector3f *hit) {
-    return (origin_ - (*hit));
+    return ((*center_) - (*hit));
 }

@@ -6,11 +6,11 @@
 #-------------------------------------------------------------------------------
 cdef extern from "camera.hpp":
     cdef cppclass CCamera:
-        CCamera (float *origin, float *target, float roll)
+        CCamera (float *center, float *target, float *roll)
 
 cdef extern from "light.hpp":
     cdef cppclass CLight:
-        CLight (float *origin)
+        CLight (float *center)
 
 cdef extern from "plane.hpp":
     cdef cppclass CPlane:
@@ -24,11 +24,20 @@ cdef extern from "cylinder.hpp":
     cdef cppclass CCylinder:
         CCylinder (float *center, float *direction, float radius, float span, float reflect, char *texture)
 
-
 cdef class Camera:
+    cdef float x
+    cdef float y
+    cdef float z
+    cdef float tx
+    cdef float ty
+    cdef float tz
+    cdef float roll
     cdef CCamera *cObject
 
 cdef class Light:
+    cdef float x
+    cdef float y
+    cdef float z
     cdef CLight *cObject
 
 cdef class Plane:

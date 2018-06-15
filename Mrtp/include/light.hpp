@@ -10,10 +10,10 @@
 
 
 class CLight {
-    Eigen::Vector3f origin_;
+    Eigen::Vector3f *center_;
 
 public:
-    CLight (float *origin);
+    CLight (float *center);
     ~CLight ();
     Eigen::Vector3f CalculateRay (Eigen::Vector3f *hit);
 };

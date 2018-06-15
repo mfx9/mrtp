@@ -18,9 +18,8 @@
 
 class CWorld {
     std::vector<Actor *> actors_;
-
-    CLight *light_;
-    CCamera *camera_;
+    std::vector<CLight *> lights_;
+    std::vector<CCamera *> cameras_;
 
 public:
     void AddCamera (CCamera *camera);

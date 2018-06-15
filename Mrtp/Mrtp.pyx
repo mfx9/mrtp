@@ -4,7 +4,8 @@
 # . Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
 # . License   : LGPL v3            (http://www.gnu.org/licenses/gpl-3.0.en.html)
 #-------------------------------------------------------------------------------
-import exceptions
+import exceptions, os.path
+
 
 DEF DEFAULT_WIDTH    =  640
 DEF DEFAULT_HEIGHT   =  480
@@ -113,7 +114,7 @@ cdef class Renderer:
         self._Text ("Rendering scene...")
         seconds = self.cObject.Render ()
 
-        self._Text ("Done. Elapsed time: %.2f sec" % seconds)
+        self._Text ("Done, elapsed time: %.2f sec" % seconds)
 
     def WriteScene (self, filename=DEFAULT_FILENAME):
         """Write a scene to a PNG file."""
@@ -125,36 +126,67 @@ cdef class Renderer:
 
 #===============================================================================
 cdef class Camera:
-    def __cinit__ (self, origin, target, float roll=0.0):
-        cdef float corigin[3]
-        cdef float ctarget[3]
-
-        corigin[0] = origin[0]
-        corigin[1] = origin[1]
-        corigin[2] = origin[2]
-
-        ctarget[0] = target[0]
-        ctarget[1] = target[1]
-        ctarget[2] = target[2]
-
-        self.cObject = new CCamera (corigin, ctarget, roll)
+    def __cinit__ (self, center, target, float roll=0.0):
+        self.x = center[0]
+        self.y = center[1]
+        self.z = center[2]
+        self.tx = target[0]
+        self.ty = target[1]
+        self.tz = target[2]
+        self.roll = roll
+        self.cObject = new CCamera (&self.x, &self.tx, &roll)
 
     def __dealloc__ (self):
         del self.cObject
+
+    @property
+    def center (self):
+        return (self.center[0], self.center[1], self.center[2])
+
+    @center.setter
+    def center (self, xyz):
+        self.center[0] = xyz[0]
+        self.center[1] = xyz[1]
+        self.center[2] = xyz[2]
+
+    @property
+    def target (self):
+        return (self.target[0], self.target[1], self.target[2])
+
+    @target.setter
+    def target (self, xyz):
+        self.target[0] = xyz[0]
+        self.target[1] = xyz[1]
+        self.target[2] = xyz[2]
+
+    @property
+    def roll (self):
+        return self.roll
+
+    @roll.setter
+    def roll (self, value):
+        self.roll = value
 
 
 cdef class Light:
-    def __cinit__ (self, origin):
-        cdef float corigin[3]
-
-        corigin[0] = origin[0]
-        corigin[1] = origin[1]
-        corigin[2] = origin[2]
-
-        self.cObject = new CLight (corigin)
+    def __cinit__ (self, center):
+        self.x = center[0]
+        self.y = center[1]
+        self.z = center[2]
+        self.cObject = new CLight (&self.x)
 
     def __dealloc__ (self):
         del self.cObject
+
+    @property
+    def center (self):
+        return (self.center[0], self.center[1], self.center[2])
+
+    @center.setter
+    def center (self, xyz):
+        self.center[0] = xyz[0]
+        self.center[1] = xyz[1]
+        self.center[2] = xyz[2]
 
 
 cdef class Plane:
@@ -162,6 +194,9 @@ cdef class Plane:
         cdef float ccenter[3]
         cdef float cnormal[3]
         cdef char *ctexture
+
+        if (not os.path.exists (texture)):
+            raise exceptions.StandardError ("Error opening texture file %s" % texture)
 
         ccenter[0] = center[0]
         ccenter[1] = center[1]
@@ -184,6 +219,9 @@ cdef class Sphere:
         cdef float caxis[3]
         cdef char *ctexture
 
+        if (not os.path.exists (texture)):
+            raise exceptions.StandardError ("Error opening texture file %s" % texture)
+
         ccenter[0] = center[0]
         ccenter[1] = center[1]
         ccenter[2] = center[2]
@@ -201,6 +239,9 @@ cdef class Cylinder:
         cdef float ccenter[3]
         cdef float cdirection[3]
         cdef char *ctexture
+
+        if (not os.path.exists (texture)):
+            raise exceptions.StandardError ("Error opening texture file %s" % texture)
 
         ccenter[0] = center[0]
         ccenter[1] = center[1]

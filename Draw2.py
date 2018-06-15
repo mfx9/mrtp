@@ -7,8 +7,8 @@
 from Mrtp import World, Renderer, Camera, Light, Plane, Sphere, Cylinder
 
 
-camera = Camera (origin=(10.0, -10.0, 3.0), target=(0.0, 0.0, 5.0), roll=0.0)
-light = Light (origin=(5.0, 5.0, 5.0))
+camera = Camera (center=(10.0, -10.0, 3.0), target=(0.0, 0.0, 5.0), roll=0.0)
+light = Light (center=(5.0, 5.0, 5.0))
 
 pa = Plane (center=(0.0, 0.0, 0.0), normal=(0.0, 0.0, 1.0), scale=0.15, reflect=1.0, texture="textures/04univ3.png")
 pb = Plane (center=(0.0, 0.0, 17.0), normal=(0.0, 0.0, -1.0), scale=0.15, reflect=1.0, texture="textures/trak2_tile1b.png")
