@@ -12,15 +12,18 @@ DEF DEFAULT_HEIGHT   =  480
 DEF DEFAULT_FOV      =   93.0
 DEF DEFAULT_DISTANCE =   60.0
 DEF DEFAULT_SHADOW   =    0.25
-DEF DEFAULT_REFLECT  =    3
+DEF DEFAULT_DEPTH    =    3
 DEF DEFAULT_FILENAME =  "scene.png"
+
+DEF DEFAULT_REFLECT  =  0.0
+DEF DEFAULT_SCALE    =  0.15
 
 DEF MIN_WIDTH   =  (DEFAULT_WIDTH  //  2)
 DEF MAX_WIDTH   =  (DEFAULT_WIDTH  *  10)
 DEF MIN_HEIGHT  =  (DEFAULT_HEIGHT //  2)
 DEF MAX_HEIGHT  =  (DEFAULT_HEIGHT *  10)
-DEF MIN_REFLECT =      0
-DEF MAX_REFLECT =     10
+DEF MIN_DEPTH   =      0
+DEF MAX_DEPTH   =     10
 DEF MIN_FOV     =     50.0
 DEF MAX_FOV     =    170.0
 
@@ -30,14 +33,16 @@ DEF MAX_THREADS     = 64
 
 
 cdef class World:
-    def __cinit__ (self):
+    def __cinit__ (self, verbose=True):
         self.cObject = new CWorld ()
+        self.verbose = verbose
 
     def __dealloc__ (self):
         del self.cObject
 
     def _Text (self, message):
-        print (" wrld> %s" % message)
+        if (self.verbose):
+            print (" wrld> %s" % message)
 
     def AddCamera (self, Camera camera):
         self.cObject.AddCamera (camera.cObject)
@@ -64,9 +69,9 @@ cdef class Renderer:
                    float fov=DEFAULT_FOV, 
                    float distance=DEFAULT_DISTANCE, 
                    float shadowfactor=DEFAULT_SHADOW, 
-                   int maxdepth=DEFAULT_REFLECT, 
-                   int reflshadow=0, 
-                   int nthreads=DEFAULT_THREADS ):
+                   int maxdepth=DEFAULT_DEPTH, 
+                   int nthreads=DEFAULT_THREADS, 
+                   verbose=True ):
         """Creates a renderer. 
 
         Keyword arguments:
@@ -76,28 +81,31 @@ cdef class Renderer:
             distance      distance to quench light (default is 60)
             shadowfactor  shadow factor (default is 0.25)
             maxdepth      recursion depth for reflected rays (default is 3)
-            reflshadow    do (1) or do not (0) reflect rays from shadowed surfaces
             nthreads      rendering threads: 0 (auto), 1 (default), 2, 4, etc.
         """
-        if ((width < MIN_WIDTH) or (width > MAX_WIDTH) or (height < MIN_HEIGHT) or (height > MAX_HEIGHT)):
+        if (width < MIN_WIDTH) or (width > MAX_WIDTH) or (height < MIN_HEIGHT) or (height > MAX_HEIGHT):
             raise exceptions.StandardError ("Resolution is out of range.")
 
-        if ((fov < MIN_FOV) or (fov > MAX_FOV)):
+        if (fov < MIN_FOV) or (fov > MAX_FOV):
             raise exceptions.StandardError ("Field of vision is out of range.")
 
-        if ((nthreads < MIN_THREADS) or (nthreads > MAX_THREADS)):
+        if (nthreads < MIN_THREADS) or (nthreads > MAX_THREADS):
             raise exceptions.StandardError ("Number of threads is out of range.")
 
-        if ((maxdepth < MIN_REFLECT) or (maxdepth > MAX_REFLECT)):
+        if (maxdepth < MIN_DEPTH) or (maxdepth > MAX_DEPTH):
             raise exceptions.StandardError ("Number of reflective rays is out of range.")
 
-        self.cObject = new CRenderer (world.cObject, width, height, fov, distance, shadowfactor, maxdepth, reflshadow, nthreads)
+        self.cObject = new CRenderer (world.cObject, width, height, fov, distance, shadowfactor, maxdepth, nthreads)
+        self.verbose = verbose
+
+        self._Text ("w=%d  h=%d  fov=%.1f  dist=%.1f  dep=%d  shad=%.2f  cpu=%d" % (width, height, fov, distance, maxdepth, shadowfactor, nthreads))
 
     def __dealloc__ (self):
         del self.cObject
 
     def _Text (self, message):
-        print (" rndr> %s" % message)
+        if (self.verbose):
+            print (" rndr> %s" % message)
 
     def Render (self):
         """Renders a scene."""
@@ -174,7 +182,7 @@ cdef class Light:
 
 
 cdef class Plane:
-    def __cinit__ (self, center, normal, texture, float scale=0.15, float reflect=0.0):
+    def __cinit__ (self, center, normal, texture, float scale=DEFAULT_SCALE, float reflect=DEFAULT_REFLECT):
         cdef float ccenter[3]
         cdef float cnormal[3]
         cdef char *ctexture
@@ -198,7 +206,7 @@ cdef class Plane:
 
 
 cdef class Sphere:
-    def __cinit__ (self, center, texture, float radius=1.0, axis=(0.0, 0.0, 1.0), float reflect=0.0):
+    def __cinit__ (self, center, texture, float radius=1.0, axis=(0.0, 0.0, 1.0), float reflect=DEFAULT_REFLECT):
         cdef float ccenter[3]
         cdef float caxis[3]
         cdef char *ctexture
@@ -219,7 +227,7 @@ cdef class Sphere:
 
 
 cdef class Cylinder:
-    def __cinit__ (self, center, direction, texture, float radius=1.0, float span=-1.0, float reflect=0.0):
+    def __cinit__ (self, center, direction, texture, float radius=1.0, float span=-1.0, float reflect=DEFAULT_REFLECT):
         cdef float ccenter[3]
         cdef float cdirection[3]
         cdef char *ctexture

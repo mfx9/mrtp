@@ -63,15 +63,17 @@ cdef extern from "world.hpp":
 
 cdef class World:
     cdef CWorld *cObject
+    cdef public object verbose 
 
 
 #===============================================================================
 cdef extern from "renderer.hpp":
 
     cdef cppclass CRenderer:
-        CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int reflshadow, int nthreads) except +
+        CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int nthreads) except +
         float Render ()
         void WriteScene (char *filename)
 
 cdef class Renderer:
     cdef CRenderer *cObject
+    cdef public object verbose 

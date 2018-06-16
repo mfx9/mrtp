@@ -22,7 +22,7 @@ class CRenderer {
 
     std::vector<Actor *> *actors_;
 
-    std::vector<Pixel> buffer_;
+    std::vector<Pixel> framebuffer_;
     int    width_;
     int    height_;
 
@@ -30,7 +30,6 @@ class CRenderer {
     float   shadow_;   //Factor between <0..1> defining the darkness of shadows
     float   cutoff_;   //Maximum distance reached by rays
     int     maxdepth_;  //Maximum number of recursions of every reflected ray
-    bool    reflshadow_;   //If true, reflect shadows from shadowed surfaces
 
     float  fov_;
     float  ratio_;
@@ -40,11 +39,11 @@ class CRenderer {
     //Private methods
     bool SolveShadows (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float maxdist);
     Actor *SolveHits (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float *currd);
-    void TraceRay_r (Eigen::Vector3f *origin, Eigen::Vector3f *direction, int depth, float mixing, Pixel *color);
+    Pixel TraceRay_r (Eigen::Vector3f *origin, Eigen::Vector3f *direction, int depth);
     void RenderBlock (int block, int nlines);
 
 public:
-    CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int reflshadow, int nthreads);
+    CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int nthreads);
     ~CRenderer ();
     float Render ();
     void WriteScene (char *filename);

@@ -3,10 +3,10 @@
  * Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
-#include <Eigen/Geometry>
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <Eigen/Geometry>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -31,8 +31,7 @@ Creates a renderer
 ================
 */
 CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float distance, 
-                      float shadowfactor, int maxdepth, int reflshadow, 
-                      int nthreads) {
+                      float shadowfactor, int maxdepth, int nthreads) {
     width_ = width;
     height_ = height;
     fov_ = fov;
@@ -43,7 +42,6 @@ CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float dis
     maxdist_ = distance;
     shadow_ = shadowfactor;
     maxdepth_ = maxdepth;
-    reflshadow_ = (reflshadow != 0) ? true : false;
     nthreads_ = nthreads;
 
     camera_ = world->GetCamera ();
@@ -51,7 +49,7 @@ CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float dis
     actors_ = world->GetActors ();
 
     Pixel dummy;
-    buffer_.assign (width_ * height_, dummy);
+    framebuffer_.assign (width_ * height_, dummy);
 }
 
 /*
@@ -73,7 +71,7 @@ Writes a rendered scene to a PNG file
 */
 void CRenderer::WriteScene (char *filename) {
     image<rgb_pixel> image (width_, height_);
-    Pixel *in = &buffer_[0];
+    Pixel *in = &framebuffer_[0];
 
     for (int i=0; i<height_; i++) {
         rgb_pixel *out = &image[i][0];
@@ -144,12 +142,17 @@ TraceRay_r
 Traces a ray and its reflected rays
 ================
 */
-void CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth, float mixing, Pixel *pixel) {
+Pixel CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
+    Pixel pixel;
+    pixel << 0.0f, 0.0f, 0.0f;
+
     float currd = maxdist_;
     Actor *hitactor = SolveHits (origin, direction, &currd);
 
     if (hitactor) {
         Vector3f inter = ((*direction) * currd) + (*origin);
+
+        Vector3f normal = hitactor->CalculateNormal (&inter);
 
         //Calculate light intensity
         Vector3f ray = light_->CalculateRay (&inter);
@@ -157,45 +160,36 @@ void CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth, fl
         float raylen = ray.norm ();
         ray *= (1.0f / raylen);
 
-        Vector3f normal = hitactor->CalculateNormal (&inter);
-        float dot = ray.dot (normal);
-        float intensity = (dot >= 0.0f) ? dot : 0.0f;
+        float intensity = ray.dot (normal);
 
-        //Check if the intersection is in a shadow
-        bool isshadow = SolveShadows (&inter, &ray, raylen);
-        float shadow = (isshadow) ? shadow_ : 1.0f;
-
-        //Decrease light intensity for actors away from the light
-        float ambient = 1.0f - pow (raylen / maxdist_, 2);
-
-        //Combine pixels
-        float lambda = mixing * intensity * shadow * ambient;
-
-        Pixel pick = hitactor->PickPixel (&inter, &normal);
-        *pixel = (1.0f - lambda) * (*pixel) + lambda * pick;
-
-        /*
-        //Quit if the surface is shadowed, but reflections are turned off
-        if (isshadow && (!reflshadow_)) {
-            return;
+        if (intensity > 0.0f) {
+            //Check if the intersection is in a shadow
+            bool isshadow = SolveShadows (&inter, &ray, raylen);
+            float shadow = (isshadow) ? shadow_ : 1.0f;
+    
+            //Decrease light intensity for actors away from the light
+            float ambient = 1.0f - pow (raylen / maxdist_, 2);
+    
+            //Combine pixels
+            float lambda = intensity * shadow * ambient;
+    
+            Pixel pick = hitactor->PickPixel (&inter, &normal);
+            pixel = (1.0f - lambda) * pixel + lambda * pick;
+    
+            //If the hit actor is reflective, trace a reflected ray
+            if (depth < maxdepth_) {
+                float coeff = hitactor->Reflect ();
+        
+                if (coeff > 0.0f) {
+                    Vector3f ray = (*direction) - (2.0f * direction->dot (normal)) * normal;
+                    Pixel reflected = TraceRay_r (&inter, &ray, depth+1);
+        
+                    pixel = (1.0f - coeff) * reflected + coeff * pixel;
+                }
+            }
         }
-
-        //Quit if the maximum level of recursion is reached
-        if (++depth > maxdepth_) {
-            return;
-        }
-
-        //If the hit actor is reflective, trace a reflected ray
-        float factor = hitactor->Reflective ();
-
-        if (factor != 0.0f) {
-            Vector3f reflected = (*direction) - (2.0f * direction->dot (normal)) * normal;
-
-            TraceRay_r (&inter, &reflected, depth, factor, pixel);
-        }
-        */
     }
-    //No intersections found, quit
+    return pixel;
 }
 
 /*
@@ -206,7 +200,7 @@ Renders a rectangular block of the screen
 ================
 */
 void CRenderer::RenderBlock (int block, int nlines) {
-    Pixel *pixel = &buffer_[block*nlines*width_];
+    Pixel *pixel = &framebuffer_[block*nlines*width_];
 
     for (int j=0; j<nlines; j++) {
 
@@ -214,9 +208,7 @@ void CRenderer::RenderBlock (int block, int nlines) {
             Vector3f origin = camera_->CalculateOrigin (i, j+block*nlines);
             Vector3f direction = camera_->CalculateDirection (&origin);
 
-            *pixel << 0.0f, 0.0f, 0.0f;
-
-            TraceRay_r (&origin, &direction, 0, 1.0f, pixel);
+            *pixel = TraceRay_r (&origin, &direction, 0);
         }
     }
 }
@@ -227,7 +219,7 @@ Render
 
 Renders a scene.
 
-In parallel mode, splits the buffer into several 
+In parallel mode, splits the frame buffer into several 
 horizontal blocks, each rendered by a separate thread.
 
 After each thread has finished, there may still be 

@@ -41,12 +41,12 @@ bool Actor::HasShadow () {
 
 /*
 ================
-Reflective
+Reflect
 
 Returns the reflection coefficient
 ================
 */
-float Actor::Reflective () {
+float Actor::Reflect () {
     return reflect_;
 }
 

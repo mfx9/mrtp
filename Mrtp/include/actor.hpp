@@ -25,7 +25,7 @@ protected:
 public:
     Actor ();
     bool HasShadow ();
-    float Reflective ();
+    float Reflect ();
 
     virtual ~Actor ();
     virtual float Solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd) = 0;
