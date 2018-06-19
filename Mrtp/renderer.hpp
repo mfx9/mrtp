@@ -28,6 +28,7 @@ class CRenderer {
 
     float   maxdist_;   //Distance at which the light is fully quenched
     float   shadow_;   //Factor between <0..1> defining the darkness of shadows
+    float   bias_;      //Correction to shadows to avoid self-intersection
     float   cutoff_;   //Maximum distance reached by rays
     int     maxdepth_;  //Maximum number of recursions of every reflected ray
 
@@ -43,7 +44,7 @@ class CRenderer {
     void RenderBlock (int block, int nlines);
 
 public:
-    CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int nthreads);
+    CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads);
     ~CRenderer ();
     float Render ();
     void WriteScene (char *filename);

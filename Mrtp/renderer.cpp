@@ -31,7 +31,7 @@ Creates a renderer
 ================
 */
 CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float distance, 
-                      float shadowfactor, int maxdepth, int nthreads) {
+                      float shadow, float bias, int maxdepth, int nthreads) {
     width_ = width;
     height_ = height;
     fov_ = fov;
@@ -40,7 +40,8 @@ CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float dis
     perspective_ = ratio_ / (2.0f * tan (kDegreeToRadian * (fov_ / 2.0f)));
 
     maxdist_ = distance;
-    shadow_ = shadowfactor;
+    shadow_ = shadow;
+    bias_ = bias;
     maxdepth_ = maxdepth;
     nthreads_ = nthreads;
 
@@ -155,20 +156,23 @@ Pixel CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
         Vector3f normal = hitactor->CalculateNormal (&inter);
 
         //Calculate light intensity
-        Vector3f ray = light_->CalculateRay (&inter);
+        Vector3f tolight = light_->CalculateRay (&inter);
 
-        float raylen = ray.norm ();
-        ray *= (1.0f / raylen);
+        float lightd = tolight.norm ();
+        tolight *= (1.0f / lightd);
 
-        float intensity = ray.dot (normal);
+        float intensity = tolight.dot (normal);
 
         if (intensity > 0.0f) {
+            //Prevent self-intersection
+            Vector3f corr = inter + bias_ * normal;
+
             //Check if the intersection is in a shadow
-            bool isshadow = SolveShadows (&inter, &ray, raylen);
+            bool isshadow = SolveShadows (&corr, &tolight, lightd);
             float shadow = (isshadow) ? shadow_ : 1.0f;
     
             //Decrease light intensity for actors away from the light
-            float ambient = 1.0f - pow (raylen / maxdist_, 2);
+            float ambient = 1.0f - pow (lightd / maxdist_, 2);
     
             //Combine pixels
             float lambda = intensity * shadow * ambient;
@@ -182,7 +186,7 @@ Pixel CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
         
                 if (coeff > 0.0f) {
                     Vector3f ray = (*direction) - (2.0f * direction->dot (normal)) * normal;
-                    Pixel reflected = TraceRay_r (&inter, &ray, depth+1);
+                    Pixel reflected = TraceRay_r (&corr, &ray, depth+1);
         
                     pixel = (1.0f - coeff) * reflected + coeff * pixel;
                 }

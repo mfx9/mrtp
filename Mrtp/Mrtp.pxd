@@ -70,7 +70,7 @@ cdef class World:
 cdef extern from "renderer.hpp":
 
     cdef cppclass CRenderer:
-        CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadowfactor, int maxdepth, int nthreads) except +
+        CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads) except +
         float Render ()
         void WriteScene (char *filename)
 

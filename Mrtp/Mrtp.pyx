@@ -12,11 +12,12 @@ DEF DEFAULT_HEIGHT   =  480
 DEF DEFAULT_FOV      =   93.0
 DEF DEFAULT_DISTANCE =   60.0
 DEF DEFAULT_SHADOW   =    0.25
+DEF DEFAULT_BIAS     =    0.001
 DEF DEFAULT_DEPTH    =    3
 DEF DEFAULT_FILENAME =  "scene.png"
 
-DEF DEFAULT_REFLECT  =  0.0
-DEF DEFAULT_SCALE    =  0.15
+DEF DEFAULT_REFLECT     =  0.0
+DEF DEFAULT_SCALE       =  0.15
 
 DEF MIN_WIDTH   =  (DEFAULT_WIDTH  //  2)
 DEF MAX_WIDTH   =  (DEFAULT_WIDTH  *  10)
@@ -61,6 +62,25 @@ cdef class World:
 
 
 #===============================================================================
+#        """Creates a renderer. 
+#
+#        Keyword arguments:
+#            width      window width (def.  %d)
+#            heigth     window heigth (def. %d)
+#            fov        field of vision, in degrees (def. %.1f)
+#            distance   distance to quench light (def. %.1f)
+#            shadow     shadow factor (def. %.2f)
+#            bias       correct shadows to avoid self-intersection (def. %.3f)
+#            maxdepth   recursion depth for reflected rays (def. %d)
+#            nthreads   number of rendering threads (0=auto, def=%d)
+#        """ % (DEFAULT_WIDTH, 
+#               DEFAULT_HEIGHT, 
+#               DEFAULT_FOV, 
+#               DEFAULT_DISTANCE, 
+#               DEFAULT_SHADOW, 
+#               DEFAULT_BIAS, 
+#               DEFAULT_DEPTH, 
+#               DEFAULT_THREADS )
 cdef class Renderer:
     def __cinit__ (self, 
                    World world, 
@@ -68,21 +88,12 @@ cdef class Renderer:
                    int height=DEFAULT_HEIGHT, 
                    float fov=DEFAULT_FOV, 
                    float distance=DEFAULT_DISTANCE, 
-                   float shadowfactor=DEFAULT_SHADOW, 
+                   float shadow=DEFAULT_SHADOW, 
+                   float bias=DEFAULT_BIAS, 
                    int maxdepth=DEFAULT_DEPTH, 
                    int nthreads=DEFAULT_THREADS, 
                    verbose=True ):
-        """Creates a renderer. 
 
-        Keyword arguments:
-            width         window width
-            heigth        window heigth
-            fov           field of vision, in degrees (default is 93)
-            distance      distance to quench light (default is 60)
-            shadowfactor  shadow factor (default is 0.25)
-            maxdepth      recursion depth for reflected rays (default is 3)
-            nthreads      rendering threads: 0 (auto), 1 (default), 2, 4, etc.
-        """
         if (width < MIN_WIDTH) or (width > MAX_WIDTH) or (height < MIN_HEIGHT) or (height > MAX_HEIGHT):
             raise exceptions.StandardError ("Resolution is out of range.")
 
@@ -95,10 +106,10 @@ cdef class Renderer:
         if (maxdepth < MIN_DEPTH) or (maxdepth > MAX_DEPTH):
             raise exceptions.StandardError ("Number of reflective rays is out of range.")
 
-        self.cObject = new CRenderer (world.cObject, width, height, fov, distance, shadowfactor, maxdepth, nthreads)
+        self.cObject = new CRenderer (world.cObject, width, height, fov, distance, shadow, bias, maxdepth, nthreads)
         self.verbose = verbose
 
-        self._Text ("w=%d  h=%d  fov=%.1f  dist=%.1f  dep=%d  shad=%.2f  cpu=%d" % (width, height, fov, distance, maxdepth, shadowfactor, nthreads))
+        self._Text ("w=%d h=%d fov=%.1f dist=%.1f shad=%.2f bias=%.3f dep=%d cpu=%d" % (width, height, fov, distance, shadow, bias, maxdepth, nthreads))
 
     def __dealloc__ (self):
         del self.cObject
@@ -108,7 +119,6 @@ cdef class Renderer:
             print (" rndr> %s" % message)
 
     def Render (self):
-        """Renders a scene."""
         cdef float seconds;
 
         self._Text ("Rendering scene...")
@@ -117,7 +127,6 @@ cdef class Renderer:
         self._Text ("Done, elapsed time: %.2f sec" % seconds)
 
     def WriteScene (self, filename=DEFAULT_FILENAME):
-        """Write a scene to a PNG file."""
         cdef char *cfilename = filename
 
         self.cObject.WriteScene (cfilename)
