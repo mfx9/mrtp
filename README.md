@@ -24,7 +24,7 @@ does not require compilation.
 In step 2, run *make* in the Mrtp/ folder. A Python library Mrtp.so 
 will be generated that is ready to use in a Python script.
 
-See the attached scripts Draw.py and Draw2.py for examples of use.
+For more information, see the attached scripts in the examples folder.
 
 ### Gallery
 
