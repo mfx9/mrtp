@@ -108,10 +108,8 @@ Texture *TextureCollector::Add (const char *path) {
             return texture;
         }
     }
-
     Texture texture (path);
     textures_.push_back (texture);
-
     Texture *last = &textures_.back ();
     last->Load ();
 

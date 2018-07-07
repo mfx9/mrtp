@@ -27,7 +27,13 @@ static const float kRealToByte = 255.0f;
 ================
 CRenderer
 
-Creates a renderer
+Creates a renderer.
+
+@distance: a distance to fully darken the light
+@shadow: darkness of shadows, between <0..1> 
+@bias: correction to shadows to avoid self-intersection
+@distance: maximum distance reached by rays
+@maxdepth: number of recursion levels of a reflected ray
 ================
 */
 CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float distance, 

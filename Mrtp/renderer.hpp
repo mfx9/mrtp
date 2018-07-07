@@ -26,11 +26,10 @@ class CRenderer {
     int    width_;
     int    height_;
 
-    float   maxdist_;   //Distance at which the light is fully quenched
-    float   shadow_;   //Factor between <0..1> defining the darkness of shadows
-    float   bias_;      //Correction to shadows to avoid self-intersection
-    float   cutoff_;   //Maximum distance reached by rays
-    int     maxdepth_;  //Maximum number of recursions of every reflected ray
+    float   maxdist_;
+    float   shadow_;
+    float   bias_;
+    int     maxdepth_;
 
     float  fov_;
     float  ratio_;
