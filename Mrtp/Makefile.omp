@@ -1,6 +1,6 @@
 # . Makefile
 
-INCLUDE=-I/usr/include/python2.7 -I/usr/include/eigen3 -I../png++/png++-0.2.9 -I.
+INCLUDE=-I/usr/include/python2.7 -I/usr/include/eigen3 -I/usr/include/png++ -I.
 FLAGS=-W -Wall -pedantic -fPIC -O2
 
 
