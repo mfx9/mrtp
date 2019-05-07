@@ -16,6 +16,8 @@ Mrtp depends on the following libraries and tools (Debian packages):
  * python2.7-dev
  * cython
 
+First compile the Mrtp static library by running *make* in the src/ folder. 
+
 In order to build the Python module, run *make* in the Mrtp/ folder.
 
 ### Gallery
