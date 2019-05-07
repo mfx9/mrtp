@@ -5,7 +5,7 @@ FLAGS=-W -Wall -pedantic -fPIC -O2
 
 
 Mrtp.so: Mrtp.o actor.o plane.o sphere.o cylinder.o texture.o light.o camera.o world.o renderer.o
-	g++ -shared $^ -o $@ -lm -lpng
+	g++ -shared $^ -o $@ -fopenmp -lm -lpng
 
 Mrtp.o: Mrtp.cpp
 	g++ $(FLAGS) $(INCLUDE) -o Mrtp.o -c Mrtp.cpp
@@ -38,7 +38,7 @@ world.o: world.cpp world.hpp
 	g++ $(FLAGS) $(INCLUDE) -o world.o -c world.cpp
 
 renderer.o: renderer.cpp renderer.hpp
-	g++ $(FLAGS) $(INCLUDE) -o renderer.o -c renderer.cpp
+	g++ $(FLAGS) -fopenmp $(INCLUDE) -o renderer.o -c renderer.cpp
 
 .PHONY: clean
 clean:
