@@ -1,5 +1,0 @@
-png++>=0.2.9
-libpng>=1.2
-libeigen3-dev
-python2.7-dev
-cython
