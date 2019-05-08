@@ -8,25 +8,24 @@
 
 #include <Eigen/Core>
 
-
 class Camera {
-public:
-    Camera (float *center, float *target, float *roll);
-    ~Camera () {}
-    void calculate_window (int width, int height, float perspective);
+  public:
+    Camera(float *center, float *target, float *roll);
+    ~Camera() {}
+    void calculate_window(int width, int height, float perspective);
 
-    Eigen::Vector3f calculate_origin (int windowx, int windowy);
-    Eigen::Vector3f calculate_direction (Eigen::Vector3f *origin);
+    Eigen::Vector3f calculate_origin(int windowx, int windowy);
+    Eigen::Vector3f calculate_direction(Eigen::Vector3f *origin);
 
-private:
-    //Pointers to Cython variables
-    Eigen::Vector3f  *eye_;
-    Eigen::Vector3f  *lookat_;
-    float            *roll_;
+  private:
+    // Pointers to Cython variables
+    Eigen::Vector3f *eye_;
+    Eigen::Vector3f *lookat_;
+    float *roll_;
 
-    Eigen::Vector3f  wo_;
-    Eigen::Vector3f  wh_;
-    Eigen::Vector3f  wv_;
+    Eigen::Vector3f wo_;
+    Eigen::Vector3f wh_;
+    Eigen::Vector3f wv_;
 };
 
-#endif  //!_CAMERA_H
+#endif //!_CAMERA_H

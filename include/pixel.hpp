@@ -10,5 +10,4 @@
 
 typedef Eigen::Vector3f Pixel;
 
-
-#endif  //!_PIXEL_H
+#endif //!_PIXEL_H

@@ -3,13 +3,12 @@
  * Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
-#include <cmath>
 #include <Eigen/Geometry>
+#include <cmath>
 
 #include "cylinder.hpp"
 
 using namespace Eigen;
-
 
 /*
 ================
@@ -18,23 +17,23 @@ Cylinder
 Constructs a cylinder
 ================
 */
-Cylinder::Cylinder (float *center, float *direction, float radius, 
-                    float span, float reflect, const char *texture) {
+Cylinder::Cylinder(float *center, float *direction, float radius, float span,
+                   float reflect, const char *texture) {
     A_ = *(Vector3f *)center;
 
     B_ = *(Vector3f *)direction;
-    B_ *= (1.0f / B_.norm ());
+    B_ *= (1.0f / B_.norm());
 
     R_ = radius;
     span_ = span;
     reflect_ = reflect;
     has_shadow_ = true;
 
-    ty_ = generate_unit_vector (&B_);
-    tx_ = ty_.cross (B_);
-    tx_ *= (1.0f / tx_.norm ());
+    ty_ = generate_unit_vector(&B_);
+    tx_ = ty_.cross(B_);
+    tx_ *= (1.0f / tx_.norm());
 
-    texture_ = textureCollector.add (texture);
+    texture_ = textureCollector.add(texture);
 }
 
 /*
@@ -72,22 +71,22 @@ Capital letters are vectors.
  alpha = d + t * b
 ================
 */
-float Cylinder::solve (Vector3f *O, Vector3f *D, float mind, float maxd) {
+float Cylinder::solve(Vector3f *O, Vector3f *D, float mind, float maxd) {
     Vector3f tmp = (*O) - A_;
 
-    float a = D->dot (tmp);
-    float b = D->dot (B_);
-    float d = tmp.dot (B_);
-    float f = (R_ * R_) - tmp.dot (tmp);
+    float a = D->dot(tmp);
+    float b = D->dot(B_);
+    float d = tmp.dot(B_);
+    float f = (R_ * R_) - tmp.dot(tmp);
 
-    //Solving a quadratic equation for t
+    // Solving a quadratic equation for t
     float aa = 1.0f - (b * b);
     float bb = 2.0f * (a - b * d);
     float cc = -(d * d) - f;
-    float t  = solve_quadratic (aa, bb, cc, mind, maxd);
+    float t = solve_quadratic(aa, bb, cc, mind, maxd);
 
     if (t > 0.0f) {
-        //Check if the cylinder is finite
+        // Check if the cylinder is finite
         if (span_ > 0.0f) {
             float alpha = d + t * b;
 
@@ -108,14 +107,14 @@ Calculates normal to a cylinder
 N = Hit - [B . (Hit - A)] * B
 ================
 */
-Vector3f Cylinder::calculate_normal (Vector3f *hit) {
+Vector3f Cylinder::calculate_normal(Vector3f *hit) {
     Vector3f tmp = (*hit) - A_;
-    float alpha = B_.dot (tmp);
+    float alpha = B_.dot(tmp);
 
     Vector3f bar = A_ + alpha * B_;
     Vector3f normal = (*hit) - bar;
 
-    return (normal * (1.0f / normal.norm ()));
+    return (normal * (1.0f / normal.norm()));
 }
 
 /*
@@ -125,13 +124,13 @@ pick_pixel
 Picks a pixel from a cylinders's texture
 ================
 */
-Pixel Cylinder::pick_pixel (Vector3f *hit, Vector3f *normal) {
+Pixel Cylinder::pick_pixel(Vector3f *hit, Vector3f *normal) {
     Vector3f tmp = (*hit) - A_;
 
-    float alpha = tmp.dot (B_);
-    float dot   = normal->dot (tx_);
-    float fracx = acos (dot) / M_PI;
+    float alpha = tmp.dot(B_);
+    float dot = normal->dot(tx_);
+    float fracx = acos(dot) / M_PI;
     float fracy = alpha / (2.0f * M_PI * R_);
 
-    return texture_->pick_pixel (fracx, fracy, 1.0f);
+    return texture_->pick_pixel(fracx, fracy, 1.0f);
 }

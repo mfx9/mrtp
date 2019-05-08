@@ -11,24 +11,25 @@
 #include "pixel.hpp"
 #include "texture.hpp"
 
-
 class Actor {
-public:
-    Actor () {}
-    virtual ~Actor () {}
-    bool has_shadow ();
-    float get_reflect ();
-    virtual float solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd) = 0;
-    virtual Pixel pick_pixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal) = 0;
-    virtual Eigen::Vector3f calculate_normal (Eigen::Vector3f *hit) = 0;
+  public:
+    Actor() {}
+    virtual ~Actor() {}
+    bool has_shadow();
+    float get_reflect();
+    virtual float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
+                        float mind, float maxd) = 0;
+    virtual Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) = 0;
+    virtual Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit) = 0;
 
-protected:
+  protected:
     bool has_shadow_;
     float reflect_;
     Texture *texture_;
 
-    static float solve_quadratic (float a, float b, float c, float mint, float maxt);
-    static Eigen::Vector3f generate_unit_vector (Eigen::Vector3f *vector);
+    static float solve_quadratic(float a, float b, float c, float mint,
+                                 float maxt);
+    static Eigen::Vector3f generate_unit_vector(Eigen::Vector3f *vector);
 };
 
-#endif  //!_ACTOR_H
+#endif //!_ACTOR_H

@@ -8,31 +8,30 @@
 
 #include <vector>
 
-#include "light.hpp"
-#include "camera.hpp"
 #include "actor.hpp"
+#include "camera.hpp"
+#include "cylinder.hpp"
+#include "light.hpp"
 #include "plane.hpp"
 #include "sphere.hpp"
-#include "cylinder.hpp"
-
 
 class World {
-public:
-    void add_camera (Camera *camera);
-    void add_light (Light *light);
-    void add_plane (Plane *plane);
-    void add_sphere (Sphere *sphere);
-    void add_cylinder (Cylinder *cylinder);
+  public:
+    void add_camera(Camera *camera);
+    void add_light(Light *light);
+    void add_plane(Plane *plane);
+    void add_sphere(Sphere *sphere);
+    void add_cylinder(Cylinder *cylinder);
 
-    //Used for binding to renderer
-    Light *get_light ();
-    Camera *get_camera ();
-    std::vector<Actor *> *get_actors ();
+    // Used for binding to renderer
+    Light *get_light();
+    Camera *get_camera();
+    std::vector<Actor *> *get_actors();
 
-private:
+  private:
     std::vector<Actor *> actors_;
     std::vector<Light *> lights_;
     std::vector<Camera *> cameras_;
 };
 
-#endif  //!_WORLD_H
+#endif //!_WORLD_H

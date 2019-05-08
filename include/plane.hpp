@@ -10,21 +10,22 @@
 
 #include "actor.hpp"
 
-
 class Plane : public Actor {
-public:
-    Plane (float *center, float *normal, float scale, float reflect, const char *texture);
+  public:
+    Plane(float *center, float *normal, float scale, float reflect,
+          const char *texture);
     ~Plane() {}
-    float solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
-    Pixel pick_pixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
-    Eigen::Vector3f calculate_normal (Eigen::Vector3f *hit);
+    float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
+                float maxd);
+    Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal);
+    Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit);
 
-private:
-    Eigen::Vector3f   center_;
-    Eigen::Vector3f   normal_;
-    Eigen::Vector3f   tx_;
-    Eigen::Vector3f   ty_;
-    float   scale_;
+  private:
+    Eigen::Vector3f center_;
+    Eigen::Vector3f normal_;
+    Eigen::Vector3f tx_;
+    Eigen::Vector3f ty_;
+    float scale_;
 };
 
-#endif  //!_PLANE_H
+#endif //!_PLANE_H

@@ -7,24 +7,19 @@
 
 using namespace Eigen;
 
-
 /*
 ================
 Light
 ================
 */
-Light::Light (float *center) {
-    center_ = (Vector3f *)center;
-}
+Light::Light(float *center) { center_ = (Vector3f *)center; }
 
 /*
 ================
 calculate_ray
 
-Calculates a ray between a hit point and 
+Calculates a ray between a hit point and
 a source of light
 ================
 */
-Vector3f Light::calculate_ray (Vector3f *hit) {
-    return ((*center_) - (*hit));
-}
+Vector3f Light::calculate_ray(Vector3f *hit) { return ((*center_) - (*hit)); }

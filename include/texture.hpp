@@ -7,21 +7,20 @@
 #define _TEXTURE_H
 
 #include <list>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "pixel.hpp"
 
-
 class Texture {
-public:
-    Texture (const char *path);
-    ~Texture () {}
-    void load_texture ();
-    bool check_path (const char *path);
-    Pixel pick_pixel (float fracx, float fracy, float scale);
+  public:
+    Texture(const char *path);
+    ~Texture() {}
+    void load_texture();
+    bool check_path(const char *path);
+    Pixel pick_pixel(float fracx, float fracy, float scale);
 
-private:
+  private:
     int width_;
     int height_;
     std::vector<Pixel> data_;
@@ -29,14 +28,13 @@ private:
 };
 
 class TextureCollector {
-public:
-    Texture *add (const char *path);
+  public:
+    Texture *add(const char *path);
 
-private:
+  private:
     std::list<Texture> textures_;
 };
 
-
 extern TextureCollector textureCollector;
 
-#endif  //!_TEXTURE_H
+#endif //!_TEXTURE_H
