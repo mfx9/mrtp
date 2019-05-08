@@ -39,4 +39,4 @@ private:
 
 extern TextureCollector textureCollector;
 
-#endif /* !_TEXTURE_H */
+#endif  //!_TEXTURE_H

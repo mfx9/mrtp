@@ -49,4 +49,4 @@ private:
     void render_block (int block, int nlines);
 };
 
-#endif /* !_RENDERER_H */
+#endif  //!_RENDERER_H

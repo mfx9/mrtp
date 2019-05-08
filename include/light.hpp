@@ -19,4 +19,4 @@ private:
     Eigen::Vector3f *center_;
 };
 
-#endif /* !_LIGHT_H */
+#endif  //!_LIGHT_H

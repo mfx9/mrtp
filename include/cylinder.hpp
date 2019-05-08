@@ -28,4 +28,4 @@ private:
     float  span_;
 };
 
-#endif /* !_CYLINDER_H */
+#endif  //!_CYLINDER_H

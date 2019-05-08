@@ -27,4 +27,4 @@ private:
     float   scale_;
 };
 
-#endif /* !_PLANE_H */
+#endif  //!_PLANE_H

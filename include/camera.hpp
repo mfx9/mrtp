@@ -29,4 +29,4 @@ private:
     Eigen::Vector3f  wv_;
 };
 
-#endif /* !_CAMERA_H */
+#endif  //!_CAMERA_H

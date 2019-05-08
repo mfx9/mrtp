@@ -35,4 +35,4 @@ private:
     std::vector<Camera *> cameras_;
 };
 
-#endif /* !_WORLD_H */
+#endif  //!_WORLD_H

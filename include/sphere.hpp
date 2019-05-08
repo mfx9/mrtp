@@ -27,4 +27,4 @@ private:
     float   R_;
 };
 
-#endif /* !_SPHERE_H */
+#endif  //!_SPHERE_H

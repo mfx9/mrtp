@@ -31,4 +31,4 @@ protected:
     static Eigen::Vector3f generate_unit_vector (Eigen::Vector3f *vector);
 };
 
-#endif /* !_ACTOR_H */
+#endif  //!_ACTOR_H
