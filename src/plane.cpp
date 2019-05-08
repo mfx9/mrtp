@@ -27,7 +27,7 @@ Plane::Plane (float *center, float *normal, float scale, float reflect, const ch
     center_ = *(Vector3f *)center;
     hasShadow_ = false;
 
-    Vector3f tmp = GenerateUnitVector (&normal_);
+    Vector3f tmp = generate_unit_vector (&normal_);
 
     tx_ = tmp.cross (normal_);
     tx_ *= (1.0f / tx_.norm ());
@@ -35,34 +35,34 @@ Plane::Plane (float *center, float *normal, float scale, float reflect, const ch
     ty_ = normal_.cross (tx_);
     ty_ *= (1.0f / ty_.norm ());
 
-    texture_ = textureCollector.Add (texture);
+    texture_ = textureCollector.add (texture);
 }
 
 /*
 ================
-PickPixel
+pick_pixel
 
 Picks a pixel from a plane's texture
 ================
 */
-Pixel Plane::PickPixel (Vector3f *hit, Vector3f *normal) {
+Pixel Plane::pick_pixel (Vector3f *hit, Vector3f *normal) {
     Vector3f v = (*hit) - center_;
 
     //Calculate components of v (dot products)
     float vx = v.dot (tx_);
     float vy = v.dot (ty_);
 
-    return texture_->PickPixel (vx, vy, scale_);
+    return texture_->pick_pixel (vx, vy, scale_);
 }
 
 /*
 ================
-Solve
+solve
 
-Solves the intersection of a ray and a plane
+solves the intersection of a ray and a plane
 ================
 */
-float Plane::Solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
+float Plane::solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
     float bar = direction->dot (normal_);
 
     if (bar != 0.0f) {
@@ -78,11 +78,11 @@ float Plane::Solve (Vector3f *origin, Vector3f *direction, float mind, float max
 
 /*
 ================
-CalculateNormal
+calculate_normal
 
 Returns a normal to a plane
 ================
 */
-Vector3f Plane::CalculateNormal (Vector3f *hit) {
+Vector3f Plane::calculate_normal (Vector3f *hit) {
     return normal_;
 }

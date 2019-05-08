@@ -37,16 +37,16 @@ class Renderer {
     int    nthreads_;
 
     //Private methods
-    bool SolveShadows (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float maxdist);
-    Actor *SolveHits (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float *currd);
-    Pixel TraceRay_r (Eigen::Vector3f *origin, Eigen::Vector3f *direction, int depth);
-    void RenderBlock (int block, int nlines);
+    bool solve_shadows (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float maxdist);
+    Actor *solve_hits (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float *currd);
+    Pixel trace_ray_r (Eigen::Vector3f *origin, Eigen::Vector3f *direction, int depth);
+    void render_block (int block, int nlines);
 
 public:
     Renderer (World *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads);
     ~Renderer ();
-    float Render ();
-    void WriteScene (char *filename);
+    float render_scene ();
+    void write_scene (char *filename);
 };
 
 #endif /* !_RENDERER_H */

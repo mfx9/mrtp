@@ -21,9 +21,9 @@ class Cylinder : public Actor {
 
 public:
     Cylinder (float *center, float *direction, float radius, float span, float reflect, const char *texture);
-    float Solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
-    Pixel PickPixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
-    Eigen::Vector3f CalculateNormal (Eigen::Vector3f *hit);
+    float solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
+    Pixel pick_pixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
+    Eigen::Vector3f calculate_normal (Eigen::Vector3f *hit);
 };
 
 #endif /* !_CYLINDER_H */

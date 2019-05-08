@@ -36,7 +36,7 @@ Texture::~Texture () {
 
 /*
 ================
-PickPixel
+pick_pixel
 
 fracx, fracy are within a range of <0..1> and
 define fractions of the x- and y-dimension 
@@ -45,7 +45,7 @@ of a texture.
 A reasonable scale for a 256x256 texture is 0.15.
 ================
 */
-Pixel Texture::PickPixel (float fracx, float fracy, float scale) {
+Pixel Texture::pick_pixel (float fracx, float fracy, float scale) {
     unsigned u = ((unsigned) (fracx * width_ * scale)) % width_;
     unsigned v = ((unsigned) (fracy * height_ * scale)) % height_;
 
@@ -57,19 +57,19 @@ Pixel Texture::PickPixel (float fracx, float fracy, float scale) {
 CheckFilename
 ================
 */
-bool Texture::CheckPath (const char *path) {
+bool Texture::check_path (const char *path) {
     return (strcmp (path, spath_.c_str ()) == 0) ? true : false;
 }
 
 /*
 ================
-Load
+load_texture
 
 Allocates memory and loads pixel data from 
 a PNG file
 ================
 */
-void Texture::Load () {
+void Texture::load_texture () {
     image<rgb_pixel> image (spath_.c_str ());
 
     width_ = image.get_width ();
@@ -100,18 +100,18 @@ one that already exists in the memory.
 Returns a pointer to the texture.
 ================
 */
-Texture *TextureCollector::Add (const char *path) {
+Texture *TextureCollector::add (const char *path) {
     for (list<Texture>::iterator t=textures_.begin (); t!=textures_.end (); t++) {
         Texture *texture = &(*t);
 
-        if (texture->CheckPath (path)) {
+        if (texture->check_path (path)) {
             return texture;
         }
     }
     Texture texture (path);
     textures_.push_back (texture);
     Texture *last = &textures_.back ();
-    last->Load ();
+    last->load_texture ();
 
     return last;
 }

@@ -27,12 +27,12 @@ Light::~Light () {
 
 /*
 ================
-CalculateRay
+calculate_ray
 
 Calculates a ray between a hit point and 
 a source of light
 ================
 */
-Vector3f Light::CalculateRay (Vector3f *hit) {
+Vector3f Light::calculate_ray (Vector3f *hit) {
     return ((*center_) - (*hit));
 }

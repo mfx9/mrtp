@@ -24,16 +24,16 @@ class Texture {
 public:
     Texture (const char *path);
     ~Texture ();
-    void Load ();
-    bool CheckPath (const char *path);
-    Pixel PickPixel (float fracx, float fracy, float scale);
+    void load_texture ();
+    bool check_path (const char *path);
+    Pixel pick_pixel (float fracx, float fracy, float scale);
 };
 
 class TextureCollector {
     std::list<Texture> textures_;
 
 public:
-    Texture *Add (const char *path);
+    Texture *add (const char *path);
 };
 
 

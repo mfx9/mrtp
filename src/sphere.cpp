@@ -28,7 +28,7 @@ Sphere::Sphere (float *center, float radius, float *axis, float reflect, const c
     ty_ = *(Vector3f *)axis;
     ty_ *= (1.0f / ty_.norm ());
 
-    Vector3f tmp = GenerateUnitVector (&ty_);
+    Vector3f tmp = generate_unit_vector (&ty_);
 
     tx_ = tmp.cross (ty_);
     tx_ *= (1.0f / tx_.norm ());
@@ -36,34 +36,34 @@ Sphere::Sphere (float *center, float radius, float *axis, float reflect, const c
     tz_ = ty_.cross (tx_);
     tz_ *= (1.0f / tz_.norm ()); 
 
-    texture_ = textureCollector.Add (texture);
+    texture_ = textureCollector.add (texture);
 }
 
 /*
 ================
-Solve
+solve
 
-Solves the intersection of a ray and a sphere
+solves the intersection of a ray and a sphere
 ================
 */
-float Sphere::Solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
+float Sphere::solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
     Vector3f t = (*origin) - center_;
 
     float a = direction->dot (*direction);
     float b = 2.0f * direction->dot (t);
     float c = t.dot (t) - (R_ * R_);
 
-    return SolveQuadratic (a, b, c, mind, maxd);
+    return solve_quadratic (a, b, c, mind, maxd);
 }
 
 /*
 ================
-CalculateNormal
+calculate_normal
 
 Calculates normal to a sphere
 ================
 */
-Vector3f Sphere::CalculateNormal (Vector3f *hit) {
+Vector3f Sphere::calculate_normal (Vector3f *hit) {
     Vector3f normal = (*hit) - center_;
 
     return (normal * (1.0f / normal.norm ()));
@@ -71,7 +71,7 @@ Vector3f Sphere::CalculateNormal (Vector3f *hit) {
 
 /*
 ================
-PickPixel
+pick_pixel
 
 Picks a pixel from a spheres's texture
 
@@ -79,7 +79,7 @@ Guidelines:
 https://www.cs.unc.edu/~rademach/xroads-RT/RTarticle.html
 ================
 */
-Pixel Sphere::PickPixel (Vector3f *hit, Vector3f *normal) {
+Pixel Sphere::pick_pixel (Vector3f *hit, Vector3f *normal) {
     float dot   = normal->dot (ty_);
     float phi   = acos (-dot);
     float fracy = phi / M_PI;
@@ -90,5 +90,5 @@ Pixel Sphere::PickPixel (Vector3f *hit, Vector3f *normal) {
     dot = normal->dot (tz_);
     float fracx = (dot > 0.0f) ? theta : (1.0f - theta);
 
-    return texture_->PickPixel (fracx, fracy, 1.0f);
+    return texture_->pick_pixel (fracx, fracy, 1.0f);
 }

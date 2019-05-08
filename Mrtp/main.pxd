@@ -55,11 +55,11 @@ cdef extern from "world.hpp":
 
     cdef cppclass World:
         World () except +
-        void AddCamera (Camera *camera)
-        void AddLight (Light *light)
-        void AddPlane (Plane *plane)
-        void AddSphere (Sphere *sphere)
-        void AddCylinder (Cylinder *cylinder)
+        void add_camera (Camera *camera)
+        void add_light (Light *light)
+        void add_plane (Plane *plane)
+        void add_sphere (Sphere *sphere)
+        void add_cylinder (Cylinder *cylinder)
 
 cdef class PyWorld:
     cdef World *cObject
@@ -71,8 +71,8 @@ cdef extern from "renderer.hpp":
 
     cdef cppclass Renderer:
         Renderer (World *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads) except +
-        float Render ()
-        void WriteScene (char *filename)
+        float render_scene ()
+        void write_scene (char *filename)
 
 cdef class PyRenderer:
     cdef Renderer *cObject

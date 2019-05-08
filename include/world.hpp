@@ -22,16 +22,16 @@ class World {
     std::vector<Camera *> cameras_;
 
 public:
-    void AddCamera (Camera *camera);
-    void AddLight (Light *light);
-    void AddPlane (Plane *plane);
-    void AddSphere (Sphere *sphere);
-    void AddCylinder (Cylinder *cylinder);
+    void add_camera (Camera *camera);
+    void add_light (Light *light);
+    void add_plane (Plane *plane);
+    void add_sphere (Sphere *sphere);
+    void add_cylinder (Cylinder *cylinder);
 
     //Used for binding to renderer
-    Light *GetLight ();
-    Camera *GetCamera ();
-    std::vector<Actor *> *GetActors ();
+    Light *get_light ();
+    Camera *get_camera ();
+    std::vector<Actor *> *get_actors ();
 };
 
 #endif /* !_WORLD_H */

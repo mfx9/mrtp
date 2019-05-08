@@ -30,31 +30,31 @@ Actor::~Actor () {
 
 /*
 ================
-HasShadow
+has_shadow
 
 Returns true if an actor casts shadow
 ================
 */
-bool Actor::HasShadow () {
+bool Actor::has_shadow () {
     return hasShadow_;
 }
 
 /*
 ================
-Reflect
+get_reflect
 
 Returns the reflection coefficient
 ================
 */
-float Actor::Reflect () {
+float Actor::get_reflect () {
     return reflect_;
 }
 
 /*
 ================
-SolveQuadratic 
+solve_quadratic 
 
-Solves a quadratic equation for t.
+solves a quadratic equation for t.
 
 Since t is a scale in: P = O + t*D, returns
 only the smaller t and within the limits of (mint, maxt).
@@ -62,7 +62,7 @@ only the smaller t and within the limits of (mint, maxt).
 Otherwise, returns -1.
 ================
 */
-float Actor::SolveQuadratic (float a, float b, float c, float mint, float maxt) {
+float Actor::solve_quadratic (float a, float b, float c, float mint, float maxt) {
     float t = -1.0f;
     float delta = b * b - 4.0f * a * c;
 
@@ -87,7 +87,7 @@ float Actor::SolveQuadratic (float a, float b, float c, float mint, float maxt) 
 
 /*
 ================
-GenerateUnitVector
+generate_unit_vector
 
 Finds the smallest component of a vector and generates 
 an "associated" unit vector.
@@ -96,7 +96,7 @@ A cross product of the vector with its "associated"
 vector should give a non-zero vector.
 ================
 */
-Vector3f Actor::GenerateUnitVector (Vector3f *vector) {
+Vector3f Actor::generate_unit_vector (Vector3f *vector) {
     float tx = (*vector)[0];
     float ty = (*vector)[1];
     float tz = (*vector)[2];

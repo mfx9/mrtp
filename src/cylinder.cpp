@@ -30,18 +30,18 @@ Cylinder::Cylinder (float *center, float *direction, float radius,
     reflect_ = reflect;
     hasShadow_ = true;
 
-    ty_ = GenerateUnitVector (&B_);
+    ty_ = generate_unit_vector (&B_);
     tx_ = ty_.cross (B_);
     tx_ *= (1.0f / tx_.norm ());
 
-    texture_ = textureCollector.Add (texture);
+    texture_ = textureCollector.add (texture);
 }
 
 /*
 ================
-Solve
+solve
 
-Solves the intersection of a ray and a cylinder
+solves the intersection of a ray and a cylinder
 
 Capital letters are vectors.
   A       Origin    of cylinder
@@ -72,7 +72,7 @@ Capital letters are vectors.
  alpha = d + t * b
 ================
 */
-float Cylinder::Solve (Vector3f *O, Vector3f *D, float mind, float maxd) {
+float Cylinder::solve (Vector3f *O, Vector3f *D, float mind, float maxd) {
     Vector3f tmp = (*O) - A_;
 
     float a = D->dot (tmp);
@@ -84,7 +84,7 @@ float Cylinder::Solve (Vector3f *O, Vector3f *D, float mind, float maxd) {
     float aa = 1.0f - (b * b);
     float bb = 2.0f * (a - b * d);
     float cc = -(d * d) - f;
-    float t  = SolveQuadratic (aa, bb, cc, mind, maxd);
+    float t  = solve_quadratic (aa, bb, cc, mind, maxd);
 
     if (t > 0.0f) {
         //Check if the cylinder is finite
@@ -101,14 +101,14 @@ float Cylinder::Solve (Vector3f *O, Vector3f *D, float mind, float maxd) {
 
 /*
 ================
-CalculateNormal
+calculate_normal
 
 Calculates normal to a cylinder
 
 N = Hit - [B . (Hit - A)] * B
 ================
 */
-Vector3f Cylinder::CalculateNormal (Vector3f *hit) {
+Vector3f Cylinder::calculate_normal (Vector3f *hit) {
     Vector3f tmp = (*hit) - A_;
     float alpha = B_.dot (tmp);
 
@@ -120,12 +120,12 @@ Vector3f Cylinder::CalculateNormal (Vector3f *hit) {
 
 /*
 ================
-PickPixel
+pick_pixel
 
 Picks a pixel from a cylinders's texture
 ================
 */
-Pixel Cylinder::PickPixel (Vector3f *hit, Vector3f *normal) {
+Pixel Cylinder::pick_pixel (Vector3f *hit, Vector3f *normal) {
     Vector3f tmp = (*hit) - A_;
 
     float alpha = tmp.dot (B_);
@@ -133,5 +133,5 @@ Pixel Cylinder::PickPixel (Vector3f *hit, Vector3f *normal) {
     float fracx = acos (dot) / M_PI;
     float fracy = alpha / (2.0f * M_PI * R_);
 
-    return texture_->PickPixel (fracx, fracy, 1.0f);
+    return texture_->pick_pixel (fracx, fracy, 1.0f);
 }

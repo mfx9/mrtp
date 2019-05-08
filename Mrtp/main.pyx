@@ -46,19 +46,19 @@ cdef class PyWorld:
             print (" wrld> %s" % message)
 
     def AddCamera (self, PyCamera camera):
-        self.cObject.AddCamera (camera.cObject)
+        self.cObject.add_camera (camera.cObject)
 
     def AddLight (self, PyLight light):
-        self.cObject.AddLight (light.cObject)
+        self.cObject.add_light (light.cObject)
 
     def AddPlane (self, PyPlane plane):
-        self.cObject.AddPlane (plane.cObject)
+        self.cObject.add_plane (plane.cObject)
 
     def AddSphere (self, PySphere sphere):
-        self.cObject.AddSphere (sphere.cObject)
+        self.cObject.add_sphere (sphere.cObject)
 
     def AddCylinder (self, PyCylinder cylinder):
-        self.cObject.AddCylinder (cylinder.cObject)
+        self.cObject.add_cylinder (cylinder.cObject)
 
 
 #===============================================================================
@@ -122,14 +122,14 @@ cdef class PyRenderer:
         cdef float seconds;
 
         self._Text ("Rendering scene...")
-        seconds = self.cObject.Render ()
+        seconds = self.cObject.render_scene ()
 
         self._Text ("Done, elapsed time: %.2f sec" % seconds)
 
     def WriteScene (self, filename=DEFAULT_FILENAME):
         cdef char *cfilename = filename
 
-        self.cObject.WriteScene (cfilename)
+        self.cObject.write_scene (cfilename)
         self._Text ("Wrote file %s" % filename)
 
 

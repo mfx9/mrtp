@@ -10,72 +10,72 @@ using namespace std;
 
 /*
 ================
-AddCamera
+add_camera
 ================
 */
-void World::AddCamera (Camera *camera) {
+void World::add_camera (Camera *camera) {
     cameras_.push_back (camera);
 }
 
 /*
 ================
-AddLight
+add_light
 ================
 */
-void World::AddLight (Light *light) {
+void World::add_light (Light *light) {
     lights_.push_back (light);
 }
 
 /*
 ================
-AddPlane
+add_plane
 ================
 */
-void World::AddPlane (Plane *plane) {
+void World::add_plane (Plane *plane) {
     actors_.push_back (plane);
 }
 
 /*
 ================
-AddSphere
+add_sphere
 ================
 */
-void World::AddSphere (Sphere *sphere) {
+void World::add_sphere (Sphere *sphere) {
     actors_.push_back (sphere);
 }
 
 /*
 ================
-AddCylinder
+add_cylinder
 ================
 */
-void World::AddCylinder (Cylinder *cylinder) {
+void World::add_cylinder (Cylinder *cylinder) {
     actors_.push_back (cylinder);
 }
 
 /*
 ================
-GetLight
+get_light
 ================
 */
-Light *World::GetLight () {
+Light *World::get_light () {
     return lights_.back ();
 }
 
 /*
 ================
-GetCamera
+get_camera
 ================
 */
-Camera *World::GetCamera () {
+Camera *World::get_camera () {
     return cameras_.back ();
 }
 
 /*
 ================
-GetActors
+get_actors
 ================
 */
-vector<Actor *> *World::GetActors () {
+vector<Actor *> *World::get_actors () {
     return &actors_;
 }

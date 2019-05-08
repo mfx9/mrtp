@@ -34,12 +34,12 @@ Camera::~Camera () {
 
 /*
 ================
-CalculateWindow
+calculate_window
 
 Calculates vectors that span a window
 ================
 */
-void Camera::CalculateWindow (int width, int height, float perspective) {
+void Camera::calculate_window (int width, int height, float perspective) {
     //i is a vector between the camera and the center of the window
     Vector3f i = (*lookat_) - (*eye_);
     i *= (1.0f / i.norm ());
@@ -80,19 +80,19 @@ void Camera::CalculateWindow (int width, int height, float perspective) {
 
 /*
 ================
-CalculateOrigin
+calculate_origin
 ================
 */
-Vector3f Camera::CalculateOrigin (int windowx, int windowy) {
+Vector3f Camera::calculate_origin (int windowx, int windowy) {
     return (wo_ + (float) windowx * wh_ + (float) windowy * wv_);
 }
 
 /*
 ================
-CalculateDirection
+calculate_direction
 ================
 */
-Vector3f Camera::CalculateDirection (Vector3f *origin) {
+Vector3f Camera::calculate_direction (Vector3f *origin) {
     Vector3f direction = (*origin) - (*eye_);
 
     return (direction * (1.0f / direction.norm ()));

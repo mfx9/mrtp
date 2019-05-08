@@ -51,9 +51,9 @@ Renderer::Renderer (World *world, int width, int height, float fov, float distan
     maxdepth_ = maxdepth;
     nthreads_ = nthreads;
 
-    camera_ = world->GetCamera ();
-    light_ = world->GetLight ();
-    actors_ = world->GetActors ();
+    camera_ = world->get_camera ();
+    light_ = world->get_light ();
+    actors_ = world->get_actors ();
 
     Pixel dummy;
     framebuffer_.assign (width_ * height_, dummy);
@@ -71,12 +71,12 @@ Renderer::~Renderer () {
 
 /*
 ================
-WriteScene
+write_scene
 
 Writes a rendered scene to a PNG file
 ================
 */
-void Renderer::WriteScene (char *filename) {
+void Renderer::write_scene (char *filename) {
     image<rgb_pixel> image (width_, height_);
     Pixel *in = &framebuffer_[0];
 
@@ -97,18 +97,18 @@ void Renderer::WriteScene (char *filename) {
 
 /*
 ================
-SolveShadows
+solve_shadows
 
 Checks for intersections with other actors between 
 the hit actor and the source of light
 ================
 */
-bool Renderer::SolveShadows (Vector3f *origin, Vector3f *direction, float maxdist) {
+bool Renderer::solve_shadows (Vector3f *origin, Vector3f *direction, float maxdist) {
     for (vector<Actor *>::iterator a=actors_->begin (); a!=actors_->end (); a++) {
         Actor *actor = *a;
 
-        if (actor->HasShadow ()) {
-            float distance = actor->Solve (origin, direction, 0.0f, maxdist);
+        if (actor->has_shadow ()) {
+            float distance = actor->solve (origin, direction, 0.0f, maxdist);
             if (distance > 0.0f) {
                 return true;
             }
@@ -119,7 +119,7 @@ bool Renderer::SolveShadows (Vector3f *origin, Vector3f *direction, float maxdis
 
 /*
 ================
-SolveHits
+solve_hits
 
 Returns a pointer and a distance to the closest 
 actor with which the ray intersects.
@@ -127,12 +127,12 @@ actor with which the ray intersects.
 Returns NULL if there have been no intersections.
 ================
 */
-Actor *Renderer::SolveHits (Vector3f *origin, Vector3f *direction, float *currd) {
+Actor *Renderer::solve_hits (Vector3f *origin, Vector3f *direction, float *currd) {
     Actor *hit = NULL;
 
     for (vector<Actor *>::iterator a=actors_->begin (); a!=actors_->end (); a++) {
         Actor *actor = *a;
-        float distance = actor->Solve (origin, direction, 0.0f, maxdist_);
+        float distance = actor->solve (origin, direction, 0.0f, maxdist_);
 
         if ((distance > 0.0f) && (distance < (*currd))) {
             *currd = distance;
@@ -144,25 +144,25 @@ Actor *Renderer::SolveHits (Vector3f *origin, Vector3f *direction, float *currd)
 
 /*
 ================
-TraceRay_r
+trace_ray_r
 
 Traces a ray and its reflected rays
 ================
 */
-Pixel Renderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
+Pixel Renderer::trace_ray_r (Vector3f *origin, Vector3f *direction, int depth) {
     Pixel pixel;
     pixel << 0.0f, 0.0f, 0.0f;
 
     float currd = maxdist_;
-    Actor *hitactor = SolveHits (origin, direction, &currd);
+    Actor *hitactor = solve_hits (origin, direction, &currd);
 
     if (hitactor) {
         Vector3f inter = ((*direction) * currd) + (*origin);
 
-        Vector3f normal = hitactor->CalculateNormal (&inter);
+        Vector3f normal = hitactor->calculate_normal (&inter);
 
         //Calculate light intensity
-        Vector3f tolight = light_->CalculateRay (&inter);
+        Vector3f tolight = light_->calculate_ray (&inter);
 
         float lightd = tolight.norm ();
         tolight *= (1.0f / lightd);
@@ -174,7 +174,7 @@ Pixel Renderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
             Vector3f corr = inter + bias_ * normal;
 
             //Check if the intersection is in a shadow
-            bool isshadow = SolveShadows (&corr, &tolight, lightd);
+            bool isshadow = solve_shadows (&corr, &tolight, lightd);
             float shadow = (isshadow) ? shadow_ : 1.0f;
     
             //Decrease light intensity for actors away from the light
@@ -183,16 +183,16 @@ Pixel Renderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
             //Combine pixels
             float lambda = intensity * shadow * ambient;
     
-            Pixel pick = hitactor->PickPixel (&inter, &normal);
+            Pixel pick = hitactor->pick_pixel (&inter, &normal);
             pixel = (1.0f - lambda) * pixel + lambda * pick;
     
             //If the hit actor is reflective, trace a reflected ray
             if (depth < maxdepth_) {
-                float coeff = hitactor->Reflect ();
+                float coeff = hitactor->get_reflect ();
         
                 if (coeff > 0.0f) {
                     Vector3f ray = (*direction) - (2.0f * direction->dot (normal)) * normal;
-                    Pixel reflected = TraceRay_r (&corr, &ray, depth+1);
+                    Pixel reflected = trace_ray_r (&corr, &ray, depth+1);
         
                     pixel = (1.0f - coeff) * reflected + coeff * pixel;
                 }
@@ -204,28 +204,28 @@ Pixel Renderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
 
 /*
 ================
-RenderBlock
+render_block
 
 Renders a rectangular block of the screen
 ================
 */
-void Renderer::RenderBlock (int block, int nlines) {
+void Renderer::render_block (int block, int nlines) {
     Pixel *pixel = &framebuffer_[block*nlines*width_];
 
     for (int j=0; j<nlines; j++) {
 
         for (int i=0; i<width_; i++, pixel++) {
-            Vector3f origin = camera_->CalculateOrigin (i, j+block*nlines);
-            Vector3f direction = camera_->CalculateDirection (&origin);
+            Vector3f origin = camera_->calculate_origin (i, j+block*nlines);
+            Vector3f direction = camera_->calculate_direction (&origin);
 
-            *pixel = TraceRay_r (&origin, &direction, 0);
+            *pixel = trace_ray_r (&origin, &direction, 0);
         }
     }
 }
 
 /*
 ================
-Render
+render_scene
 
 Renders a scene.
 
@@ -241,15 +241,15 @@ Returns rendering time in seconds, corrected for
 the number of threads.
 ================
 */
-float Renderer::Render () {
-    camera_->CalculateWindow (width_, height_, perspective_);
+float Renderer::render_scene () {
+    camera_->calculate_window (width_, height_, perspective_);
 
     int timeStart = clock ();
 
 #ifdef _OPENMP
     if (nthreads_ == 1) {
         //Serial execution
-        RenderBlock (0, height_);
+        render_block (0, height_);
     }
     else {
         //Parallel execution
@@ -261,17 +261,17 @@ float Renderer::Render () {
 
         #pragma omp parallel for
         for (block=0; block<nthreads_; block++) {
-            RenderBlock (block, nlines);
+            render_block (block, nlines);
         }
 
         int nfill = height_ % nthreads_;
         if (nfill) {
-            RenderBlock (block+1, nfill);
+            render_block (block+1, nfill);
         }
     }
 #else
     //No OpenMP compiled in, always do serial execution
-    RenderBlock (0, height_);
+    render_block (0, height_);
 
 #endif /* !_OPENMP */
 

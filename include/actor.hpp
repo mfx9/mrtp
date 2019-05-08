@@ -19,18 +19,18 @@ protected:
     Texture *texture_;
 
     //Private methods
-    static float SolveQuadratic (float a, float b, float c, float mint, float maxt);
-    static Eigen::Vector3f GenerateUnitVector (Eigen::Vector3f *vector);
+    static float solve_quadratic (float a, float b, float c, float mint, float maxt);
+    static Eigen::Vector3f generate_unit_vector (Eigen::Vector3f *vector);
 
 public:
     Actor ();
-    bool HasShadow ();
-    float Reflect ();
+    bool has_shadow ();
+    float get_reflect ();
 
     virtual ~Actor ();
-    virtual float Solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd) = 0;
-    virtual Pixel PickPixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal) = 0;
-    virtual Eigen::Vector3f CalculateNormal (Eigen::Vector3f *hit) = 0;
+    virtual float solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd) = 0;
+    virtual Pixel pick_pixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal) = 0;
+    virtual Eigen::Vector3f calculate_normal (Eigen::Vector3f *hit) = 0;
 };
 
 #endif /* !_ACTOR_H */

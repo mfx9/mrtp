@@ -22,10 +22,10 @@ class Camera {
 public:
     Camera (float *center, float *target, float *roll);
     ~Camera ();
-    void CalculateWindow (int width, int height, float perspective);
+    void calculate_window (int width, int height, float perspective);
 
-    Eigen::Vector3f CalculateOrigin (int windowx, int windowy);
-    Eigen::Vector3f CalculateDirection (Eigen::Vector3f *origin);
+    Eigen::Vector3f calculate_origin (int windowx, int windowy);
+    Eigen::Vector3f calculate_direction (Eigen::Vector3f *origin);
 };
 
 #endif /* !_CAMERA_H */
