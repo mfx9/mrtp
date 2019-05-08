@@ -16,9 +16,9 @@
 #include "world.hpp"
 
 
-class CRenderer {
-    CCamera  *camera_;
-    CLight   *light_;
+class Renderer {
+    Camera  *camera_;
+    Light   *light_;
 
     std::vector<Actor *> *actors_;
 
@@ -43,8 +43,8 @@ class CRenderer {
     void RenderBlock (int block, int nlines);
 
 public:
-    CRenderer (CWorld *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads);
-    ~CRenderer ();
+    Renderer (World *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads);
+    ~Renderer ();
     float Render ();
     void WriteScene (char *filename);
 };

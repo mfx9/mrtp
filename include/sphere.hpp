@@ -11,7 +11,7 @@
 #include "actor.hpp"
 
 
-class CSphere : public Actor {
+class Sphere : public Actor {
     Eigen::Vector3f   center_;
     Eigen::Vector3f   tx_;
     Eigen::Vector3f   ty_;
@@ -19,7 +19,7 @@ class CSphere : public Actor {
     float   R_;
 
 public:
-    CSphere (float *center, float radius, float *axis, float reflect, const char *texture);
+    Sphere (float *center, float radius, float *axis, float reflect, const char *texture);
     float Solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
     Pixel PickPixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
     Eigen::Vector3f CalculateNormal (Eigen::Vector3f *hit);

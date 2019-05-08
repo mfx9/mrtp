@@ -13,7 +13,7 @@ using namespace std;
 AddCamera
 ================
 */
-void CWorld::AddCamera (CCamera *camera) {
+void World::AddCamera (Camera *camera) {
     cameras_.push_back (camera);
 }
 
@@ -22,7 +22,7 @@ void CWorld::AddCamera (CCamera *camera) {
 AddLight
 ================
 */
-void CWorld::AddLight (CLight *light) {
+void World::AddLight (Light *light) {
     lights_.push_back (light);
 }
 
@@ -31,7 +31,7 @@ void CWorld::AddLight (CLight *light) {
 AddPlane
 ================
 */
-void CWorld::AddPlane (CPlane *plane) {
+void World::AddPlane (Plane *plane) {
     actors_.push_back (plane);
 }
 
@@ -40,7 +40,7 @@ void CWorld::AddPlane (CPlane *plane) {
 AddSphere
 ================
 */
-void CWorld::AddSphere (CSphere *sphere) {
+void World::AddSphere (Sphere *sphere) {
     actors_.push_back (sphere);
 }
 
@@ -49,7 +49,7 @@ void CWorld::AddSphere (CSphere *sphere) {
 AddCylinder
 ================
 */
-void CWorld::AddCylinder (CCylinder *cylinder) {
+void World::AddCylinder (Cylinder *cylinder) {
     actors_.push_back (cylinder);
 }
 
@@ -58,7 +58,7 @@ void CWorld::AddCylinder (CCylinder *cylinder) {
 GetLight
 ================
 */
-CLight *CWorld::GetLight () {
+Light *World::GetLight () {
     return lights_.back ();
 }
 
@@ -67,7 +67,7 @@ CLight *CWorld::GetLight () {
 GetCamera
 ================
 */
-CCamera *CWorld::GetCamera () {
+Camera *World::GetCamera () {
     return cameras_.back ();
 }
 
@@ -76,6 +76,6 @@ CCamera *CWorld::GetCamera () {
 GetActors
 ================
 */
-vector<Actor *> *CWorld::GetActors () {
+vector<Actor *> *World::GetActors () {
     return &actors_;
 }

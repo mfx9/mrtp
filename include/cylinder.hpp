@@ -11,7 +11,7 @@
 #include "actor.hpp"
 
 
-class CCylinder : public Actor {
+class Cylinder : public Actor {
     Eigen::Vector3f  A_;
     Eigen::Vector3f  B_;
     Eigen::Vector3f  tx_;
@@ -20,7 +20,7 @@ class CCylinder : public Actor {
     float  span_;
 
 public:
-    CCylinder (float *center, float *direction, float radius, float span, float reflect, const char *texture);
+    Cylinder (float *center, float *direction, float radius, float span, float reflect, const char *texture);
     float Solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
     Pixel PickPixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
     Eigen::Vector3f CalculateNormal (Eigen::Vector3f *hit);

@@ -25,7 +25,7 @@ static const float kRealToByte = 255.0f;
 
 /*
 ================
-CRenderer
+Renderer
 
 Creates a renderer.
 
@@ -36,7 +36,7 @@ Creates a renderer.
 @maxdepth: number of recursion levels of a reflected ray
 ================
 */
-CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float distance, 
+Renderer::Renderer (World *world, int width, int height, float fov, float distance, 
                       float shadow, float bias, int maxdepth, int nthreads) {
     width_ = width;
     height_ = height;
@@ -61,12 +61,12 @@ CRenderer::CRenderer (CWorld *world, int width, int height, float fov, float dis
 
 /*
 ================
-~CRenderer
+~Renderer
 
 Destroys a renderer
 ================
 */
-CRenderer::~CRenderer () {
+Renderer::~Renderer () {
 }
 
 /*
@@ -76,7 +76,7 @@ WriteScene
 Writes a rendered scene to a PNG file
 ================
 */
-void CRenderer::WriteScene (char *filename) {
+void Renderer::WriteScene (char *filename) {
     image<rgb_pixel> image (width_, height_);
     Pixel *in = &framebuffer_[0];
 
@@ -103,7 +103,7 @@ Checks for intersections with other actors between
 the hit actor and the source of light
 ================
 */
-bool CRenderer::SolveShadows (Vector3f *origin, Vector3f *direction, float maxdist) {
+bool Renderer::SolveShadows (Vector3f *origin, Vector3f *direction, float maxdist) {
     for (vector<Actor *>::iterator a=actors_->begin (); a!=actors_->end (); a++) {
         Actor *actor = *a;
 
@@ -127,7 +127,7 @@ actor with which the ray intersects.
 Returns NULL if there have been no intersections.
 ================
 */
-Actor *CRenderer::SolveHits (Vector3f *origin, Vector3f *direction, float *currd) {
+Actor *Renderer::SolveHits (Vector3f *origin, Vector3f *direction, float *currd) {
     Actor *hit = NULL;
 
     for (vector<Actor *>::iterator a=actors_->begin (); a!=actors_->end (); a++) {
@@ -149,7 +149,7 @@ TraceRay_r
 Traces a ray and its reflected rays
 ================
 */
-Pixel CRenderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
+Pixel Renderer::TraceRay_r (Vector3f *origin, Vector3f *direction, int depth) {
     Pixel pixel;
     pixel << 0.0f, 0.0f, 0.0f;
 
@@ -209,7 +209,7 @@ RenderBlock
 Renders a rectangular block of the screen
 ================
 */
-void CRenderer::RenderBlock (int block, int nlines) {
+void Renderer::RenderBlock (int block, int nlines) {
     Pixel *pixel = &framebuffer_[block*nlines*width_];
 
     for (int j=0; j<nlines; j++) {
@@ -241,7 +241,7 @@ Returns rendering time in seconds, corrected for
 the number of threads.
 ================
 */
-float CRenderer::Render () {
+float Renderer::Render () {
     camera_->CalculateWindow (width_, height_, perspective_);
 
     int timeStart = clock ();

@@ -13,12 +13,12 @@ using namespace Eigen;
 
 /*
 ================
-CSphere
+Sphere
 
 Constructs a sphere
 ================
 */
-CSphere::CSphere (float *center, float radius, float *axis, float reflect, const char *texture) {
+Sphere::Sphere (float *center, float radius, float *axis, float reflect, const char *texture) {
     center_ = *(Vector3f *)center;
 
     R_ = radius;
@@ -46,7 +46,7 @@ Solve
 Solves the intersection of a ray and a sphere
 ================
 */
-float CSphere::Solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
+float Sphere::Solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
     Vector3f t = (*origin) - center_;
 
     float a = direction->dot (*direction);
@@ -63,7 +63,7 @@ CalculateNormal
 Calculates normal to a sphere
 ================
 */
-Vector3f CSphere::CalculateNormal (Vector3f *hit) {
+Vector3f Sphere::CalculateNormal (Vector3f *hit) {
     Vector3f normal = (*hit) - center_;
 
     return (normal * (1.0f / normal.norm ()));
@@ -79,7 +79,7 @@ Guidelines:
 https://www.cs.unc.edu/~rademach/xroads-RT/RTarticle.html
 ================
 */
-Pixel CSphere::PickPixel (Vector3f *hit, Vector3f *normal) {
+Pixel Sphere::PickPixel (Vector3f *hit, Vector3f *normal) {
     float dot   = normal->dot (ty_);
     float phi   = acos (-dot);
     float fracy = phi / M_PI;

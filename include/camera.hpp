@@ -9,7 +9,7 @@
 #include <Eigen/Core>
 
 
-class CCamera {
+class Camera {
     //Pointers to Cython variables
     Eigen::Vector3f  *eye_;
     Eigen::Vector3f  *lookat_;
@@ -20,8 +20,8 @@ class CCamera {
     Eigen::Vector3f  wv_;
 
 public:
-    CCamera (float *center, float *target, float *roll);
-    ~CCamera ();
+    Camera (float *center, float *target, float *roll);
+    ~Camera ();
     void CalculateWindow (int width, int height, float perspective);
 
     Eigen::Vector3f CalculateOrigin (int windowx, int windowy);

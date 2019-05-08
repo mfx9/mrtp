@@ -7,26 +7,26 @@
 import sys
 sys.path.append ("..")
 
-from Mrtp import World, Renderer, Camera, Light, Plane, Sphere, Cylinder
+from Mrtp import PyWorld, PyRenderer, PyCamera, PyLight, PyPlane, PySphere, PyCylinder
 
 
-camera = Camera (center=(10.0, -10.0, 3.0), target=(0.0, 0.0, 5.0), roll=0.0)
-light = Light (center=(5.0, 5.0, 5.0))
+camera = PyCamera (center=(10.0, -10.0, 3.0), target=(0.0, 0.0, 5.0), roll=0.0)
+light = PyLight (center=(5.0, 5.0, 5.0))
 
-pa = Plane (center=(0.0, 0.0, 0.0), normal=(0.0, 0.0, 1.0), scale=0.15, reflect=0.75, texture="../textures/trak2_tile1b.png")
-pb = Plane (center=(0.0, 0.0, 17.0), normal=(0.0, 0.0, -1.0), scale=0.15, texture="../textures/04univ3.png")
-pc = Plane (center=(-17.0, 0.0, 0.0), normal=(1.0, 0.0, 0.0), scale=0.25, texture="../textures/trak_light2b.png")
-pd = Plane (center=(0.0, -17.0, 0.0), normal=(0.0, 1.0, 0.0), scale=0.15, texture="../textures/01tizeta_floor_g.png")
-pe = Plane (center=(17.0, 0.0, 0.0), normal=(-1.0, 0.0, 0.0), scale=0.15, texture="../textures/01tizeta_floor_f.png")
-pf = Plane (center=(0.0, 17.0, 0.0), normal=(0.0, -1.0, 0.0), scale=0.15, texture="../textures/04univ2.png")
+pa = PyPlane (center=(0.0, 0.0, 0.0), normal=(0.0, 0.0, 1.0), scale=0.15, reflect=0.75, texture="../textures/trak2_tile1b.png")
+pb = PyPlane (center=(0.0, 0.0, 17.0), normal=(0.0, 0.0, -1.0), scale=0.15, texture="../textures/04univ3.png")
+pc = PyPlane (center=(-17.0, 0.0, 0.0), normal=(1.0, 0.0, 0.0), scale=0.25, texture="../textures/trak_light2b.png")
+pd = PyPlane (center=(0.0, -17.0, 0.0), normal=(0.0, 1.0, 0.0), scale=0.15, texture="../textures/01tizeta_floor_g.png")
+pe = PyPlane (center=(17.0, 0.0, 0.0), normal=(-1.0, 0.0, 0.0), scale=0.15, texture="../textures/01tizeta_floor_f.png")
+pf = PyPlane (center=(0.0, 17.0, 0.0), normal=(0.0, -1.0, 0.0), scale=0.15, texture="../textures/04univ2.png")
 
-ca = Cylinder (center=(5.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
-cb = Cylinder (center=(0.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
-cc = Cylinder (center=(-5.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
-cd = Cylinder (center=(0.0, 0.0, 15.0), direction=(1.0, 0.0, 0.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
+ca = PyCylinder (center=(5.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
+cb = PyCylinder (center=(0.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
+cc = PyCylinder (center=(-5.0, 0.0, 0.0), direction=(0.0, 0.0, 1.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
+cd = PyCylinder (center=(0.0, 0.0, 15.0), direction=(1.0, 0.0, 0.0), radius=0.7, span=-1.0, texture="../textures/qubodup-light_wood.png")
 
 
-world = World ()
+world = PyWorld ()
 
 world.AddCamera (camera)
 world.AddLight (light)
@@ -41,6 +41,6 @@ world.AddCylinder (cb)
 world.AddCylinder (cc)
 world.AddCylinder (cd)
 
-renderer = Renderer (world, width=1024, height=768)
+renderer = PyRenderer (world, width=1024, height=768)
 renderer.Render ()
 renderer.WriteScene ("test-scene-2.png")

@@ -11,7 +11,7 @@
 #include "actor.hpp"
 
 
-class CPlane : public Actor {
+class Plane : public Actor {
     Eigen::Vector3f   center_;
     Eigen::Vector3f   normal_;
     Eigen::Vector3f   tx_;
@@ -19,7 +19,7 @@ class CPlane : public Actor {
     float   scale_;
 
 public:
-    CPlane (float *center, float *normal, float scale, float reflect, const char *texture);
+    Plane (float *center, float *normal, float scale, float reflect, const char *texture);
     float Solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
     Pixel PickPixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
     Eigen::Vector3f CalculateNormal (Eigen::Vector3f *hit);

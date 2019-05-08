@@ -13,12 +13,12 @@ using namespace Eigen;
 
 /*
 ================
-CCylinder
+Cylinder
 
 Constructs a cylinder
 ================
 */
-CCylinder::CCylinder (float *center, float *direction, float radius, 
+Cylinder::Cylinder (float *center, float *direction, float radius, 
                     float span, float reflect, const char *texture) {
     A_ = *(Vector3f *)center;
 
@@ -72,7 +72,7 @@ Capital letters are vectors.
  alpha = d + t * b
 ================
 */
-float CCylinder::Solve (Vector3f *O, Vector3f *D, float mind, float maxd) {
+float Cylinder::Solve (Vector3f *O, Vector3f *D, float mind, float maxd) {
     Vector3f tmp = (*O) - A_;
 
     float a = D->dot (tmp);
@@ -108,7 +108,7 @@ Calculates normal to a cylinder
 N = Hit - [B . (Hit - A)] * B
 ================
 */
-Vector3f CCylinder::CalculateNormal (Vector3f *hit) {
+Vector3f Cylinder::CalculateNormal (Vector3f *hit) {
     Vector3f tmp = (*hit) - A_;
     float alpha = B_.dot (tmp);
 
@@ -125,7 +125,7 @@ PickPixel
 Picks a pixel from a cylinders's texture
 ================
 */
-Pixel CCylinder::PickPixel (Vector3f *hit, Vector3f *normal) {
+Pixel Cylinder::PickPixel (Vector3f *hit, Vector3f *normal) {
     Vector3f tmp = (*hit) - A_;
 
     float alpha = tmp.dot (B_);

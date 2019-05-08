@@ -7,10 +7,10 @@
 import sys, collections, math
 
 sys.path.append ("..")
-sys.path.append ("/home/mikolaj/devel/MolarisTools")
+sys.path.append ("/home/mikolaj/github/MolarisTools")
 
 from MolarisTools.Scripts import BondsFromDistances
-from Mrtp import World, Renderer, Camera, Light, Plane, Sphere, Cylinder
+from Mrtp import PyWorld, PyRenderer, PyCamera, PyLight, PyPlane, PySphere, PyCylinder
 
 
 Atom = collections.namedtuple ("Atom", "label  serial  x  y  z")
@@ -70,7 +70,7 @@ class Molecule:
 
         for (label, serial, x, y, z) in self.reference:
             (radius, texture) = radiiTextures[label]
-            sphere = Sphere (center=(x, y, z), radius=(radius*scale), texture=texture)
+            sphere = PySphere (center=(x, y, z), radius=(radius*scale), texture=texture)
             spheres.append (sphere)
         return spheres
 
@@ -85,7 +85,7 @@ class Molecule:
             (dx, dy, dz) = (atoma.x-atomb.x, atoma.y-atomb.y, atoma.z-atomb.z)
             span = math.sqrt (dx**2 + dy**2 + dz**2) * 0.5
         
-            cylinder = Cylinder (center=(cx, cy, cz), direction=(dx, dy, dz), radius=radius, span=span, texture=bondTexture)
+            cylinder = PyCylinder (center=(cx, cy, cz), direction=(dx, dy, dz), radius=radius, span=span, texture=bondTexture)
             cylinders.append (cylinder)
         return cylinders
 
@@ -102,13 +102,13 @@ class Molecule:
 
 
 #===============================================================================
-camera = Camera (center=(-5.0, 10.0, 5.0), target=(0.0, 0.0, 0.0), roll=0.0)
-light = Light (center=(-3.0, 3.0, 11.0))
-floor = Plane (center=(0.0, 0.0, -10.0), normal=(0.0, 0.0, 1.0), scale=0.15, texture="../textures/01tizeta_floor_f.png")
-wall = Plane (center=(0.0, -16.0, 0.0), normal=(0.0, 1.0, 0.0), scale=0.15, reflect=0.65, texture="../textures/trak2_tile1b.png")
-wallb = Plane (center=(16.0, 0.0, 0.0), normal=(-1.0, 0.0, 0.0), scale=0.15, texture="../textures/02camino.png")
+camera = PyCamera (center=(-5.0, 10.0, 5.0), target=(0.0, 0.0, 0.0), roll=0.0)
+light = PyLight (center=(-3.0, 3.0, 11.0))
+floor = PyPlane (center=(0.0, 0.0, -10.0), normal=(0.0, 0.0, 1.0), scale=0.15, texture="../textures/01tizeta_floor_f.png")
+wall = PyPlane (center=(0.0, -16.0, 0.0), normal=(0.0, 1.0, 0.0), scale=0.15, reflect=0.65, texture="../textures/trak2_tile1b.png")
+wallb = PyPlane (center=(16.0, 0.0, 0.0), normal=(-1.0, 0.0, 0.0), scale=0.15, texture="../textures/02camino.png")
 
-world = World ()
+world = PyWorld ()
 world.AddCamera (camera)
 world.AddLight (light)
 world.AddPlane (floor)
@@ -120,6 +120,6 @@ molecule.SetUp ()
 molecule.ScaleMove ()
 molecule.FillWorld (world)
 
-renderer = Renderer (world, width=640, height=480)
+renderer = PyRenderer (world, width=640, height=480)
 renderer.Render ()
 renderer.WriteScene ("molecule.png")

@@ -33,9 +33,9 @@ DEF MIN_THREADS     =  0
 DEF MAX_THREADS     = 64
 
 
-cdef class World:
+cdef class PyWorld:
     def __cinit__ (self, verbose=True):
-        self.cObject = new CWorld ()
+        self.cObject = new World ()
         self.verbose = verbose
 
     def __dealloc__ (self):
@@ -45,19 +45,19 @@ cdef class World:
         if (self.verbose):
             print (" wrld> %s" % message)
 
-    def AddCamera (self, Camera camera):
+    def AddCamera (self, PyCamera camera):
         self.cObject.AddCamera (camera.cObject)
 
-    def AddLight (self, Light light):
+    def AddLight (self, PyLight light):
         self.cObject.AddLight (light.cObject)
 
-    def AddPlane (self, Plane plane):
+    def AddPlane (self, PyPlane plane):
         self.cObject.AddPlane (plane.cObject)
 
-    def AddSphere (self, Sphere sphere):
+    def AddSphere (self, PySphere sphere):
         self.cObject.AddSphere (sphere.cObject)
 
-    def AddCylinder (self, Cylinder cylinder):
+    def AddCylinder (self, PyCylinder cylinder):
         self.cObject.AddCylinder (cylinder.cObject)
 
 
@@ -81,9 +81,9 @@ cdef class World:
 #               DEFAULT_BIAS, 
 #               DEFAULT_DEPTH, 
 #               DEFAULT_THREADS )
-cdef class Renderer:
+cdef class PyRenderer:
     def __cinit__ (self, 
-                   World world, 
+                   PyWorld world, 
                    int width=DEFAULT_WIDTH, 
                    int height=DEFAULT_HEIGHT, 
                    float fov=DEFAULT_FOV, 
@@ -106,7 +106,7 @@ cdef class Renderer:
         if (maxdepth < MIN_DEPTH) or (maxdepth > MAX_DEPTH):
             raise exceptions.StandardError ("Number of reflective rays is out of range.")
 
-        self.cObject = new CRenderer (world.cObject, width, height, fov, distance, shadow, bias, maxdepth, nthreads)
+        self.cObject = new Renderer (world.cObject, width, height, fov, distance, shadow, bias, maxdepth, nthreads)
         self.verbose = verbose
 
         self._Text ("w=%d h=%d fov=%.1f dist=%.1f shad=%.2f bias=%.3f dep=%d cpu=%d" % (width, height, fov, distance, shadow, bias, maxdepth, nthreads))
@@ -134,7 +134,7 @@ cdef class Renderer:
 
 
 #===============================================================================
-cdef class Camera:
+cdef class PyCamera:
     def __cinit__ (self, center, target, float roll=0.0):
         self.x_ = center[0]
         self.y_ = center[1]
@@ -143,7 +143,7 @@ cdef class Camera:
         self.ty_ = target[1]
         self.tz_ = target[2]
         self.roll_ = roll
-        self.cObject = new CCamera (&self.x_, &self.tx_, &self.roll_)
+        self.cObject = new Camera (&self.x_, &self.tx_, &self.roll_)
 
     def __dealloc__ (self):
         del self.cObject
@@ -171,12 +171,12 @@ cdef class Camera:
         self.roll_ = value
 
 
-cdef class Light:
+cdef class PyLight:
     def __cinit__ (self, center):
         self.x_ = center[0]
         self.y_ = center[1]
         self.z_ = center[2]
-        self.cObject = new CLight (&self.x_)
+        self.cObject = new Light (&self.x_)
 
     def __dealloc__ (self):
         del self.cObject
@@ -190,7 +190,7 @@ cdef class Light:
         self.z_ = xyz[2]
 
 
-cdef class Plane:
+cdef class PyPlane:
     def __cinit__ (self, center, normal, texture, float scale=DEFAULT_SCALE, float reflect=DEFAULT_REFLECT):
         cdef float ccenter[3]
         cdef float cnormal[3]
@@ -208,13 +208,13 @@ cdef class Plane:
         cnormal[2] = normal[2]
 
         ctexture = texture
-        self.cObject = new CPlane (ccenter, cnormal, scale, reflect, ctexture)
+        self.cObject = new Plane (ccenter, cnormal, scale, reflect, ctexture)
 
     def __dealloc__ (self):
         del self.cObject
 
 
-cdef class Sphere:
+cdef class PySphere:
     def __cinit__ (self, center, texture, float radius=1.0, axis=(0.0, 0.0, 1.0), float reflect=DEFAULT_REFLECT):
         cdef float ccenter[3]
         cdef float caxis[3]
@@ -232,10 +232,10 @@ cdef class Sphere:
         caxis[2] = axis[2]
 
         ctexture = texture
-        self.cObject = new CSphere (ccenter, radius, caxis, reflect, ctexture)
+        self.cObject = new Sphere (ccenter, radius, caxis, reflect, ctexture)
 
 
-cdef class Cylinder:
+cdef class PyCylinder:
     def __cinit__ (self, center, direction, texture, float radius=1.0, float span=-1.0, float reflect=DEFAULT_REFLECT):
         cdef float ccenter[3]
         cdef float cdirection[3]
@@ -253,4 +253,4 @@ cdef class Cylinder:
         cdirection[2] = direction[2]
 
         ctexture = texture
-        self.cObject = new CCylinder (ccenter, cdirection, radius, span, reflect, ctexture)
+        self.cObject = new Cylinder (ccenter, cdirection, radius, span, reflect, ctexture)

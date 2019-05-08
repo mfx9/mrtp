@@ -10,19 +10,19 @@ using namespace Eigen;
 
 /*
 ================
-CLight
+Light
 ================
 */
-CLight::CLight (float *center) {
+Light::Light (float *center) {
     center_ = (Vector3f *)center;
 }
 
 /*
 ================
-~CLight
+~Light
 ================
 */
-CLight::~CLight () {
+Light::~Light () {
 }
 
 /*
@@ -33,6 +33,6 @@ Calculates a ray between a hit point and
 a source of light
 ================
 */
-Vector3f CLight::CalculateRay (Vector3f *hit) {
+Vector3f Light::CalculateRay (Vector3f *hit) {
     return ((*center_) - (*hit));
 }

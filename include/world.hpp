@@ -16,21 +16,21 @@
 #include "cylinder.hpp"
 
 
-class CWorld {
+class World {
     std::vector<Actor *> actors_;
-    std::vector<CLight *> lights_;
-    std::vector<CCamera *> cameras_;
+    std::vector<Light *> lights_;
+    std::vector<Camera *> cameras_;
 
 public:
-    void AddCamera (CCamera *camera);
-    void AddLight (CLight *light);
-    void AddPlane (CPlane *plane);
-    void AddSphere (CSphere *sphere);
-    void AddCylinder (CCylinder *cylinder);
+    void AddCamera (Camera *camera);
+    void AddLight (Light *light);
+    void AddPlane (Plane *plane);
+    void AddSphere (Sphere *sphere);
+    void AddCylinder (Cylinder *cylinder);
 
     //Used for binding to renderer
-    CLight *GetLight ();
-    CCamera *GetCamera ();
+    Light *GetLight ();
+    Camera *GetCamera ();
     std::vector<Actor *> *GetActors ();
 };
 

@@ -12,12 +12,12 @@ using namespace Eigen;
 
 /*
 ================
-CPlane
+Plane
 
 Constructs a plane
 ================
 */
-CPlane::CPlane (float *center, float *normal, float scale, float reflect, const char *texture) {
+Plane::Plane (float *center, float *normal, float scale, float reflect, const char *texture) {
     normal_ = *(Vector3f *)normal;
     normal_ *= (1.0f / normal_.norm ());
 
@@ -45,7 +45,7 @@ PickPixel
 Picks a pixel from a plane's texture
 ================
 */
-Pixel CPlane::PickPixel (Vector3f *hit, Vector3f *normal) {
+Pixel Plane::PickPixel (Vector3f *hit, Vector3f *normal) {
     Vector3f v = (*hit) - center_;
 
     //Calculate components of v (dot products)
@@ -62,7 +62,7 @@ Solve
 Solves the intersection of a ray and a plane
 ================
 */
-float CPlane::Solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
+float Plane::Solve (Vector3f *origin, Vector3f *direction, float mind, float maxd) {
     float bar = direction->dot (normal_);
 
     if (bar != 0.0f) {
@@ -83,6 +83,6 @@ CalculateNormal
 Returns a normal to a plane
 ================
 */
-Vector3f CPlane::CalculateNormal (Vector3f *hit) {
+Vector3f Plane::CalculateNormal (Vector3f *hit) {
     return normal_;
 }
