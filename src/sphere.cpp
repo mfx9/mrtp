@@ -5,10 +5,11 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
-
 #include "sphere.hpp"
 
 using namespace Eigen;
+
+namespace mrtp {
 
 /*
 ================
@@ -93,3 +94,5 @@ Pixel Sphere::pick_pixel(Vector3f *hit, Vector3f *normal) {
 
     return texture_->pick_pixel(fracx, fracy, 1.0f);
 }
+
+} //end namespace mrtp

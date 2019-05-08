@@ -10,6 +10,8 @@
 
 #include "actor.hpp"
 
+namespace mrtp {
+
 class Sphere : public Actor {
   public:
     Sphere(float *center, float radius, float *axis, float reflect,
@@ -27,5 +29,7 @@ class Sphere : public Actor {
     Eigen::Vector3f tz_;
     float R_;
 };
+
+} //end namespace mrtp
 
 #endif //!_SPHERE_H

@@ -10,7 +10,7 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#endif // !_OPENMP
+#endif
 
 #include "png.hpp"
 #include "renderer.hpp"
@@ -18,6 +18,9 @@
 using namespace std;
 using namespace png;
 using namespace Eigen;
+
+
+namespace mrtp {
 
 static const float kDegreeToRadian = M_PI / 180.0f;
 static const float kRealToByte = 255.0f;
@@ -277,3 +280,5 @@ float Renderer::render_scene() {
     }
     return timeUsed;
 }
+
+} //end namespace mrtp

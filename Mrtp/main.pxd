@@ -4,23 +4,23 @@
 # . Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
 # . License   : LGPL v3            (http://www.gnu.org/licenses/gpl-3.0.en.html)
 #-------------------------------------------------------------------------------
-cdef extern from "camera.hpp":
+cdef extern from "camera.hpp" namespace "mrtp":
     cdef cppclass Camera:
         Camera (float *center, float *target, float *roll)
 
-cdef extern from "light.hpp":
+cdef extern from "light.hpp" namespace "mrtp":
     cdef cppclass Light:
         Light (float *center)
 
-cdef extern from "plane.hpp":
+cdef extern from "plane.hpp" namespace "mrtp":
     cdef cppclass Plane:
         Plane (float *center, float *normal, float scale, float reflect, char *texture)
 
-cdef extern from "sphere.hpp":
+cdef extern from "sphere.hpp" namespace "mrtp":
     cdef cppclass Sphere:
         Sphere (float *center, float radius, float *axis, float reflect, char *texture)
 
-cdef extern from "cylinder.hpp":
+cdef extern from "cylinder.hpp" namespace "mrtp":
     cdef cppclass Cylinder:
         Cylinder (float *center, float *direction, float radius, float span, float reflect, char *texture)
 
@@ -51,7 +51,7 @@ cdef class PyCylinder:
 
 
 #===============================================================================
-cdef extern from "world.hpp":
+cdef extern from "world.hpp" namespace "mrtp":
 
     cdef cppclass World:
         World () except +
@@ -67,7 +67,7 @@ cdef class PyWorld:
 
 
 #===============================================================================
-cdef extern from "renderer.hpp":
+cdef extern from "renderer.hpp" namespace "mrtp":
 
     cdef cppclass Renderer:
         Renderer (World *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads) except +

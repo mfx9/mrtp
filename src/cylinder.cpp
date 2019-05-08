@@ -5,10 +5,11 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
-
 #include "cylinder.hpp"
 
 using namespace Eigen;
+
+namespace mrtp {
 
 /*
 ================
@@ -134,3 +135,5 @@ Pixel Cylinder::pick_pixel(Vector3f *hit, Vector3f *normal) {
 
     return texture_->pick_pixel(fracx, fracy, 1.0f);
 }
+
+} //end namespace mrtp

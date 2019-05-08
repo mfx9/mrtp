@@ -5,11 +5,12 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
-
 #include "actor.hpp"
 
 using namespace Eigen;
 using namespace std;
+
+namespace mrtp {
 
 /*
 ================
@@ -98,3 +99,5 @@ Vector3f Actor::generate_unit_vector(Vector3f *vector) {
     }
     return unit;
 }
+
+} //end namespace mrtp

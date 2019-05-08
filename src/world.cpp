@@ -7,6 +7,8 @@
 
 using namespace std;
 
+namespace mrtp {
+
 /*
 ================
 add_camera
@@ -62,3 +64,5 @@ get_actors
 ================
 */
 vector<Actor *> *World::get_actors() { return &actors_; }
+
+} //end namespace mrtp

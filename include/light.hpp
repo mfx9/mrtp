@@ -8,6 +8,8 @@
 
 #include <Eigen/Core>
 
+namespace mrtp {
+
 class Light {
   public:
     Light(float *center);
@@ -17,5 +19,7 @@ class Light {
   private:
     Eigen::Vector3f *center_;
 };
+
+} //end namespace mrtp
 
 #endif //!_LIGHT_H

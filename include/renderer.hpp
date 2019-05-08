@@ -15,6 +15,8 @@
 #include "pixel.hpp"
 #include "world.hpp"
 
+namespace mrtp {
+
 class Renderer {
   public:
     Renderer(World *world, int width, int height, float fov, float distance,
@@ -51,5 +53,7 @@ class Renderer {
                       int depth);
     void render_block(int block, int nlines);
 };
+
+} //end namespace mrtp
 
 #endif //!_RENDERER_H

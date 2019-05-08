@@ -10,6 +10,8 @@
 
 #include "actor.hpp"
 
+namespace mrtp {
+
 class Plane : public Actor {
   public:
     Plane(float *center, float *normal, float scale, float reflect,
@@ -27,5 +29,7 @@ class Plane : public Actor {
     Eigen::Vector3f ty_;
     float scale_;
 };
+
+} //end namespace mrtp
 
 #endif //!_PLANE_H

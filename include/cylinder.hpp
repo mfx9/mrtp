@@ -7,8 +7,9 @@
 #define _CYLINDER_H
 
 #include <Eigen/Core>
-
 #include "actor.hpp"
+
+namespace mrtp {
 
 class Cylinder : public Actor {
   public:
@@ -28,5 +29,7 @@ class Cylinder : public Actor {
     float R_;
     float span_;
 };
+
+} //end namespace mrtp
 
 #endif //!_CYLINDER_H

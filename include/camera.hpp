@@ -8,6 +8,8 @@
 
 #include <Eigen/Core>
 
+namespace mrtp {
+
 class Camera {
   public:
     Camera(float *center, float *target, float *roll);
@@ -27,5 +29,7 @@ class Camera {
     Eigen::Vector3f wh_;
     Eigen::Vector3f wv_;
 };
+
+} //end namespace mrtp
 
 #endif //!_CAMERA_H

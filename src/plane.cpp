@@ -4,10 +4,11 @@
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
 #include <Eigen/Geometry>
-
 #include "plane.hpp"
 
 using namespace Eigen;
+
+namespace mrtp {
 
 /*
 ================
@@ -85,3 +86,5 @@ Returns a normal to a plane
 ================
 */
 Vector3f Plane::calculate_normal(Vector3f *hit) { return normal_; }
+
+} //end namespace mrtp

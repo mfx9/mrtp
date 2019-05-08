@@ -11,6 +11,8 @@
 #include "pixel.hpp"
 #include "texture.hpp"
 
+namespace mrtp {
+
 class Actor {
   public:
     Actor() {}
@@ -31,5 +33,7 @@ class Actor {
                                  float maxt);
     static Eigen::Vector3f generate_unit_vector(Eigen::Vector3f *vector);
 };
+
+} //end namespace mrtp
 
 #endif //!_ACTOR_H

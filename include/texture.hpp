@@ -9,8 +9,9 @@
 #include <list>
 #include <string>
 #include <vector>
-
 #include "pixel.hpp"
+
+namespace mrtp {
 
 class Texture {
   public:
@@ -36,5 +37,6 @@ class TextureCollector {
 };
 
 extern TextureCollector textureCollector;
+} //end namespace mrtp
 
 #endif //!_TEXTURE_H

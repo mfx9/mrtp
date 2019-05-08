@@ -5,10 +5,11 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
-
 #include "camera.hpp"
 
 using namespace Eigen;
+
+namespace mrtp {
 
 static float kDegreeToRadian = M_PI / 180.0f;
 
@@ -88,3 +89,5 @@ Vector3f Camera::calculate_direction(Vector3f *origin) {
 
     return (direction * (1.0f / direction.norm()));
 }
+
+} //end namespace mrtp

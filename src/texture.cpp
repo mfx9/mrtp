@@ -4,12 +4,13 @@
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
 #include <cstring> //Needed for strcmp
-
 #include "png.hpp"
 #include "texture.hpp"
 
 using namespace std;
 using namespace png;
+
+namespace mrtp {
 
 static const float kRealToByte = 255.0f;
 static const float kByteToReal = 1.0f / kRealToByte;
@@ -105,3 +106,5 @@ Texture *TextureCollector::add(const char *path) {
 
     return last;
 }
+
+} //end namespace mrtp

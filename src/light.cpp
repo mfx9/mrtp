@@ -7,6 +7,8 @@
 
 using namespace Eigen;
 
+namespace mrtp {
+
 /*
 ================
 Light
@@ -23,3 +25,5 @@ a source of light
 ================
 */
 Vector3f Light::calculate_ray(Vector3f *hit) { return ((*center_) - (*hit)); }
+
+} //end namespace mrtp

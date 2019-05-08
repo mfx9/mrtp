@@ -7,13 +7,14 @@
 #define _WORLD_H
 
 #include <vector>
-
 #include "actor.hpp"
 #include "camera.hpp"
 #include "cylinder.hpp"
 #include "light.hpp"
 #include "plane.hpp"
 #include "sphere.hpp"
+
+namespace mrtp {
 
 class World {
   public:
@@ -33,5 +34,7 @@ class World {
     std::vector<Light *> lights_;
     std::vector<Camera *> cameras_;
 };
+
+} //end namespace mrtp
 
 #endif //!_WORLD_H
