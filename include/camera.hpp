@@ -10,6 +10,15 @@
 
 
 class Camera {
+public:
+    Camera (float *center, float *target, float *roll);
+    ~Camera () {}
+    void calculate_window (int width, int height, float perspective);
+
+    Eigen::Vector3f calculate_origin (int windowx, int windowy);
+    Eigen::Vector3f calculate_direction (Eigen::Vector3f *origin);
+
+private:
     //Pointers to Cython variables
     Eigen::Vector3f  *eye_;
     Eigen::Vector3f  *lookat_;
@@ -18,14 +27,6 @@ class Camera {
     Eigen::Vector3f  wo_;
     Eigen::Vector3f  wh_;
     Eigen::Vector3f  wv_;
-
-public:
-    Camera (float *center, float *target, float *roll);
-    ~Camera ();
-    void calculate_window (int width, int height, float perspective);
-
-    Eigen::Vector3f calculate_origin (int windowx, int windowy);
-    Eigen::Vector3f calculate_direction (Eigen::Vector3f *origin);
 };
 
 #endif /* !_CAMERA_H */

@@ -28,14 +28,6 @@ Texture::Texture (const char *path) {
 
 /*
 ================
-~Texture
-================
-*/
-Texture::~Texture () {
-}
-
-/*
-================
 pick_pixel
 
 fracx, fracy are within a range of <0..1> and

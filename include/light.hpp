@@ -10,12 +10,13 @@
 
 
 class Light {
-    Eigen::Vector3f *center_;
-
 public:
     Light (float *center);
-    ~Light ();
+    ~Light () {}
     Eigen::Vector3f calculate_ray (Eigen::Vector3f *hit);
+
+private:
+    Eigen::Vector3f *center_;
 };
 
 #endif /* !_LIGHT_H */

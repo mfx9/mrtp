@@ -12,17 +12,19 @@
 
 
 class Sphere : public Actor {
+public:
+    Sphere (float *center, float radius, float *axis, float reflect, const char *texture);
+    ~Sphere() {}
+    float solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
+    Pixel pick_pixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
+    Eigen::Vector3f calculate_normal (Eigen::Vector3f *hit);
+
+private:
     Eigen::Vector3f   center_;
     Eigen::Vector3f   tx_;
     Eigen::Vector3f   ty_;
     Eigen::Vector3f   tz_;
     float   R_;
-
-public:
-    Sphere (float *center, float radius, float *axis, float reflect, const char *texture);
-    float solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd);
-    Pixel pick_pixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal);
-    Eigen::Vector3f calculate_normal (Eigen::Vector3f *hit);
 };
 
 #endif /* !_SPHERE_H */

@@ -17,10 +17,6 @@
 
 
 class World {
-    std::vector<Actor *> actors_;
-    std::vector<Light *> lights_;
-    std::vector<Camera *> cameras_;
-
 public:
     void add_camera (Camera *camera);
     void add_light (Light *light);
@@ -32,6 +28,11 @@ public:
     Light *get_light ();
     Camera *get_camera ();
     std::vector<Actor *> *get_actors ();
+
+private:
+    std::vector<Actor *> actors_;
+    std::vector<Light *> lights_;
+    std::vector<Camera *> cameras_;
 };
 
 #endif /* !_WORLD_H */

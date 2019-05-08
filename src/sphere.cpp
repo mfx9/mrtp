@@ -22,7 +22,7 @@ Sphere::Sphere (float *center, float radius, float *axis, float reflect, const c
     center_ = *(Vector3f *)center;
 
     R_ = radius;
-    hasShadow_ = true;
+    has_shadow_ = true;
     reflect_ = reflect;
 
     ty_ = *(Vector3f *)axis;

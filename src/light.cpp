@@ -19,14 +19,6 @@ Light::Light (float *center) {
 
 /*
 ================
-~Light
-================
-*/
-Light::~Light () {
-}
-
-/*
-================
 calculate_ray
 
 Calculates a ray between a hit point and 

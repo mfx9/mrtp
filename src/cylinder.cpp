@@ -28,7 +28,7 @@ Cylinder::Cylinder (float *center, float *direction, float radius,
     R_ = radius;
     span_ = span;
     reflect_ = reflect;
-    hasShadow_ = true;
+    has_shadow_ = true;
 
     ty_ = generate_unit_vector (&B_);
     tx_ = ty_.cross (B_);

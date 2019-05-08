@@ -61,16 +61,6 @@ Renderer::Renderer (World *world, int width, int height, float fov, float distan
 
 /*
 ================
-~Renderer
-
-Destroys a renderer
-================
-*/
-Renderer::~Renderer () {
-}
-
-/*
-================
 write_scene
 
 Writes a rendered scene to a PNG file

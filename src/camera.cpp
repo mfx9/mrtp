@@ -26,14 +26,6 @@ Camera::Camera (float *center, float *target, float *roll) {
 
 /*
 ================
-~Camera
-================
-*/
-Camera::~Camera () {
-}
-
-/*
-================
 calculate_window
 
 Calculates vectors that span a window

@@ -14,29 +14,13 @@ using namespace std;
 
 /*
 ================
-Actor
-================
-*/
-Actor::Actor () {
-}
-
-/*
-================
-~Actor
-================
-*/
-Actor::~Actor () {
-}
-
-/*
-================
 has_shadow
 
 Returns true if an actor casts shadow
 ================
 */
 bool Actor::has_shadow () {
-    return hasShadow_;
+    return has_shadow_;
 }
 
 /*

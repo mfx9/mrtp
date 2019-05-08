@@ -13,24 +13,22 @@
 
 
 class Actor {
-protected:
-    bool hasShadow_;
-    float reflect_;
-    Texture *texture_;
-
-    //Private methods
-    static float solve_quadratic (float a, float b, float c, float mint, float maxt);
-    static Eigen::Vector3f generate_unit_vector (Eigen::Vector3f *vector);
-
 public:
-    Actor ();
+    Actor () {}
+    virtual ~Actor () {}
     bool has_shadow ();
     float get_reflect ();
-
-    virtual ~Actor ();
     virtual float solve (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind, float maxd) = 0;
     virtual Pixel pick_pixel (Eigen::Vector3f *hit, Eigen::Vector3f *normal) = 0;
     virtual Eigen::Vector3f calculate_normal (Eigen::Vector3f *hit) = 0;
+
+protected:
+    bool has_shadow_;
+    float reflect_;
+    Texture *texture_;
+
+    static float solve_quadratic (float a, float b, float c, float mint, float maxt);
+    static Eigen::Vector3f generate_unit_vector (Eigen::Vector3f *vector);
 };
 
 #endif /* !_ACTOR_H */

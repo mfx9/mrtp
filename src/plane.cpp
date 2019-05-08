@@ -25,7 +25,7 @@ Plane::Plane (float *center, float *normal, float scale, float reflect, const ch
     scale_ = scale;
 
     center_ = *(Vector3f *)center;
-    hasShadow_ = false;
+    has_shadow_ = false;
 
     Vector3f tmp = generate_unit_vector (&normal_);
 

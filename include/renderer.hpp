@@ -17,6 +17,13 @@
 
 
 class Renderer {
+public:
+    Renderer (World *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads);
+    ~Renderer () {}
+    float render_scene ();
+    void write_scene (char *filename);
+
+private:
     Camera  *camera_;
     Light   *light_;
 
@@ -36,17 +43,10 @@ class Renderer {
     float  perspective_;
     int    nthreads_;
 
-    //Private methods
     bool solve_shadows (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float maxdist);
     Actor *solve_hits (Eigen::Vector3f *origin, Eigen::Vector3f *direction, float *currd);
     Pixel trace_ray_r (Eigen::Vector3f *origin, Eigen::Vector3f *direction, int depth);
     void render_block (int block, int nlines);
-
-public:
-    Renderer (World *world, int width, int height, float fov, float distance, float shadow, float bias, int maxdepth, int nthreads);
-    ~Renderer ();
-    float render_scene ();
-    void write_scene (char *filename);
 };
 
 #endif /* !_RENDERER_H */
