@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# . File      : Mrtp.pyx
+# . File      : main.pyx
 # . Program   : mrtp
 # . Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
 # . License   : LGPL v3            (http://www.gnu.org/licenses/gpl-3.0.en.html)
@@ -7,30 +7,30 @@
 import exceptions, os.path
 
 
-DEF DEFAULT_WIDTH    =  640
-DEF DEFAULT_HEIGHT   =  480
-DEF DEFAULT_FOV      =   93.0
-DEF DEFAULT_DISTANCE =   60.0
-DEF DEFAULT_SHADOW   =    0.25
-DEF DEFAULT_BIAS     =    0.001
-DEF DEFAULT_DEPTH    =    3
-DEF DEFAULT_FILENAME =  "scene.png"
+DEF DEFAULT_WIDTH = 640
+DEF DEFAULT_HEIGHT = 480
+DEF DEFAULT_FOV = 93.0
+DEF DEFAULT_DISTANCE = 60.0
+DEF DEFAULT_SHADOW = 0.25
+DEF DEFAULT_BIAS = 0.001
+DEF DEFAULT_DEPTH = 3
+DEF DEFAULT_FILENAME = "scene.png"
 
-DEF DEFAULT_REFLECT     =  0.0
-DEF DEFAULT_SCALE       =  0.15
+DEF DEFAULT_REFLECT = 0.0
+DEF DEFAULT_SCALE = 0.15
 
-DEF MIN_WIDTH   =  (DEFAULT_WIDTH  //  2)
-DEF MAX_WIDTH   =  (DEFAULT_WIDTH  *  10)
-DEF MIN_HEIGHT  =  (DEFAULT_HEIGHT //  2)
-DEF MAX_HEIGHT  =  (DEFAULT_HEIGHT *  10)
-DEF MIN_DEPTH   =      0
-DEF MAX_DEPTH   =     10
-DEF MIN_FOV     =     50.0
-DEF MAX_FOV     =    170.0
+DEF MIN_WIDTH = (DEFAULT_WIDTH  //  2)
+DEF MAX_WIDTH = (DEFAULT_WIDTH  *  10)
+DEF MIN_HEIGHT = (DEFAULT_HEIGHT //  2)
+DEF MAX_HEIGHT = (DEFAULT_HEIGHT *  10)
+DEF MIN_DEPTH = 0
+DEF MAX_DEPTH = 10
+DEF MIN_FOV = 50.0
+DEF MAX_FOV = 170.0
 
-DEF DEFAULT_THREADS =  1
-DEF MIN_THREADS     =  0
-DEF MAX_THREADS     = 64
+DEF DEFAULT_THREADS = 1
+DEF MIN_THREADS = 0
+DEF MAX_THREADS = 64
 
 
 cdef class PyWorld:
@@ -62,25 +62,6 @@ cdef class PyWorld:
 
 
 #===============================================================================
-#        """Creates a renderer. 
-#
-#        Keyword arguments:
-#            width      window width (def.  %d)
-#            heigth     window heigth (def. %d)
-#            fov        field of vision, in degrees (def. %.1f)
-#            distance   distance to quench light (def. %.1f)
-#            shadow     shadow factor (def. %.2f)
-#            bias       correct shadows to avoid self-intersection (def. %.3f)
-#            maxdepth   recursion depth for reflected rays (def. %d)
-#            nthreads   number of rendering threads (0=auto, def=%d)
-#        """ % (DEFAULT_WIDTH, 
-#               DEFAULT_HEIGHT, 
-#               DEFAULT_FOV, 
-#               DEFAULT_DISTANCE, 
-#               DEFAULT_SHADOW, 
-#               DEFAULT_BIAS, 
-#               DEFAULT_DEPTH, 
-#               DEFAULT_THREADS )
 cdef class PyRenderer:
     def __cinit__ (self, 
                    PyWorld world, 
