@@ -18,10 +18,32 @@ static float kDegreeToRadian = M_PI / 180.0f;
 Camera
 ================
 */
-Camera::Camera(float *center, float *target, float *roll) {
-    eye_ = (Vector3f *)center;
-    lookat_ = (Vector3f *)target;
+Camera::Camera(float eye[], float lookat[], float roll) {
+    eye_ << eye[0], eye[1], eye[2];
+    lookat_ << lookat[0], lookat[1], lookat[2];
     roll_ = roll;
+}
+
+/*
+================
+update_eye
+
+Updates the location of a camera
+================
+*/
+void Camera::update_eye(float eye[]) {
+    eye_ << eye[0], eye[1], eye[2];
+}
+
+/*
+================
+update_lookat
+
+Updates the point a camera is looking at
+================
+*/
+void Camera::update_lookat(float lookat[]) {
+    lookat_ << lookat[0], lookat[1], lookat[2];
 }
 
 /*
@@ -33,7 +55,7 @@ Calculates vectors that span a window
 */
 void Camera::calculate_window(int width, int height, float perspective) {
     // i is a vector between the camera and the center of the window
-    Vector3f i = (*lookat_) - (*eye_);
+    Vector3f i = lookat_ - eye_;
     i *= (1.0f / i.norm());
 
     Vector3f k;
@@ -46,7 +68,7 @@ void Camera::calculate_window(int width, int height, float perspective) {
     k *= (1.0f / k.norm());
 
     // Rotate camera around the i axis
-    float roll = (*roll_) * kDegreeToRadian;
+    float roll = roll_ * kDegreeToRadian;
     float sina = sin(roll);
     float cosa = cos(roll);
 
@@ -57,7 +79,7 @@ void Camera::calculate_window(int width, int height, float perspective) {
     k = kp;
 
     // Calculate the central point of the window
-    Vector3f center = (*eye_) + perspective * i;
+    Vector3f center = eye_ + perspective * i;
 
     // Find three corners of the window
     wo_ = center - 0.5f * j + 0.5f * k;
@@ -85,7 +107,7 @@ calculate_direction
 ================
 */
 Vector3f Camera::calculate_direction(Vector3f *origin) {
-    Vector3f direction = (*origin) - (*eye_);
+    Vector3f direction = (*origin) - eye_;
 
     return (direction * (1.0f / direction.norm()));
 }

@@ -12,12 +12,13 @@ namespace mrtp {
 
 class Light {
   public:
-    Light(float *center);
+    Light(float center[]);
     ~Light() {}
+    void update_center(float center[]);
     Eigen::Vector3f calculate_ray(Eigen::Vector3f *hit);
 
   private:
-    Eigen::Vector3f *center_;
+    Eigen::Vector3f center_;
 };
 
 } //end namespace mrtp

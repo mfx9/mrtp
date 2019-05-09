@@ -117,58 +117,51 @@ cdef class PyRenderer:
 #===============================================================================
 cdef class PyCamera:
     def __cinit__ (self, center, target, float roll=0.0):
-        self.x_ = center[0]
-        self.y_ = center[1]
-        self.z_ = center[2]
-        self.tx_ = target[0]
-        self.ty_ = target[1]
-        self.tz_ = target[2]
-        self.roll_ = roll
-        self.cObject = new Camera (&self.x_, &self.tx_, &self.roll_)
+        cdef float foo[3]
+        cdef float bar[3]
+        foo[0] = center[0]
+        foo[1] = center[1]
+        foo[2] = center[2]
+        bar[0] = target[0]
+        bar[1] = target[1]
+        bar[2] = target[2]
+        self.cObject = new Camera (foo, bar, roll)
 
     def __dealloc__ (self):
         del self.cObject
 
-    def Center (self):
-        return (self.x_, self.y_, self.z_)
-
     def SetCenter (self, xyz):
-        self.x_ = xyz[0]
-        self.y_ = xyz[1]
-        self.z_ = xyz[2]
-
-    def Target (self):
-        return (self.tx_, self.ty_, self.tz_)
+        cdef float tmp[3]
+        tmp[0] = xyz[0]
+        tmp[1] = xyz[1]
+        tmp[2] = xyz[2]
+        self.cObject.update_eye (tmp)
 
     def SetTarget (self, xyz):
-        self.tx_ = xyz[0]
-        self.ty_ = xyz[1]
-        self.tz_ = xyz[2]
-
-    def Roll (self):
-        return self.roll_
-
-    def SetRoll (self, float value):
-        self.roll_ = value
+        cdef float tmp[3]
+        tmp[0] = xyz[0]
+        tmp[1] = xyz[1]
+        tmp[2] = xyz[2]
+        self.cObject.update_lookat (tmp)
 
 
 cdef class PyLight:
     def __cinit__ (self, center):
-        self.x_ = center[0]
-        self.y_ = center[1]
-        self.z_ = center[2]
-        self.cObject = new Light (&self.x_)
+        cdef float tmp[3]
+        tmp[0] = center[0]
+        tmp[1] = center[1]
+        tmp[2] = center[2]
+        self.cObject = new Light (tmp)
 
     def __dealloc__ (self):
         del self.cObject
 
-    def Center (self):
-        return (self.x_, self.y_, self.z_)
-
     def SetCenter (self, xyz):
-        self.x_ = xyz[0]
-        self.y_ = xyz[1]
-        self.z_ = xyz[2]
+        cdef float tmp[3]
+        tmp[0] = xyz[0]
+        tmp[1] = xyz[1]
+        tmp[2] = xyz[2]
+        self.cObject.update_center (tmp)
 
 
 cdef class PyPlane:

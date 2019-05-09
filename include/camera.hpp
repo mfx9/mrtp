@@ -12,18 +12,20 @@ namespace mrtp {
 
 class Camera {
   public:
-    Camera(float *center, float *target, float *roll);
+    Camera(float eye[], float lookat[], float roll);
     ~Camera() {}
     void calculate_window(int width, int height, float perspective);
+    void update_eye(float eye[]);
+    void update_lookat(float lookat[]);
 
     Eigen::Vector3f calculate_origin(int windowx, int windowy);
     Eigen::Vector3f calculate_direction(Eigen::Vector3f *origin);
 
   private:
     // Pointers to Cython variables
-    Eigen::Vector3f *eye_;
-    Eigen::Vector3f *lookat_;
-    float *roll_;
+    Eigen::Vector3f eye_;
+    Eigen::Vector3f lookat_;
+    float roll_;
 
     Eigen::Vector3f wo_;
     Eigen::Vector3f wh_;

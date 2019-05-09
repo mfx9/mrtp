@@ -6,11 +6,14 @@
 #-------------------------------------------------------------------------------
 cdef extern from "camera.hpp" namespace "mrtp":
     cdef cppclass Camera:
-        Camera (float *center, float *target, float *roll)
+        Camera (float eye[], float lookat[], float roll)
+        void update_eye (float eye[])
+        void update_lookat (float lookat[])
 
 cdef extern from "light.hpp" namespace "mrtp":
     cdef cppclass Light:
-        Light (float *center)
+        Light (float center[])
+        void update_center (float center[])
 
 cdef extern from "plane.hpp" namespace "mrtp":
     cdef cppclass Plane:
@@ -25,19 +28,9 @@ cdef extern from "cylinder.hpp" namespace "mrtp":
         Cylinder (float *center, float *direction, float radius, float span, float reflect, char *texture)
 
 cdef class PyCamera:
-    cdef float x_
-    cdef float y_
-    cdef float z_
-    cdef float tx_
-    cdef float ty_
-    cdef float tz_
-    cdef float roll_
     cdef Camera *cObject
 
 cdef class PyLight:
-    cdef float x_
-    cdef float y_
-    cdef float z_
     cdef Light *cObject
 
 cdef class PyPlane:
