@@ -5,43 +5,19 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
+
 #include "actor.hpp"
 
 using namespace Eigen;
 using namespace std;
 
+
 namespace mrtp {
 
-/*
-================
-has_shadow
-
-Returns true if an actor casts shadow
-================
-*/
 bool Actor::has_shadow() { return has_shadow_; }
 
-/*
-================
-get_reflect
-
-Returns the reflection coefficient
-================
-*/
 float Actor::get_reflect() { return reflect_; }
 
-/*
-================
-solve_quadratic
-
-solves a quadratic equation for t.
-
-Since t is a scale in: P = O + t*D, returns
-only the smaller t and within the limits of (mint, maxt).
-
-Otherwise, returns -1.
-================
-*/
 float Actor::solve_quadratic(float a, float b, float c, float mint,
                              float maxt) {
     float t = -1.0f;
@@ -65,17 +41,6 @@ float Actor::solve_quadratic(float a, float b, float c, float mint,
     return t;
 }
 
-/*
-================
-generate_unit_vector
-
-Finds the smallest component of a vector and generates
-an "associated" unit vector.
-
-A cross product of the vector with its "associated"
-vector should give a non-zero vector.
-================
-*/
 Vector3f Actor::generate_unit_vector(Vector3f *vector) {
     float tx = (*vector)[0];
     float ty = (*vector)[1];

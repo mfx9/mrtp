@@ -26,17 +26,11 @@ static const float kDegreeToRadian = M_PI / 180.0f;
 static const float kRealToByte = 255.0f;
 
 /*
-================
-Renderer
-
-Creates a renderer.
-
-@distance: a distance to fully darken the light
-@shadow: darkness of shadows, between <0..1>
-@bias: correction to shadows to avoid self-intersection
-@distance: maximum distance reached by rays
-@maxdepth: number of recursion levels of a reflected ray
-================
+distance: a distance to fully darken the light
+shadow: darkness of shadows, between <0..1>
+bias: correction to shadows to avoid self-intersection
+distance: maximum distance reached by rays
+maxdepth: number of recursion levels of a reflected ray
 */
 Renderer::Renderer(World *world, int width, int height, float fov,
                    float distance, float shadow, float bias, int maxdepth,
@@ -62,13 +56,6 @@ Renderer::Renderer(World *world, int width, int height, float fov,
     framebuffer_.assign(width_ * height_, dummy);
 }
 
-/*
-================
-write_scene
-
-Writes a rendered scene to a PNG file
-================
-*/
 void Renderer::write_scene(char *filename) {
     image<rgb_pixel> image(width_, height_);
     Pixel *in = &framebuffer_[0];
@@ -78,30 +65,18 @@ void Renderer::write_scene(char *filename) {
 
         for (int j = 0; j < width_; j++, in++, out++) {
             Pixel bytes = kRealToByte * (*in);
-
             out->red = (unsigned char)bytes[0];
             out->green = (unsigned char)bytes[1];
             out->blue = (unsigned char)bytes[2];
         }
     }
-
     image.write(filename);
 }
 
-/*
-================
-solve_shadows
-
-Checks for intersections with other actors between
-the hit actor and the source of light
-================
-*/
 bool Renderer::solve_shadows(Vector3f *origin, Vector3f *direction,
                              float maxdist) {
-    for (vector<Actor *>::iterator a = actors_->begin(); a != actors_->end();
-         a++) {
+    for (vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
         Actor *actor = *a;
-
         if (actor->has_shadow()) {
             float distance = actor->solve(origin, direction, 0.0f, maxdist);
             if (distance > 0.0f) {
@@ -112,25 +87,13 @@ bool Renderer::solve_shadows(Vector3f *origin, Vector3f *direction,
     return false;
 }
 
-/*
-================
-solve_hits
-
-Returns a pointer and a distance to the closest
-actor with which the ray intersects.
-
-Returns NULL if there have been no intersections.
-================
-*/
 Actor *Renderer::solve_hits(Vector3f *origin, Vector3f *direction,
                             float *currd) {
     Actor *hit = NULL;
 
-    for (vector<Actor *>::iterator a = actors_->begin(); a != actors_->end();
-         a++) {
+    for (vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
         Actor *actor = *a;
         float distance = actor->solve(origin, direction, 0.0f, maxdist_);
-
         if ((distance > 0.0f) && (distance < (*currd))) {
             *currd = distance;
             hit = actor;
@@ -139,13 +102,6 @@ Actor *Renderer::solve_hits(Vector3f *origin, Vector3f *direction,
     return hit;
 }
 
-/*
-================
-trace_ray_r
-
-Traces a ray and its reflected rays
-================
-*/
 Pixel Renderer::trace_ray_r(Vector3f *origin, Vector3f *direction, int depth) {
     Pixel pixel;
     pixel << 0.0f, 0.0f, 0.0f;
@@ -186,12 +142,10 @@ Pixel Renderer::trace_ray_r(Vector3f *origin, Vector3f *direction, int depth) {
             // If the hit actor is reflective, trace a reflected ray
             if (depth < maxdepth_) {
                 float coeff = hitactor->get_reflect();
-
                 if (coeff > 0.0f) {
                     Vector3f ray =
                         (*direction) - (2.0f * direction->dot(normal)) * normal;
                     Pixel reflected = trace_ray_r(&corr, &ray, depth + 1);
-
                     pixel = (1.0f - coeff) * reflected + coeff * pixel;
                 }
             }
@@ -200,13 +154,6 @@ Pixel Renderer::trace_ray_r(Vector3f *origin, Vector3f *direction, int depth) {
     return pixel;
 }
 
-/*
-================
-render_block
-
-Renders a rectangular block of the screen
-================
-*/
 void Renderer::render_block(int block, int nlines) {
     Pixel *pixel = &framebuffer_[block * nlines * width_];
 
@@ -215,18 +162,12 @@ void Renderer::render_block(int block, int nlines) {
         for (int i = 0; i < width_; i++, pixel++) {
             Vector3f origin = camera_->calculate_origin(i, j + block * nlines);
             Vector3f direction = camera_->calculate_direction(&origin);
-
             *pixel = trace_ray_r(&origin, &direction, 0);
         }
     }
 }
 
 /*
-================
-render_scene
-
-Renders a scene.
-
 In parallel mode, splits the frame buffer into several
 horizontal blocks, each rendered by a separate thread.
 
@@ -237,7 +178,6 @@ If nthreads=0, uses as many threads as available.
 
 Returns rendering time in seconds, corrected for
 the number of threads.
-================
 */
 float Renderer::render_scene() {
     camera_->calculate_window(width_, height_, perspective_);
@@ -270,11 +210,10 @@ float Renderer::render_scene() {
     // No OpenMP compiled in, always do serial execution
     render_block(0, height_);
 
-#endif /* !_OPENMP */
+#endif //!_OPENMP
 
     int timeStop = clock();
     float timeUsed = (float)(timeStop - timeStart) / CLOCKS_PER_SEC;
-
     if (nthreads_ > 1) {
         timeUsed *= (1.0f / (float)nthreads_);
     }

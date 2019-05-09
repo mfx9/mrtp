@@ -5,19 +5,14 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
+
 #include "cylinder.hpp"
 
 using namespace Eigen;
 
+
 namespace mrtp {
 
-/*
-================
-Cylinder
-
-Constructs a cylinder
-================
-*/
 Cylinder::Cylinder(float *center, float *direction, float radius, float span,
                    float reflect, const char *texture) {
     A_ = *(Vector3f *)center;
@@ -38,11 +33,6 @@ Cylinder::Cylinder(float *center, float *direction, float radius, float span,
 }
 
 /*
-================
-solve
-
-solves the intersection of a ray and a cylinder
-
 Capital letters are vectors.
   A       Origin    of cylinder
   B       Direction of cylinder
@@ -70,7 +60,6 @@ Capital letters are vectors.
  t^2 * (1 - b^2)  +  2t * (a - b * d)  -
      -  d^2 - f = 0    => t = ...
  alpha = d + t * b
-================
 */
 float Cylinder::solve(Vector3f *O, Vector3f *D, float mind, float maxd) {
     Vector3f tmp = (*O) - A_;
@@ -90,7 +79,6 @@ float Cylinder::solve(Vector3f *O, Vector3f *D, float mind, float maxd) {
         // Check if the cylinder is finite
         if (span_ > 0.0f) {
             float alpha = d + t * b;
-
             if ((alpha < -span_) || (alpha > span_)) {
                 return -1.0f;
             }
@@ -99,35 +87,18 @@ float Cylinder::solve(Vector3f *O, Vector3f *D, float mind, float maxd) {
     return t;
 }
 
-/*
-================
-calculate_normal
-
-Calculates normal to a cylinder
-
-N = Hit - [B . (Hit - A)] * B
-================
-*/
 Vector3f Cylinder::calculate_normal(Vector3f *hit) {
+    // N = Hit - [B . (Hit - A)] * B
     Vector3f tmp = (*hit) - A_;
     float alpha = B_.dot(tmp);
-
     Vector3f bar = A_ + alpha * B_;
     Vector3f normal = (*hit) - bar;
 
     return (normal * (1.0f / normal.norm()));
 }
 
-/*
-================
-pick_pixel
-
-Picks a pixel from a cylinders's texture
-================
-*/
 Pixel Cylinder::pick_pixel(Vector3f *hit, Vector3f *normal) {
     Vector3f tmp = (*hit) - A_;
-
     float alpha = tmp.dot(B_);
     float dot = normal->dot(tx_);
     float fracx = acos(dot) / M_PI;

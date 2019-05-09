@@ -7,32 +7,13 @@
 
 using namespace Eigen;
 
+
 namespace mrtp {
 
-/*
-================
-Light
-================
-*/
 Light::Light(float center[]) { center_ << center[0], center[1], center[2]; }
 
-/*
-================
-update_center
-
-Updates the location of a light
-================
-*/
 void Light::update_center(float center[]) { center_ << center[0], center[1], center[2]; }
 
-/*
-================
-calculate_ray
-
-Calculates a ray between a hit point and
-a source of light
-================
-*/
 Vector3f Light::calculate_ray(Vector3f *hit) { return (center_ - (*hit)); }
 
 } //end namespace mrtp
