@@ -5,19 +5,15 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
-
 #include "cylinder.hpp"
-
-using namespace Eigen;
 
 
 namespace mrtp {
 
 Cylinder::Cylinder(float *center, float *direction, float radius, float span,
                    float reflect, const char *texture) {
-    A_ = *(Vector3f *)center;
-
-    B_ = *(Vector3f *)direction;
+    A_ = *(Eigen::Vector3f *)center;
+    B_ = *(Eigen::Vector3f *)direction;
     B_ *= (1.0f / B_.norm());
 
     R_ = radius;
@@ -61,8 +57,8 @@ Capital letters are vectors.
      -  d^2 - f = 0    => t = ...
  alpha = d + t * b
 */
-float Cylinder::solve(Vector3f *O, Vector3f *D, float mind, float maxd) {
-    Vector3f tmp = (*O) - A_;
+float Cylinder::solve(Eigen::Vector3f *O, Eigen::Vector3f *D, float mind, float maxd) {
+    Eigen::Vector3f tmp = (*O) - A_;
 
     float a = D->dot(tmp);
     float b = D->dot(B_);
@@ -87,18 +83,18 @@ float Cylinder::solve(Vector3f *O, Vector3f *D, float mind, float maxd) {
     return t;
 }
 
-Vector3f Cylinder::calculate_normal(Vector3f *hit) {
+Eigen::Vector3f Cylinder::calculate_normal(Eigen::Vector3f *hit) {
     // N = Hit - [B . (Hit - A)] * B
-    Vector3f tmp = (*hit) - A_;
+    Eigen::Vector3f tmp = (*hit) - A_;
     float alpha = B_.dot(tmp);
-    Vector3f bar = A_ + alpha * B_;
-    Vector3f normal = (*hit) - bar;
+    Eigen::Vector3f bar = A_ + alpha * B_;
+    Eigen::Vector3f normal = (*hit) - bar;
 
     return (normal * (1.0f / normal.norm()));
 }
 
-Pixel Cylinder::pick_pixel(Vector3f *hit, Vector3f *normal) {
-    Vector3f tmp = (*hit) - A_;
+Pixel Cylinder::pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) {
+    Eigen::Vector3f tmp = (*hit) - A_;
     float alpha = tmp.dot(B_);
     float dot = normal->dot(tx_);
     float fracx = acos(dot) / M_PI;

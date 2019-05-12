@@ -5,7 +5,6 @@
  */
 #include "world.hpp"
 
-using namespace std;
 
 namespace mrtp {
 
@@ -23,6 +22,6 @@ Light *World::get_light() { return lights_.back(); }
 
 Camera *World::get_camera() { return cameras_.back(); }
 
-vector<Actor *> *World::get_actors() { return &actors_; }
+std::vector<Actor *> *World::get_actors() { return &actors_; }
 
 } //end namespace mrtp

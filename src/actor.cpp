@@ -8,9 +8,6 @@
 
 #include "actor.hpp"
 
-using namespace Eigen;
-using namespace std;
-
 
 namespace mrtp {
 
@@ -41,7 +38,7 @@ float Actor::solve_quadratic(float a, float b, float c, float mint,
     return t;
 }
 
-Vector3f Actor::generate_unit_vector(Vector3f *vector) {
+Eigen::Vector3f Actor::generate_unit_vector(Eigen::Vector3f *vector) {
     float tx = (*vector)[0];
     float ty = (*vector)[1];
     float tz = (*vector)[2];
@@ -50,7 +47,7 @@ Vector3f Actor::generate_unit_vector(Vector3f *vector) {
     float y = (ty < 0.0f) ? -ty : ty;
     float z = (tz < 0.0f) ? -tz : tz;
 
-    Vector3f unit;
+    Eigen::Vector3f unit;
     unit << 0.0f, 0.0f, 1.0f;
 
     if (x < y) {

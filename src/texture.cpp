@@ -3,12 +3,10 @@
  * Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
-#include <cstring> //Needed for strcmp
+#include <cstring>
+
 #include "png.hpp"
 #include "texture.hpp"
-
-using namespace std;
-using namespace png;
 
 
 namespace mrtp {
@@ -39,14 +37,14 @@ bool Texture::check_path(const char *path) {
 }
 
 void Texture::load_texture() {
-    image<rgb_pixel> image(spath_.c_str());
+    png::image<png::rgb_pixel> image(spath_.c_str());
 
     width_ = image.get_width();
     height_ = image.get_height();
     data_.reserve(width_ * height_);
 
     for (int i = 0; i < height_; i++) {
-        rgb_pixel *in = &image[i][0];
+        png::rgb_pixel *in = &image[i][0];
 
         for (int j = 0; j < width_; j++, in++) {
             Pixel out;
@@ -63,7 +61,7 @@ one that already exists in the memory.
 Returns a pointer to the texture.
 */
 Texture *TextureCollector::add(const char *path) {
-    for (list<Texture>::iterator t = textures_.begin(); t != textures_.end(); t++) {
+    for (std::list<Texture>::iterator t = textures_.begin(); t != textures_.end(); t++) {
         Texture *texture = &(*t);
         if (texture->check_path(path)) {
             return texture;

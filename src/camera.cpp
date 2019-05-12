@@ -5,9 +5,8 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
-#include "camera.hpp"
 
-using namespace Eigen;
+#include "camera.hpp"
 
 
 namespace mrtp {
@@ -28,13 +27,13 @@ void Camera::update_lookat(float lookat[]) {
 
 void Camera::calculate_window(int width, int height, float perspective) {
     // i is a vector between the camera and the center of the window
-    Vector3f i = lookat_ - eye_;
+    Eigen::Vector3f i = lookat_ - eye_;
     i *= (1.0f / i.norm());
 
-    Vector3f k;
+    Eigen::Vector3f k;
     k << 0.0f, 0.0f, 1.0f;
 
-    Vector3f j = i.cross(k);
+    Eigen::Vector3f j = i.cross(k);
     j *= (1.0f / j.norm());
 
     k = j.cross(i);
@@ -42,35 +41,35 @@ void Camera::calculate_window(int width, int height, float perspective) {
 
     // Rotate camera around the i axis
     float roll = roll_ * M_PI / 180.0f;
-    float sina = sin(roll);
-    float cosa = cos(roll);
+    float sina = std::sin(roll);
+    float cosa = std::cos(roll);
 
-    Vector3f jp = cosa * j + sina * k;
-    Vector3f kp = -sina * j + cosa * k;
+    Eigen::Vector3f jp = cosa * j + sina * k;
+    Eigen::Vector3f kp = -sina * j + cosa * k;
 
     j = jp;
     k = kp;
 
     // Calculate the central point of the window
-    Vector3f center = eye_ + perspective * i;
+    Eigen::Vector3f center = eye_ + perspective * i;
 
     // Find three corners of the window
     wo_ = center - 0.5f * j + 0.5f * k;
 
-    Vector3f h = wo_ + j;
-    Vector3f v = wo_ - k;
+    Eigen::Vector3f h = wo_ + j;
+    Eigen::Vector3f v = wo_ - k;
 
     // Find vectors spanning the window
     wh_ = (1.0f / (float)width) * (h - wo_);
     wv_ = (1.0f / (float)height) * (v - wo_);
 }
 
-Vector3f Camera::calculate_origin(int windowx, int windowy) {
+Eigen::Vector3f Camera::calculate_origin(int windowx, int windowy) {
     return (wo_ + (float)windowx * wh_ + (float)windowy * wv_);
 }
 
-Vector3f Camera::calculate_direction(Vector3f *origin) {
-    Vector3f direction = (*origin) - eye_;
+Eigen::Vector3f Camera::calculate_direction(Eigen::Vector3f *origin) {
+    Eigen::Vector3f direction = (*origin) - eye_;
     return (direction * (1.0f / direction.norm()));
 }
 

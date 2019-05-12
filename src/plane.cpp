@@ -6,22 +6,20 @@
 #include <Eigen/Geometry>
 #include "plane.hpp"
 
-using namespace Eigen;
-
 
 namespace mrtp {
 
 Plane::Plane(float *center, float *normal, float scale, float reflect,
              const char *texture) {
-    normal_ = *(Vector3f *)normal;
+    normal_ = *(Eigen::Vector3f *)normal;
     normal_ *= (1.0f / normal_.norm());
 
     reflect_ = reflect;
     scale_ = scale;
-    center_ = *(Vector3f *)center;
+    center_ = *(Eigen::Vector3f *)center;
     has_shadow_ = false;
 
-    Vector3f tmp = generate_unit_vector(&normal_);
+    Eigen::Vector3f tmp = generate_unit_vector(&normal_);
     tx_ = tmp.cross(normal_);
     tx_ *= (1.0f / tx_.norm());
     ty_ = normal_.cross(tx_);
@@ -30,8 +28,8 @@ Plane::Plane(float *center, float *normal, float scale, float reflect,
     texture_ = textureCollector.add(texture);
 }
 
-Pixel Plane::pick_pixel(Vector3f *hit, Vector3f *normal) {
-    Vector3f v = (*hit) - center_;
+Pixel Plane::pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) {
+    Eigen::Vector3f v = (*hit) - center_;
     // Calculate components of v (dot products)
     float vx = v.dot(tx_);
     float vy = v.dot(ty_);
@@ -39,12 +37,12 @@ Pixel Plane::pick_pixel(Vector3f *hit, Vector3f *normal) {
     return texture_->pick_pixel(vx, vy, scale_);
 }
 
-float Plane::solve(Vector3f *origin, Vector3f *direction, float mind,
+float Plane::solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                    float maxd) {
     float bar = direction->dot(normal_);
 
     if (bar != 0.0f) {
-        Vector3f tmp = (*origin) - center_;
+        Eigen::Vector3f tmp = (*origin) - center_;
         float d = -tmp.dot(normal_) / bar;
         if ((d >= mind) && (d <= maxd)) {
             return d;
@@ -53,6 +51,6 @@ float Plane::solve(Vector3f *origin, Vector3f *direction, float mind,
     return -1.0f;
 }
 
-Vector3f Plane::calculate_normal(Vector3f *hit) { return normal_; }
+Eigen::Vector3f Plane::calculate_normal(Eigen::Vector3f *hit) { return normal_; }
 
 } //end namespace mrtp

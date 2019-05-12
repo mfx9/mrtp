@@ -15,10 +15,6 @@
 #include "png.hpp"
 #include "renderer.hpp"
 
-using namespace std;
-using namespace png;
-using namespace Eigen;
-
 
 namespace mrtp {
 
@@ -40,7 +36,7 @@ Renderer::Renderer(World *world, int width, int height, float fov,
     fov_ = fov;
 
     ratio_ = (float)width_ / (float)height_;
-    perspective_ = ratio_ / (2.0f * tan(kDegreeToRadian * (fov_ / 2.0f)));
+    perspective_ = ratio_ / (2.0f * std::tan(kDegreeToRadian * (fov_ / 2.0f)));
 
     maxdist_ = distance;
     shadow_ = shadow;
@@ -57,11 +53,11 @@ Renderer::Renderer(World *world, int width, int height, float fov,
 }
 
 void Renderer::write_scene(char *filename) {
-    image<rgb_pixel> image(width_, height_);
+    png::image<png::rgb_pixel> image(width_, height_);
     Pixel *in = &framebuffer_[0];
 
     for (int i = 0; i < height_; i++) {
-        rgb_pixel *out = &image[i][0];
+        png::rgb_pixel *out = &image[i][0];
 
         for (int j = 0; j < width_; j++, in++, out++) {
             Pixel bytes = kRealToByte * (*in);
@@ -73,9 +69,9 @@ void Renderer::write_scene(char *filename) {
     image.write(filename);
 }
 
-bool Renderer::solve_shadows(Vector3f *origin, Vector3f *direction,
+bool Renderer::solve_shadows(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
                              float maxdist) {
-    for (vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
+    for (std::vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
         Actor *actor = *a;
         if (actor->has_shadow()) {
             float distance = actor->solve(origin, direction, 0.0f, maxdist);
@@ -87,11 +83,11 @@ bool Renderer::solve_shadows(Vector3f *origin, Vector3f *direction,
     return false;
 }
 
-Actor *Renderer::solve_hits(Vector3f *origin, Vector3f *direction,
+Actor *Renderer::solve_hits(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
                             float *currd) {
     Actor *hit = NULL;
 
-    for (vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
+    for (std::vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
         Actor *actor = *a;
         float distance = actor->solve(origin, direction, 0.0f, maxdist_);
         if ((distance > 0.0f) && (distance < (*currd))) {
@@ -102,7 +98,7 @@ Actor *Renderer::solve_hits(Vector3f *origin, Vector3f *direction,
     return hit;
 }
 
-Pixel Renderer::trace_ray_r(Vector3f *origin, Vector3f *direction, int depth) {
+Pixel Renderer::trace_ray_r(Eigen::Vector3f *origin, Eigen::Vector3f *direction, int depth) {
     Pixel pixel;
     pixel << 0.0f, 0.0f, 0.0f;
 
@@ -110,12 +106,11 @@ Pixel Renderer::trace_ray_r(Vector3f *origin, Vector3f *direction, int depth) {
     Actor *hitactor = solve_hits(origin, direction, &currd);
 
     if (hitactor) {
-        Vector3f inter = ((*direction) * currd) + (*origin);
-
-        Vector3f normal = hitactor->calculate_normal(&inter);
+        Eigen::Vector3f inter = ((*direction) * currd) + (*origin);
+        Eigen::Vector3f normal = hitactor->calculate_normal(&inter);
 
         // Calculate light intensity
-        Vector3f tolight = light_->calculate_ray(&inter);
+        Eigen::Vector3f tolight = light_->calculate_ray(&inter);
 
         float lightd = tolight.norm();
         tolight *= (1.0f / lightd);
@@ -124,14 +119,14 @@ Pixel Renderer::trace_ray_r(Vector3f *origin, Vector3f *direction, int depth) {
 
         if (intensity > 0.0f) {
             // Prevent self-intersection
-            Vector3f corr = inter + bias_ * normal;
+            Eigen::Vector3f corr = inter + bias_ * normal;
 
             // Check if the intersection is in a shadow
             bool isshadow = solve_shadows(&corr, &tolight, lightd);
             float shadow = (isshadow) ? shadow_ : 1.0f;
 
             // Decrease light intensity for actors away from the light
-            float ambient = 1.0f - pow(lightd / maxdist_, 2);
+            float ambient = 1.0f - std::pow(lightd / maxdist_, 2);
 
             // Combine pixels
             float lambda = intensity * shadow * ambient;
@@ -143,7 +138,7 @@ Pixel Renderer::trace_ray_r(Vector3f *origin, Vector3f *direction, int depth) {
             if (depth < maxdepth_) {
                 float coeff = hitactor->get_reflect();
                 if (coeff > 0.0f) {
-                    Vector3f ray =
+                    Eigen::Vector3f ray =
                         (*direction) - (2.0f * direction->dot(normal)) * normal;
                     Pixel reflected = trace_ray_r(&corr, &ray, depth + 1);
                     pixel = (1.0f - coeff) * reflected + coeff * pixel;
@@ -160,8 +155,8 @@ void Renderer::render_block(int block, int nlines) {
     for (int j = 0; j < nlines; j++) {
 
         for (int i = 0; i < width_; i++, pixel++) {
-            Vector3f origin = camera_->calculate_origin(i, j + block * nlines);
-            Vector3f direction = camera_->calculate_direction(&origin);
+            Eigen::Vector3f origin = camera_->calculate_origin(i, j + block * nlines);
+            Eigen::Vector3f direction = camera_->calculate_direction(&origin);
             *pixel = trace_ray_r(&origin, &direction, 0);
         }
     }
@@ -212,7 +207,7 @@ float Renderer::render_scene() {
 
 #endif //!_OPENMP
 
-    int timeStop = clock();
+    int timeStop = std::clock();
     float timeUsed = (float)(timeStop - timeStart) / CLOCKS_PER_SEC;
     if (nthreads_ > 1) {
         timeUsed *= (1.0f / (float)nthreads_);
