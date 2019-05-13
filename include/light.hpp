@@ -14,7 +14,6 @@ class Light {
   public:
     Light(float center[]);
     ~Light() {}
-    void update_center(float center[]);
     Eigen::Vector3f calculate_ray(Eigen::Vector3f *hit);
 
   private:

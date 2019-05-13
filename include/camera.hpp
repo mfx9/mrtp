@@ -15,9 +15,6 @@ class Camera {
     Camera(float eye[], float lookat[], float roll);
     ~Camera() {}
     void calculate_window(int width, int height, float perspective);
-    void update_eye(float eye[]);
-    void update_lookat(float lookat[]);
-
     Eigen::Vector3f calculate_origin(int windowx, int windowy);
     Eigen::Vector3f calculate_direction(Eigen::Vector3f *origin);
 

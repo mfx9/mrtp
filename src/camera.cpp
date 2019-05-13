@@ -17,14 +17,6 @@ Camera::Camera(float eye[], float lookat[], float roll) {
     roll_ = roll;
 }
 
-void Camera::update_eye(float eye[]) {
-    eye_ << eye[0], eye[1], eye[2];
-}
-
-void Camera::update_lookat(float lookat[]) {
-    lookat_ << lookat[0], lookat[1], lookat[2];
-}
-
 void Camera::calculate_window(int width, int height, float perspective) {
     // i is a vector between the camera and the center of the window
     Eigen::Vector3f i = lookat_ - eye_;
