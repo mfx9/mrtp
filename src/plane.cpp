@@ -4,19 +4,18 @@
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
 #include <Eigen/Geometry>
+
 #include "plane.hpp"
 
 
 namespace mrtp {
 
-Plane::Plane(float *center, float *normal, float scale, float reflect,
-             const char *texture) {
-    normal_ = *(Eigen::Vector3f *)normal;
-    normal_ *= (1.0f / normal_.norm());
-
-    reflect_ = reflect;
+Plane::Plane(Eigen::Vector3f *center, Eigen::Vector3f *normal, float scale, 
+             float reflect, const char *texture) {
+    center_ = *center;
+    normal_ = (1.0f / normal->norm()) * (*normal);
     scale_ = scale;
-    center_ = *(Eigen::Vector3f *)center;
+    reflect_ = reflect;
     has_shadow_ = false;
 
     Eigen::Vector3f tmp = generate_unit_vector(&normal_);

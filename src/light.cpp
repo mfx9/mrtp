@@ -8,7 +8,7 @@
 
 namespace mrtp {
 
-Light::Light(float center[]) { center_ << center[0], center[1], center[2]; }
+Light::Light(Eigen::Vector3f *center) { center_ = *center; }
 
 Eigen::Vector3f Light::calculate_ray(Eigen::Vector3f *hit) { return (center_ - (*hit)); }
 

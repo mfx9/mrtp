@@ -5,20 +5,20 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
+
 #include "sphere.hpp"
 
 
 namespace mrtp {
 
-Sphere::Sphere(float *center, float radius, float *axis, float reflect,
-               const char *texture) {
-    center_ = *(Eigen::Vector3f *)center;
-
+Sphere::Sphere(Eigen::Vector3f *center, float radius, Eigen::Vector3f *axis, 
+               float reflect, const char *texture) {
+    center_ = *center;
     R_ = radius;
     has_shadow_ = true;
     reflect_ = reflect;
 
-    ty_ = *(Eigen::Vector3f *)axis;
+    ty_ = *axis;
     ty_ *= (1.0f / ty_.norm());
     Eigen::Vector3f tmp = generate_unit_vector(&ty_);
     tx_ = tmp.cross(ty_);

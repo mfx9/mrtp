@@ -12,7 +12,7 @@ namespace mrtp {
 
 class Light {
   public:
-    Light(float center[]);
+    Light(Eigen::Vector3f *center);
     ~Light() {}
     Eigen::Vector3f calculate_ray(Eigen::Vector3f *hit);
 

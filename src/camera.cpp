@@ -11,9 +11,9 @@
 
 namespace mrtp {
 
-Camera::Camera(float eye[], float lookat[], float roll) {
-    eye_ << eye[0], eye[1], eye[2];
-    lookat_ << lookat[0], lookat[1], lookat[2];
+Camera::Camera(Eigen::Vector3f *eye, Eigen::Vector3f *lookat, float roll) {
+    eye_ = *eye;
+    lookat_ = *lookat;
     roll_ = roll;
 }
 

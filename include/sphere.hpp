@@ -14,8 +14,8 @@ namespace mrtp {
 
 class Sphere : public Actor {
   public:
-    Sphere(float *center, float radius, float *axis, float reflect,
-           const char *texture);
+    Sphere(Eigen::Vector3f *center, float radius, Eigen::Vector3f *axis, 
+           float reflect, const char *texture);
     ~Sphere() {}
     float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                 float maxd);

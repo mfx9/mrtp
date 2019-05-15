@@ -9,12 +9,13 @@
 #include <Eigen/Core>
 #include "actor.hpp"
 
+
 namespace mrtp {
 
 class Cylinder : public Actor {
   public:
-    Cylinder(float *center, float *direction, float radius, float span,
-             float reflect, const char *texture);
+    Cylinder(Eigen::Vector3f *center, Eigen::Vector3f *direction, float radius, 
+             float span, float reflect, const char *texture);
     ~Cylinder() {}
     float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                 float maxd);

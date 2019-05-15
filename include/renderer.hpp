@@ -23,27 +23,21 @@ class Renderer {
              float shadow, float bias, int maxdepth, int nthreads);
     ~Renderer() {}
     float render_scene();
-    void write_scene(char *filename);
+    void write_scene(const char *path);
 
   private:
-    Camera *camera_;
-    Light *light_;
-
-    std::vector<Actor *> *actors_;
-
+    World *world_;
     std::vector<Pixel> framebuffer_;
     int width_;
     int height_;
-
+    int maxdepth_;
+    int nthreads_;
     float maxdist_;
     float shadow_;
     float bias_;
-    int maxdepth_;
-
     float fov_;
     float ratio_;
     float perspective_;
-    int nthreads_;
 
     bool solve_shadows(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
                        float maxdist);

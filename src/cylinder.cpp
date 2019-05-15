@@ -5,17 +5,17 @@
  */
 #include <Eigen/Geometry>
 #include <cmath>
+
 #include "cylinder.hpp"
 
 
 namespace mrtp {
 
-Cylinder::Cylinder(float *center, float *direction, float radius, float span,
-                   float reflect, const char *texture) {
-    A_ = *(Eigen::Vector3f *)center;
-    B_ = *(Eigen::Vector3f *)direction;
+Cylinder::Cylinder(Eigen::Vector3f *center, Eigen::Vector3f *direction, float radius, 
+                   float span, float reflect, const char *texture) {
+    A_ = *center;
+    B_ = *direction;
     B_ *= (1.0f / B_.norm());
-
     R_ = radius;
     span_ = span;
     reflect_ = reflect;

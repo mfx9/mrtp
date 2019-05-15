@@ -14,8 +14,8 @@ namespace mrtp {
 
 class Plane : public Actor {
   public:
-    Plane(float *center, float *normal, float scale, float reflect,
-          const char *texture);
+    Plane(Eigen::Vector3f *center, Eigen::Vector3f *normal, float scale, 
+          float reflect, const char *texture);
     ~Plane() {}
     float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                 float maxd);

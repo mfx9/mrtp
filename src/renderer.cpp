@@ -31,28 +31,24 @@ maxdepth: number of recursion levels of a reflected ray
 Renderer::Renderer(World *world, int width, int height, float fov,
                    float distance, float shadow, float bias, int maxdepth,
                    int nthreads) {
+    world_ = world;
     width_ = width;
     height_ = height;
     fov_ = fov;
-
-    ratio_ = (float)width_ / (float)height_;
-    perspective_ = ratio_ / (2.0f * std::tan(kDegreeToRadian * (fov_ / 2.0f)));
-
     maxdist_ = distance;
     shadow_ = shadow;
     bias_ = bias;
     maxdepth_ = maxdepth;
     nthreads_ = nthreads;
 
-    camera_ = world->get_camera();
-    light_ = world->get_light();
-    actors_ = world->get_actors();
+    ratio_ = (float)width_ / (float)height_;
+    perspective_ = ratio_ / (2.0f * std::tan(kDegreeToRadian * (fov_ / 2.0f)));
 
     Pixel dummy;
     framebuffer_.assign(width_ * height_, dummy);
 }
 
-void Renderer::write_scene(char *filename) {
+void Renderer::write_scene(const char *path) {
     png::image<png::rgb_pixel> image(width_, height_);
     Pixel *in = &framebuffer_[0];
 
@@ -66,13 +62,17 @@ void Renderer::write_scene(char *filename) {
             out->blue = (unsigned char)bytes[2];
         }
     }
-    image.write(filename);
+    image.write(path);
 }
 
 bool Renderer::solve_shadows(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
                              float maxdist) {
-    for (std::vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
-        Actor *actor = *a;
+    std::vector<Actor *> actors = world_->ptr_actors_;
+    std::vector<Actor *>::iterator iter = actors.begin();
+    std::vector<Actor *>::iterator iter_end = actors.end();
+
+    for (; iter != iter_end; ++iter) {
+        Actor *actor = *iter;
         if (actor->has_shadow()) {
             float distance = actor->solve(origin, direction, 0.0f, maxdist);
             if (distance > 0.0f) {
@@ -85,10 +85,13 @@ bool Renderer::solve_shadows(Eigen::Vector3f *origin, Eigen::Vector3f *direction
 
 Actor *Renderer::solve_hits(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
                             float *currd) {
-    Actor *hit = NULL;
+    std::vector<Actor *> actors = world_->ptr_actors_;
+    std::vector<Actor *>::iterator iter = actors.begin();
+    std::vector<Actor *>::iterator iter_end = actors.end();
+    Actor *hit = nullptr;
 
-    for (std::vector<Actor *>::iterator a = actors_->begin(); a != actors_->end(); a++) {
-        Actor *actor = *a;
+    for (; iter != iter_end; ++iter) {
+        Actor *actor = *iter;
         float distance = actor->solve(origin, direction, 0.0f, maxdist_);
         if ((distance > 0.0f) && (distance < (*currd))) {
             *currd = distance;
@@ -110,7 +113,7 @@ Pixel Renderer::trace_ray_r(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
         Eigen::Vector3f normal = hitactor->calculate_normal(&inter);
 
         // Calculate light intensity
-        Eigen::Vector3f tolight = light_->calculate_ray(&inter);
+        Eigen::Vector3f tolight = world_->ptr_light_->calculate_ray(&inter);
 
         float lightd = tolight.norm();
         tolight *= (1.0f / lightd);
@@ -138,8 +141,7 @@ Pixel Renderer::trace_ray_r(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
             if (depth < maxdepth_) {
                 float coeff = hitactor->get_reflect();
                 if (coeff > 0.0f) {
-                    Eigen::Vector3f ray =
-                        (*direction) - (2.0f * direction->dot(normal)) * normal;
+                    Eigen::Vector3f ray = (*direction) - (2.0f * direction->dot(normal)) * normal;
                     Pixel reflected = trace_ray_r(&corr, &ray, depth + 1);
                     pixel = (1.0f - coeff) * reflected + coeff * pixel;
                 }
@@ -153,10 +155,9 @@ void Renderer::render_block(int block, int nlines) {
     Pixel *pixel = &framebuffer_[block * nlines * width_];
 
     for (int j = 0; j < nlines; j++) {
-
         for (int i = 0; i < width_; i++, pixel++) {
-            Eigen::Vector3f origin = camera_->calculate_origin(i, j + block * nlines);
-            Eigen::Vector3f direction = camera_->calculate_direction(&origin);
+            Eigen::Vector3f origin = world_->ptr_camera_->calculate_origin(i, j + block * nlines);
+            Eigen::Vector3f direction = world_->ptr_camera_->calculate_direction(&origin);
             *pixel = trace_ray_r(&origin, &direction, 0);
         }
     }
@@ -175,7 +176,7 @@ Returns rendering time in seconds, corrected for
 the number of threads.
 */
 float Renderer::render_scene() {
-    camera_->calculate_window(width_, height_, perspective_);
+    world_->ptr_camera_->calculate_window(width_, height_, perspective_);
 
     int timeStart = clock();
 

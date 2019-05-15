@@ -7,6 +7,8 @@
 #define _WORLD_H
 
 #include <vector>
+#include <list>
+
 #include "actor.hpp"
 #include "camera.hpp"
 #include "cylinder.hpp"
@@ -14,25 +16,29 @@
 #include "plane.hpp"
 #include "sphere.hpp"
 
+
 namespace mrtp {
+
+enum WorldStatus_t {ws_ok, ws_fail, ws_err_camera, ws_err_light, 
+                    ws_err_no_actors};
 
 class World {
   public:
-    void add_camera(Camera *camera);
-    void add_light(Light *light);
-    void add_plane(Plane *plane);
-    void add_sphere(Sphere *sphere);
-    void add_cylinder(Cylinder *cylinder);
+    World(const char *path): path_(path) {}
+    ~World() {}
+    WorldStatus_t initialize();
 
-    // Used for binding to renderer
-    Light *get_light();
-    Camera *get_camera();
-    std::vector<Actor *> *get_actors();
+    Camera *ptr_camera_;
+    Light *ptr_light_;
+    std::vector<Actor *> ptr_actors_;
 
   private:
-    std::vector<Actor *> actors_;
-    std::vector<Light *> lights_;
-    std::vector<Camera *> cameras_;
+    const char *path_;
+    std::list<Camera> cameras_;
+    std::list<Light> lights_;
+    std::list<Plane> planes_;
+    std::list<Sphere> spheres_;
+    std::list<Cylinder> cylinders_;
 };
 
 } //end namespace mrtp
