@@ -68,7 +68,7 @@ WorldStatus_t World::initialize() {
             const char *plane_texture = raw_texture->data();
 
             float plane_scale = (float)tab_plane->get_as<double>("scale").value_or(0.15f);
-            float plane_reflect = (float)tab_plane->get_as<double>("reflect").value_or(0.75f);
+            float plane_reflect = (float)tab_plane->get_as<double>("reflect").value_or(0.0f);
 
             Plane plane(&plane_center, &plane_normal, plane_scale, plane_reflect, plane_texture);
             planes_.push_back(plane);
@@ -83,6 +83,7 @@ WorldStatus_t World::initialize() {
             Eigen::Vector3d temp_center(raw_center->data());
             Eigen::Vector3f sphere_center = temp_center.cast<float>();
 
+            //TODO Axis is optional, set to <0, 0, 1>
             auto raw_axis = tab_sphere->get_array_of<double>("axis");
             Eigen::Vector3d temp_axis(raw_center->data());
             Eigen::Vector3f sphere_axis = temp_axis.cast<float>();
