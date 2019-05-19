@@ -22,4 +22,4 @@ class Light {
 
 } //end namespace mrtp
 
-#endif //!_LIGHT_H
+#endif //_LIGHT_H

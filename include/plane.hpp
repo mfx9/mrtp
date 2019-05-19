@@ -32,4 +32,4 @@ class Plane : public Actor {
 
 } //end namespace mrtp
 
-#endif //!_PLANE_H
+#endif //_PLANE_H

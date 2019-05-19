@@ -32,4 +32,4 @@ class Sphere : public Actor {
 
 } //end namespace mrtp
 
-#endif //!_SPHERE_H
+#endif //_SPHERE_H

@@ -43,4 +43,4 @@ class World {
 
 } //end namespace mrtp
 
-#endif //!_WORLD_H
+#endif //_WORLD_H

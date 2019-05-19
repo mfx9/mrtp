@@ -29,4 +29,4 @@ class Camera {
 
 } //end namespace mrtp
 
-#endif //!_CAMERA_H
+#endif //_CAMERA_H

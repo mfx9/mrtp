@@ -55,4 +55,4 @@ class Renderer {
 
 } //end namespace mrtp
 
-#endif //!_RENDERER_H
+#endif //_RENDERER_H

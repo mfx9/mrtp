@@ -36,4 +36,4 @@ class Actor {
 
 } //end namespace mrtp
 
-#endif //!_ACTOR_H
+#endif //_ACTOR_H

@@ -46,7 +46,7 @@ enum ExitCode_t {exit_ok, exit_no_options, exit_unknown_option, exit_light_dista
 
 
 void help_message() {
-    std::cout << R"(Usage: mrtp_cli [OPTION]... FILE
+    std::cout << R"(Usage: mrtp_cli [OPTION]... FILE...
   Options:
     -d, --light-distance     distance to darken light (def. 60)
     -f, --fov                field of vision, in degrees (def. 93)
