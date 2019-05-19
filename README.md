@@ -14,9 +14,9 @@ Mrtp also depends on (submodules):
 
 ### Installation
 
-Make sure you have the necessary libraries installed. Review the makefile. 
-Finally, run make in the main directory. The executable should appear 
-in bin/mrtp\_cli. 
+Make sure you have the necessary libraries installed. You may want to review 
+the makefile. Finally, run make in the main directory. The executable 
+should appear in bin/mrtp\_cli. 
 
 ```
 apt-get install libpng-dev libpng++-dev libeigen3-dev
