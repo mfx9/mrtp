@@ -1,8 +1,9 @@
-.vscode/
+.vscode/*
+build/*
+bin/*
 *~
 *.swp
 *.a
 *.o
 *.so
 *.pyc
-mrtp_cli
