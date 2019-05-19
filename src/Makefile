@@ -1,17 +1,11 @@
-# Makefile for libmrtp.a
+# Makefile for mrtp_cli
 
 INCLUDE=-I/usr/include/eigen3 -I/usr/include/png++ -I../include -I../cpptoml/include
 FLAGS=-W -Wall -pedantic -fPIC -O2
-LIBS=-L.
-
-default: libmrtp.a
 
 
-libmrtp.a: actor.o plane.o sphere.o cylinder.o texture.o light.o camera.o world.o renderer.o
-	ar rcs $@ $^
-
-mrtp_cli: main.o libmrtp.a
-	g++ $(LIBS) $^ -o $@ -fopenmp -lm -lpng -lmrtp
+mrtp_cli: main.o actor.o plane.o sphere.o cylinder.o texture.o light.o camera.o world.o renderer.o
+	g++ $^ -o $@ -fopenmp -lm -lpng
 
 main.o: main.cpp
 	g++ $(FLAGS) $(INCLUDE) -o main.o -c main.cpp
@@ -46,4 +40,4 @@ renderer.o: renderer.cpp ../include/renderer.hpp
 
 .PHONY: clean
 clean:
-	-rm -f mrtp_cli libmrtp.a *.o &>/dev/null
+	-rm -f mrtp_cli *.o &>/dev/null

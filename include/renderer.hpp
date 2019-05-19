@@ -15,18 +15,23 @@
 #include "pixel.hpp"
 #include "world.hpp"
 
+
 namespace mrtp {
+
+enum RendererStatus_t {rs_ok, rs_fail};
 
 class Renderer {
   public:
     Renderer(World *world, int width, int height, float fov, float distance,
-             float shadow, float bias, int maxdepth, int nthreads);
+             float shadow, float bias, int maxdepth, int nthreads, 
+             const char *path);
     ~Renderer() {}
     float render_scene();
-    void write_scene(const char *path);
+    bool write_scene();
 
   private:
     World *world_;
+    const char *path_;
     std::vector<Pixel> framebuffer_;
     int width_;
     int height_;

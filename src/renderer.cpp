@@ -30,7 +30,7 @@ maxdepth: number of recursion levels of a reflected ray
 */
 Renderer::Renderer(World *world, int width, int height, float fov,
                    float distance, float shadow, float bias, int maxdepth,
-                   int nthreads) {
+                   int nthreads, const char *path) {
     world_ = world;
     width_ = width;
     height_ = height;
@@ -40,15 +40,16 @@ Renderer::Renderer(World *world, int width, int height, float fov,
     bias_ = bias;
     maxdepth_ = maxdepth;
     nthreads_ = nthreads;
+    path_ = path;
 
     ratio_ = (float)width_ / (float)height_;
-    perspective_ = ratio_ / (2.0f * std::tan(kDegreeToRadian * (fov_ / 2.0f)));
+    perspective_ = ratio_ / (2.0f * std::tan(kDegreeToRadian * fov_ / 2.0f));
 
     Pixel dummy;
     framebuffer_.assign(width_ * height_, dummy);
 }
 
-void Renderer::write_scene(const char *path) {
+bool Renderer::write_scene() {
     png::image<png::rgb_pixel> image(width_, height_);
     Pixel *in = &framebuffer_[0];
 
@@ -62,7 +63,8 @@ void Renderer::write_scene(const char *path) {
             out->blue = (unsigned char)bytes[2];
         }
     }
-    image.write(path);
+    image.write(path_);
+    return rs_ok;
 }
 
 bool Renderer::solve_shadows(Eigen::Vector3f *origin, Eigen::Vector3f *direction,
@@ -178,7 +180,7 @@ the number of threads.
 float Renderer::render_scene() {
     world_->ptr_camera_->calculate_window(width_, height_, perspective_);
 
-    int timeStart = clock();
+    int time_start = clock();
 
 #ifdef _OPENMP
     if (nthreads_ == 1) {
@@ -208,12 +210,12 @@ float Renderer::render_scene() {
 
 #endif //!_OPENMP
 
-    int timeStop = std::clock();
-    float timeUsed = (float)(timeStop - timeStart) / CLOCKS_PER_SEC;
+    int time_stop = std::clock();
+    float time_used = (float)(time_stop - time_start) / CLOCKS_PER_SEC;
     if (nthreads_ > 1) {
-        timeUsed *= (1.0f / (float)nthreads_);
+        time_used *= (1.0f / (float)nthreads_);
     }
-    return timeUsed;
+    return time_used;
 }
 
 } //end namespace mrtp
