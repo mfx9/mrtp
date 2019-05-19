@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cstdlib>
 
 #include "world.hpp"
 #include "renderer.hpp"
@@ -265,6 +266,7 @@ int main(int argc, char **argv) {
 
         mrtp::World world(toml_file.c_str());
         if (world.initialize() != mrtp::ws_ok) {
+            if (!quiet) { std::cerr << std::endl; }
             std::cerr << "error initializing world" << std::endl;
             return exit_init_world;
         }

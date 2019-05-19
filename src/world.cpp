@@ -15,8 +15,7 @@ WorldStatus_t World::initialize() {
     std::shared_ptr<cpptoml::table> config;
     try {
         config = cpptoml::parse_file(path_);
-    }
-    catch (...) {
+    } catch (...) {
         return ws_fail;
     }
 
