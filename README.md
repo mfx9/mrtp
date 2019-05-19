@@ -14,10 +14,12 @@ Mrtp also depends on (submodules):
 
 ### Installation
 
-You may start from reviewing the makefile. Then, run the following 
-commands. The executable should be in bin/mrtp\_cli. 
+Make sure you have the necessary libraries installed. Review the makefile. 
+Finally, run make in the main directory. The executable should appear 
+in bin/mrtp\_cli. 
 
 ```
+apt-get install libpng-dev libpng++-dev libeigen3-dev
 git submodule update --init --recursive
 mkdir bin build
 make
