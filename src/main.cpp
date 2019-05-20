@@ -87,34 +87,32 @@ int main(int argc, char **argv) {
         std::string option(argv[i]);
 
         if (option == "-d" || option == "--light-distance") {
-            if (i + 1 < argc) {
-                std::string argument(argv[++i]);
-                std::stringstream convert(argument);
-                convert >> distance;
-                if (!convert) {
-                    std::cerr << "error reading light distance" << std::endl;
-                    return exit_light_distance;
-                }
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "distance requires argument" << std::endl;
+                return exit_light_distance;
+            }
+            std::string argument(argv[++i]);
+            std::stringstream convert(argument);
+            convert >> distance;
+            if (!convert) {
+                std::cerr << "error reading light distance" << std::endl;
                 return exit_light_distance;
             }
 
         } else if (option == "-f" || option == "--fov") {
-            if (i + 1 < argc) {
-                std::string argument(argv[++i]);
-                std::stringstream convert(argument);
-                convert >> fov;
-                if (!convert) {
-                    std::cerr << "error reading field of vision" << std::endl;
-                    return exit_fov;
-                }
-                if (fov < kMinFOV || fov > kMaxFOV) {
-                    std::cerr << "field of vision is out of range" << std::endl;
-                    return exit_fov;
-                }
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "field of vision requires argument" << std::endl;
+                return exit_fov;
+            }
+            std::string argument(argv[++i]);
+            std::stringstream convert(argument);
+            convert >> fov;
+            if (!convert) {
+                std::cerr << "error reading field of vision" << std::endl;
+                return exit_fov;
+            }
+            if (fov < kMinFOV || fov > kMaxFOV) {
+                std::cerr << "field of vision is out of range" << std::endl;
                 return exit_fov;
             }
 
@@ -123,110 +121,104 @@ int main(int argc, char **argv) {
             return exit_ok;
 
         } else if (option == "-m" || option == "--light-mode") {
-            if (i + 1 < argc) {
-                std::string argument(argv[++i]);
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "mode of light requires argument" << std::endl;
                 return exit_light_mode;
             }
+            std::string argument(argv[++i]);
 
         } else if (option == "-o" || option == "--output-file") {
-            if (i + 1 < argc) {
-                png_file = argv[++i];
-                //TODO Check for a valid filename
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "output file requires argument" << std::endl;
                 return exit_output_file;
             }
+            png_file = argv[++i];
+            //TODO Check for a valid filename
 
         } else if (option == "-q" || option == "--quiet") {
             quiet = true;
 
         } else if (option == "-R" || option == "--recursion-levels") {
-            if (i + 1 < argc) {
-                std::string argument(argv[++i]);
-                std::stringstream convert(argument);
-                convert >> recursion;
-                if (!convert) {
-                    std::cerr << "error reading levels of recursion" << std::endl;
-                    return exit_recursion_levels;
-                }
-                if (recursion < kMinRecursionLevels || recursion > kMaxRecursionLevels) {
-                    std::cerr << "out of range recursion levels" << std::endl;
-                    return exit_recursion_levels;
-                }
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "recursion requires argument" << std::endl;
+                return exit_recursion_levels;
+            }
+            std::string argument(argv[++i]);
+            std::stringstream convert(argument);
+            convert >> recursion;
+            if (!convert) {
+                std::cerr << "error reading levels of recursion" << std::endl;
+                return exit_recursion_levels;
+            }
+            if (recursion < kMinRecursionLevels || recursion > kMaxRecursionLevels) {
+                std::cerr << "out of range recursion levels" << std::endl;
                 return exit_recursion_levels;
             }
 
         } else if (option == "-r" || option == "--resolution") {
-            if (i + 1 < argc) {
-                std::string argument(argv[++i]);
-                size_t pos = argument.find('x');
-                if (pos == std::string::npos) {
-                    pos = argument.find('X');
-                    if (pos == std::string::npos) {
-                        std::cerr << "invalid format of resolution" << std::endl;
-                        return exit_resolution;
-                    }
-                }
-                std::string left(argument.substr(0, pos));
-                std::stringstream convert(left);
-                convert >> width;
-                if (!convert) {
-                    std::cerr << "unable to convert width" << std::endl;
-                    return exit_resolution;
-                }
-                if (width < kMinWidth || width > kMaxWidth) {
-                    std::cerr << "out of range width" << std::endl;
-                    return exit_resolution;
-                }
-                std::string right(argument.substr(pos+1, argument.length()-pos-1));
-                std::stringstream convert_other(right);
-                convert_other >> height;
-                if (!convert_other) {
-                    std::cerr << "unable to convert height" << std::endl;
-                    return exit_resolution;
-                }
-                if (height < kMinHeight || height > kMaxHeight) {
-                    std::cerr << "out of range height" << std::endl;
-                    return exit_resolution;
-                }
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "resolution requires argument" << std::endl;
+                return exit_resolution;
+            }
+            std::string argument(argv[++i]);
+            size_t pos = argument.find('x');
+            if (pos == std::string::npos) {
+                pos = argument.find('X');
+                if (pos == std::string::npos) {
+                    std::cerr << "invalid format of resolution" << std::endl;
+                    return exit_resolution;
+                }
+            }
+            std::string left(argument.substr(0, pos));
+            std::stringstream convert(left);
+            convert >> width;
+            if (!convert) {
+                std::cerr << "unable to convert width" << std::endl;
+                return exit_resolution;
+            }
+            if (width < kMinWidth || width > kMaxWidth) {
+                std::cerr << "out of range width" << std::endl;
+                return exit_resolution;
+            }
+            std::string right(argument.substr(pos+1, argument.length()-pos-1));
+            std::stringstream convert_other(right);
+            convert_other >> height;
+            if (!convert_other) {
+                std::cerr << "unable to convert height" << std::endl;
+                return exit_resolution;
+            }
+            if (height < kMinHeight || height > kMaxHeight) {
+                std::cerr << "out of range height" << std::endl;
                 return exit_resolution;
             }
 
         } else if (option == "-s" || option == "--shadow-factor") {
-            if (i + 1 < argc) {
-                std::string argument(argv[++i]);
-                std::stringstream convert(argument);
-                convert >> shadow;
-                if (!convert) {
-                    std::cerr << "error reading shadow factor" << std::endl;
-                    return exit_shadow_factor;
-                }
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "shadow factor requires argument" << std::endl;
+                return exit_shadow_factor;
+            }
+            std::string argument(argv[++i]);
+            std::stringstream convert(argument);
+            convert >> shadow;
+            if (!convert) {
+                std::cerr << "error reading shadow factor" << std::endl;
                 return exit_shadow_factor;
             }
 
         } else if (option == "-t" || option == "--threads") {
-            if (i + 1 < argc) {
-                std::string argument(argv[++i]);
-                std::stringstream convert(argument);
-                convert >> threads;
-                if (!convert) {
-                    std::cerr << "error reading number of threads" << std::endl;
-                    return exit_threads;
-                }
-                if (threads < kMinThreads || threads > kMaxThreads) {
-                    std::cerr << "out of range number of threads" << std::endl;
-                    return exit_threads;
-                }
-            } else {
+            if (i + 1 >= argc) {
                 std::cerr << "number of threads requires argument" << std::endl;
+                return exit_threads;
+            }
+            std::string argument(argv[++i]);
+            std::stringstream convert(argument);
+            convert >> threads;
+            if (!convert) {
+                std::cerr << "error reading number of threads" << std::endl;
+                return exit_threads;
+            }
+            if (threads < kMinThreads || threads > kMaxThreads) {
+                std::cerr << "out of range number of threads" << std::endl;
                 return exit_threads;
             }
 
