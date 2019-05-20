@@ -6,8 +6,10 @@
 #ifndef _WORLD_H
 #define _WORLD_H
 
+#include <memory>
 #include <vector>
 #include <list>
+#include "cpptoml.h"
 
 #include "actor.hpp"
 #include "camera.hpp"
@@ -33,6 +35,10 @@ class World {
     std::vector<Actor *> ptr_actors_;
 
   private:
+    WorldStatus_t load_planes(std::shared_ptr<cpptoml::table_array> table, unsigned int *count);
+    WorldStatus_t load_spheres(std::shared_ptr<cpptoml::table_array> table, unsigned int *count);
+    WorldStatus_t load_cylinders(std::shared_ptr<cpptoml::table_array> table, unsigned int *count);
+
     const char *path_;
     std::list<Camera> cameras_;
     std::list<Light> lights_;
