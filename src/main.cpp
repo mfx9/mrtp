@@ -238,10 +238,10 @@ int main(int argc, char **argv) {
         return exit_toml;
     }
 
-    bool use_auto_name = toml_files.size() > 1;
+    bool use_auto_name = (toml_files.size() > 1) || (png_file == "");
     if (use_auto_name) {
         if (png_file != "") {
-            if (!quiet) { std::cerr << "multiple toml files: do not use -o/--output-file" << std::endl; }
+            std::cerr << "multiple toml files: do not use -o/--output-file" << std::endl;
             return exit_output_file;
         }
     }
