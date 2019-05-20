@@ -4,7 +4,6 @@
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
 #include "world.hpp"
-#include "cpptoml.h"
 
 
 namespace mrtp {
@@ -50,27 +49,31 @@ WorldStatus_t World::initialize() {
     lights_.push_back(light);
     ptr_light_ = &lights_.back();
 
-    WorldStatus_t check = ws_ok;
-    unsigned int count = 0;
-
     auto tab_planes = config->get_table_array("planes");
-    if (tab_planes) { check = load_planes(tab_planes, &count); }
-    if (check != ws_ok) { return check; }
+    if (tab_planes) {
+        WorldStatus_t check = load_planes(tab_planes);
+        if (check != ws_ok) { return check; }
+    }
 
     auto tab_spheres = config->get_table_array("spheres");
-    if (tab_spheres) { check = load_spheres(tab_spheres, &count); }
-    if (check != ws_ok) { return check; }
+    if (tab_spheres) {
+        WorldStatus_t check = load_spheres(tab_spheres);
+        if (check != ws_ok) { return check; }
+    }
 
     auto tab_cylinders = config->get_table_array("cylinders");
-    if (tab_cylinders) { check = load_cylinders(tab_cylinders, &count); }
-    if (check != ws_ok) { return check; }
+    if (tab_cylinders) {
+        WorldStatus_t check = load_cylinders(tab_cylinders);
+        if (check != ws_ok) { return check; }
+    }
 
-    if (count < 1) { return ws_err_no_actors; }
+    size_t num_actors = planes_.size() + spheres_.size() + cylinders_.size();
+    if (num_actors < 1) { return ws_err_no_actors; }
 
-    return check;
+    return ws_ok;
 }
 
-WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> table, unsigned int *count) {
+WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> table) {
     for (const auto& tab_plane : *table) {
         auto raw_center = tab_plane->get_array_of<double>("center");
         Eigen::Vector3d temp_center(raw_center->data());
@@ -89,11 +92,11 @@ WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> table, un
         Plane plane(&plane_center, &plane_normal, plane_scale, plane_reflect, plane_texture);
         planes_.push_back(plane);
         ptr_actors_.push_back(&planes_.back());
-        (*count)++;
     }
+    return ws_ok;
 }
 
-WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> table, unsigned int *count) {
+WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> table) {
     for (const auto& tab_sphere : *table) {
         auto raw_center = tab_sphere->get_array_of<double>("center");
         Eigen::Vector3d temp_center(raw_center->data());
@@ -113,11 +116,11 @@ WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> table, u
         Sphere sphere(&sphere_center, sphere_radius, &sphere_axis, sphere_reflect, sphere_texture);
         spheres_.push_back(sphere);
         ptr_actors_.push_back(&spheres_.back());
-        (*count)++;
     }
+    return ws_ok;
 }
 
-WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> table, unsigned int *count) {
+WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> table) {
     for (const auto& tab_cylinder : *table) {
         auto raw_center = tab_cylinder->get_array_of<double>("center");
         Eigen::Vector3d temp_center(raw_center->data());
@@ -137,8 +140,8 @@ WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> table,
         Cylinder cylinder(&cylinder_center, &cylinder_direction, cylinder_radius, cylinder_span, cylinder_reflect, cylinder_texture);
         cylinders_.push_back(cylinder);
         ptr_actors_.push_back(&cylinders_.back());
-        (*count)++;
     }
+    return ws_ok;
 }
 
 } //end namespace mrtp

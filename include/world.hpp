@@ -35,9 +35,9 @@ class World {
     std::vector<Actor *> ptr_actors_;
 
   private:
-    WorldStatus_t load_planes(std::shared_ptr<cpptoml::table_array> table, unsigned int *count);
-    WorldStatus_t load_spheres(std::shared_ptr<cpptoml::table_array> table, unsigned int *count);
-    WorldStatus_t load_cylinders(std::shared_ptr<cpptoml::table_array> table, unsigned int *count);
+    WorldStatus_t load_planes(std::shared_ptr<cpptoml::table_array> table);
+    WorldStatus_t load_spheres(std::shared_ptr<cpptoml::table_array> table);
+    WorldStatus_t load_cylinders(std::shared_ptr<cpptoml::table_array> table);
 
     const char *path_;
     std::list<Camera> cameras_;
