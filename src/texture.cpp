@@ -61,8 +61,11 @@ one that already exists in the memory.
 Returns a pointer to the texture.
 */
 Texture *TextureCollector::add(const char *path) {
-    for (std::list<Texture>::iterator t = textures_.begin(); t != textures_.end(); t++) {
-        Texture *texture = &(*t);
+    std::list<Texture>::iterator iter = textures_.begin();
+    std::list<Texture>::iterator iter_end = textures_.end();
+
+    for (; iter != iter_end; ++iter) {
+        Texture *texture = &(*iter);
         if (texture->check_path(path)) {
             return texture;
         }
