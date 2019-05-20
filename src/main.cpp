@@ -238,13 +238,11 @@ int main(int argc, char **argv) {
         return exit_toml;
     }
 
-    bool is_many = toml_files.size() > 1;
-    if (is_many) {
+    bool use_auto_name = toml_files.size() > 1;
+    if (use_auto_name) {
         if (png_file != "") {
-            if (!quiet) { 
-                std::cout << "multiple toml files: leave option -o/--output-file blank" << std::endl; 
-                return exit_output_file;
-            }
+            if (!quiet) { std::cerr << "multiple toml files: do not use -o/--output-file" << std::endl; }
+            return exit_output_file;
         }
     }
 
@@ -263,7 +261,7 @@ int main(int argc, char **argv) {
             return exit_init_world;
         }
 
-        if (png_file == "" || is_many) {
+        if (use_auto_name) {
             std::string foo(toml_file);
             size_t pos = toml_file.rfind(".toml");
             if (pos != std::string::npos) { foo = toml_file.substr(0, pos); }
