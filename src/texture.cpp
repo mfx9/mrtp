@@ -66,10 +66,9 @@ Texture *TextureCollector::add(const char *path) {
 
     for (; iter != iter_end; ++iter) {
         Texture *texture = &(*iter);
-        if (texture->check_path(path)) {
-            return texture;
-        }
+        if (texture->check_path(path)) { return texture; }
     }
+
     Texture texture(path);
     textures_.push_back(texture);
     Texture *last = &textures_.back();
