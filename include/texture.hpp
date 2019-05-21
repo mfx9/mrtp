@@ -7,36 +7,36 @@
 #define _TEXTURE_H
 
 #include <list>
-#include <vector>
 #include <string>
-
+#include <vector>
 #include "pixel.hpp"
 
+namespace mrtp {
 
 class Texture {
+  public:
+    Texture(const char *path);
+    ~Texture() {}
+    void load_texture();
+    bool check_path(const char *path);
+    Pixel pick_pixel(float fracx, float fracy, float scale);
+
+  private:
     int width_;
     int height_;
-
     std::vector<Pixel> data_;
-
     std::string spath_;
-
-public:
-    Texture (const char *path);
-    ~Texture ();
-    void Load ();
-    bool CheckPath (const char *path);
-    Pixel PickPixel (float fracx, float fracy, float scale);
 };
 
 class TextureCollector {
-    std::list<Texture> textures_;
+  public:
+    Texture *add(const char *path);
 
-public:
-    Texture *Add (const char *path);
+  private:
+    std::list<Texture> textures_;
 };
 
-
 extern TextureCollector textureCollector;
+} //end namespace mrtp
 
-#endif /* !_TEXTURE_H */
+#endif //_TEXTURE_H

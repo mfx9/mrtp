@@ -1,30 +1,33 @@
 # Mrtp
 
-A minimalistic raytracing tool to explore combining C++ with Python.
+A weekend project to build a simple raytracer in C++. 
 
-Author: Mikolaj Feliks \<<mikolaj.feliks@gmail.com>\><br>
-Released as open source software under the GNU GPL v3.0 license (see COPYING).
+Textures are from: https://opengameart.org/content/100-seamless-textures
 
-### Installation instructions
-
-Mrtp depends on the following libraries and tools:
- * libpng-dev>=1.2
- * png++>=0.2.9
+Mrtp depends on the following libraries and tools (Debian packages):
+ * libpng-dev
+ * libpng++-dev
  * libeigen3-dev
- * python2.7-dev
- * cython
 
-For reading textures and writing output images, Mrtp uses
-[png++](http://www.nongnu.org/pngpp/), a C++ wrapper for libpng. 
+Mrtp also depends on (submodules): 
+ * cpptoml
 
-In step 1, run *make* in the png++/ folder. This will automatically 
-download and unpack all necessary files. png++ is a header library and 
-does not require compilation.
+### Installation
 
-In step 2, run *make* in the Mrtp/ folder. A Python library Mrtp.so 
-will be generated that is ready to use in a Python script.
+Make sure you have the necessary libraries installed. Otherwise, try (in Debian):
 
-For more information, see the attached scripts in the examples folder.
+```
+apt-get install libpng-dev libpng++-dev libeigen3-dev
+```
+
+You may want to review the makefile. Finally, run make in the main directory. 
+The executable should appear in bin/mrtp\_cli. 
+
+```
+git submodule update --init --recursive
+mkdir bin build
+make
+```
 
 ### Gallery
 

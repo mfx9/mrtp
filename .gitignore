@@ -1,5 +1,6 @@
-/png++/png++*
-Mrtp/Mrtp.cpp
+.vscode/*
+build/*
+bin/*
 *~
 *.swp
 *.a

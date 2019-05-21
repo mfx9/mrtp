@@ -8,14 +8,18 @@
 
 #include <Eigen/Core>
 
+namespace mrtp {
 
-class CLight {
-    Eigen::Vector3f *center_;
+class Light {
+  public:
+    Light(Eigen::Vector3f *center);
+    ~Light() {}
+    Eigen::Vector3f calculate_ray(Eigen::Vector3f *hit);
 
-public:
-    CLight (float *center);
-    ~CLight ();
-    Eigen::Vector3f CalculateRay (Eigen::Vector3f *hit);
+  private:
+    Eigen::Vector3f center_;
 };
 
-#endif /* !_LIGHT_H */
+} //end namespace mrtp
+
+#endif //_LIGHT_H
