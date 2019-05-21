@@ -49,47 +49,40 @@ WorldStatus_t World::initialize() {
     lights_.push_back(light);
     ptr_light_ = &lights_.back();
 
-    auto tab_planes = config->get_table_array("planes");
-    if (tab_planes) {
-        WorldStatus_t check = load_planes(tab_planes);
-        if (check != ws_ok) { return check; }
-    }
+    WorldStatus_t check = load_planes(config->get_table_array("planes"));
+    if (check != ws_ok) { return check; }
 
-    auto tab_spheres = config->get_table_array("spheres");
-    if (tab_spheres) {
-        WorldStatus_t check = load_spheres(tab_spheres);
-        if (check != ws_ok) { return check; }
-    }
+    check = load_spheres(config->get_table_array("spheres"));
+    if (check != ws_ok) { return check; }
 
-    auto tab_cylinders = config->get_table_array("cylinders");
-    if (tab_cylinders) {
-        WorldStatus_t check = load_cylinders(tab_cylinders);
-        if (check != ws_ok) { return check; }
-    }
+    check = load_cylinders(config->get_table_array("cylinders"));
+    if (check != ws_ok) { return check; }
 
     size_t num_actors = planes_.size() + spheres_.size() + cylinders_.size();
     if (num_actors < 1) { return ws_err_no_actors; }
 
-    return ws_ok;
+    return check;
 }
 
 WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> table) {
-    for (const auto& tab_plane : *table) {
-        auto raw_center = tab_plane->get_array_of<double>("center");
+    if (!table) { return ws_ok; }
+
+    for (const auto& items : *table) {
+        auto raw_center = items->get_array_of<double>("center");
         Eigen::Vector3d temp_center(raw_center->data());
-        Eigen::Vector3f plane_center = temp_center.cast<float>();
+        Eigen::Vector3f center = temp_center.cast<float>();
 
-        auto raw_normal = tab_plane->get_array_of<double>("normal");
+        auto raw_normal = items->get_array_of<double>("normal");
         Eigen::Vector3d temp_normal(raw_normal->data());
-        Eigen::Vector3f plane_normal = temp_normal.cast<float>();
+        Eigen::Vector3f normal = temp_normal.cast<float>();
 
-        auto raw_texture = tab_plane->get_as<std::string>("texture");
-        const char *plane_texture = raw_texture->data();
+        auto raw_texture = items->get_as<std::string>("texture");
+        const char *texture = raw_texture->data();
 
-        float plane_scale = (float)tab_plane->get_as<double>("scale").value_or(0.15f);
-        float plane_reflect = (float)tab_plane->get_as<double>("reflect").value_or(0.0f);
+        float scale = (float)items->get_as<double>("scale").value_or(0.15f);
+        float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
 
-        Plane plane(&plane_center, &plane_normal, plane_scale, plane_reflect, plane_texture);
+        Plane plane(&center, &normal, scale, reflect, texture);
         planes_.push_back(plane);
         ptr_actors_.push_back(&planes_.back());
     }
@@ -97,23 +90,25 @@ WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> table) {
 }
 
 WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> table) {
-    for (const auto& tab_sphere : *table) {
-        auto raw_center = tab_sphere->get_array_of<double>("center");
+    if (!table) { return ws_ok; }
+
+    for (const auto& items : *table) {
+        auto raw_center = items->get_array_of<double>("center");
         Eigen::Vector3d temp_center(raw_center->data());
-        Eigen::Vector3f sphere_center = temp_center.cast<float>();
+        Eigen::Vector3f center = temp_center.cast<float>();
 
         //TODO Axis is optional, set to <0, 0, 1>
-        auto raw_axis = tab_sphere->get_array_of<double>("axis");
+        auto raw_axis = items->get_array_of<double>("axis");
         Eigen::Vector3d temp_axis(raw_center->data());
-        Eigen::Vector3f sphere_axis = temp_axis.cast<float>();
+        Eigen::Vector3f axis = temp_axis.cast<float>();
 
-        auto raw_texture = tab_sphere->get_as<std::string>("texture");
-        const char *sphere_texture = raw_texture->data();
+        auto raw_texture = items->get_as<std::string>("texture");
+        const char *texture = raw_texture->data();
 
-        float sphere_radius = (float)tab_sphere->get_as<double>("radius").value_or(1.0f);
-        float sphere_reflect = (float)tab_sphere->get_as<double>("reflect").value_or(0.0f);
+        float radius = (float)items->get_as<double>("radius").value_or(1.0f);
+        float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
 
-        Sphere sphere(&sphere_center, sphere_radius, &sphere_axis, sphere_reflect, sphere_texture);
+        Sphere sphere(&center, radius, &axis, reflect, texture);
         spheres_.push_back(sphere);
         ptr_actors_.push_back(&spheres_.back());
     }
@@ -121,23 +116,25 @@ WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> table) {
 }
 
 WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> table) {
-    for (const auto& tab_cylinder : *table) {
-        auto raw_center = tab_cylinder->get_array_of<double>("center");
+    if (!table) { return ws_ok; }
+
+    for (const auto& items : *table) {
+        auto raw_center = items->get_array_of<double>("center");
         Eigen::Vector3d temp_center(raw_center->data());
-        Eigen::Vector3f cylinder_center = temp_center.cast<float>();
+        Eigen::Vector3f center = temp_center.cast<float>();
 
-        auto raw_direction = tab_cylinder->get_array_of<double>("direction");
+        auto raw_direction = items->get_array_of<double>("direction");
         Eigen::Vector3d temp_direction(raw_direction->data());
-        Eigen::Vector3f cylinder_direction = temp_direction.cast<float>();
+        Eigen::Vector3f direction = temp_direction.cast<float>();
 
-        auto raw_texture = tab_cylinder->get_as<std::string>("texture");
-        const char *cylinder_texture = raw_texture->data();
+        auto raw_texture = items->get_as<std::string>("texture");
+        const char *texture = raw_texture->data();
 
-        float cylinder_span = (float)tab_cylinder->get_as<double>("span").value_or(-1.0f);
-        float cylinder_radius = (float)tab_cylinder->get_as<double>("radius").value_or(1.0f);
-        float cylinder_reflect = (float)tab_cylinder->get_as<double>("reflect").value_or(0.0f);
+        float span = (float)items->get_as<double>("span").value_or(-1.0f);
+        float radius = (float)items->get_as<double>("radius").value_or(1.0f);
+        float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
 
-        Cylinder cylinder(&cylinder_center, &cylinder_direction, cylinder_radius, cylinder_span, cylinder_reflect, cylinder_texture);
+        Cylinder cylinder(&center, &direction, radius, span, reflect, texture);
         cylinders_.push_back(cylinder);
         ptr_actors_.push_back(&cylinders_.back());
     }
