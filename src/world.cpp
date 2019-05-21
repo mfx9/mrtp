@@ -3,27 +3,34 @@
  * Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
+#include <sys/stat.h>
+
 #include "world.hpp"
 
 
 namespace mrtp {
+
+static bool file_exists(const char *path) {
+    struct stat buffer;
+    return stat(path, &buffer) == 0;
+}
 
 WorldStatus_t World::initialize() {
     std::shared_ptr<cpptoml::table> config;
     try {
         config = cpptoml::parse_file(path_);
     } catch (...) {
-        return ws_fail;
+        return ws_parse_error;
     }
 
     auto tab_camera = config->get_table("camera");
-    if (!tab_camera) { return ws_err_camera; }
+    if (!tab_camera) { return ws_no_camera; }
     
     auto raw_eye = tab_camera->get_array_of<double>("center");
-    if (!raw_eye) { return ws_err_camera; }
+    if (!raw_eye) { return ws_camera_param; }
     
     auto raw_lookat = tab_camera->get_array_of<double>("target");
-    if (!raw_lookat) { return ws_err_camera; }
+    if (!raw_lookat) { return ws_camera_param; }
 
     float camera_roll = (float)tab_camera->get_as<double>("roll").value_or(0.0f);
 
@@ -37,10 +44,10 @@ WorldStatus_t World::initialize() {
     ptr_camera_ = &cameras_.back();
 
     auto tab_light = config->get_table("light");
-    if (!tab_light) { return ws_err_light; }
+    if (!tab_light) { return ws_no_light; }
 
     auto raw_center = tab_light->get_array_of<double>("center");
-    if (!raw_center) { return ws_err_light; }
+    if (!raw_center) { return ws_light_param; }
 
     Eigen::Vector3d temp_center(raw_center->data());
     Eigen::Vector3f light_center = temp_center.cast<float>();
@@ -59,7 +66,7 @@ WorldStatus_t World::initialize() {
     if (check != ws_ok) { return check; }
 
     size_t num_actors = planes_.size() + spheres_.size() + cylinders_.size();
-    if (num_actors < 1) { return ws_err_no_actors; }
+    if (num_actors < 1) { return ws_no_actors; }
 
     return check;
 }
@@ -78,6 +85,7 @@ WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> table) {
 
         auto raw_texture = items->get_as<std::string>("texture");
         const char *texture = raw_texture->data();
+        if (!file_exists(texture)) { return ws_no_texture; }
 
         float scale = (float)items->get_as<double>("scale").value_or(0.15f);
         float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
@@ -104,6 +112,7 @@ WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> table) {
 
         auto raw_texture = items->get_as<std::string>("texture");
         const char *texture = raw_texture->data();
+        if (!file_exists(texture)) { return ws_no_texture; }
 
         float radius = (float)items->get_as<double>("radius").value_or(1.0f);
         float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
@@ -129,6 +138,7 @@ WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> table)
 
         auto raw_texture = items->get_as<std::string>("texture");
         const char *texture = raw_texture->data();
+        if (!file_exists(texture)) { return ws_no_texture; }
 
         float span = (float)items->get_as<double>("span").value_or(-1.0f);
         float radius = (float)items->get_as<double>("radius").value_or(1.0f);
