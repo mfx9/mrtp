@@ -260,7 +260,8 @@ int main(int argc, char **argv) {
         if (status != mrtp::ws_ok) {
             if (!quiet) { std::cout << std::endl; }
 
-            if (status == mrtp::ws_parse_error) { std::cerr << "error parsing file" << std::endl; }
+            if (status == mrtp::ws_no_file) { std::cerr << "file not found" << std::endl; }
+            else if (status == mrtp::ws_parse_error) { std::cerr << "error parsing file" << std::endl; }
             else if (status == mrtp::ws_no_camera) { std::cerr << "camera not found" << std::endl; }
             else if (status == mrtp::ws_no_light) { std::cerr << "light not found" << std::endl; }
             else if (status == mrtp::ws_no_actors) { std::cerr << "no actors found" << std::endl; }

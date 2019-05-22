@@ -12,6 +12,11 @@ namespace mrtp {
 
 //Local functions
 
+static bool file_exists(const char *path) {
+    struct stat buffer;
+    return stat(path, &buffer) == 0;
+}
+
 static bool read_vector(std::shared_ptr<cpptoml::table> items, const char *id, 
                         Eigen::Vector3f *vector) {
     auto raw = items->get_array_of<double>(id);
@@ -25,8 +30,7 @@ static bool read_texture(std::shared_ptr<cpptoml::table> items, std::string *out
     auto raw = items->get_as<std::string>("texture");
     if (!raw) { return false; }
     const char *texture = raw->data();
-    struct stat buffer;
-    if (stat(texture, &buffer) != 0) { return false; }
+    if (!file_exists(texture)) { return false; }
     *output = texture;
     return true;
 }
@@ -38,12 +42,10 @@ World::World(const char *path): path_(path) {}
 World::~World() {}
 
 WorldStatus_t World::initialize() {
+    if (!file_exists(path_)) { return ws_no_file; }
+
     std::shared_ptr<cpptoml::table> config;
-    try {
-        config = cpptoml::parse_file(path_);
-    } catch (...) {
-        return ws_parse_error;
-    }
+    try { config = cpptoml::parse_file(path_); } catch (...) { return ws_parse_error; }
 
     auto tab_camera = config->get_table("camera");
     if (!tab_camera) { return ws_no_camera; }
@@ -80,9 +82,14 @@ WorldStatus_t World::initialize() {
 
     WorldStatus_t check;
 
-    if ((check = load_planes(config->get_table_array("planes"))) != ws_ok) { return check; }
-    if ((check = load_spheres(config->get_table_array("spheres"))) != ws_ok) { return check; }
-    if ((check = load_cylinders(config->get_table_array("cylinders"))) != ws_ok) { return check; }
+    auto planes = config->get_table_array("planes");
+    if ((check = load_planes(planes)) != ws_ok) { return check; }
+
+    auto spheres = config->get_table_array("spheres");
+    if ((check = load_spheres(spheres)) != ws_ok) { return check; }
+
+    auto cylinders = config->get_table_array("cylinders");
+    if ((check = load_cylinders(cylinders)) != ws_ok) { return check; }
 
     if (ptr_actors_.empty()) { return ws_no_actors; }
 
