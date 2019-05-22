@@ -23,7 +23,8 @@ namespace mrtp {
 
 enum WorldStatus_t {ws_ok, ws_fail, ws_parse_error, ws_no_camera, 
                     ws_camera_param, ws_no_light, ws_light_param, 
-                    ws_no_actors, ws_no_texture};
+                    ws_no_actors, ws_no_texture, ws_plane_param, 
+                    ws_sphere_param, ws_cylinder_param};
 
 class World {
   public:
@@ -40,9 +41,9 @@ class World {
     WorldStatus_t load_sphere(std::shared_ptr<cpptoml::table> items);
     WorldStatus_t load_cylinder(std::shared_ptr<cpptoml::table> items);
     
-    WorldStatus_t load_planes(std::shared_ptr<cpptoml::table> config);
-    WorldStatus_t load_spheres(std::shared_ptr<cpptoml::table> config);
-    WorldStatus_t load_cylinders(std::shared_ptr<cpptoml::table> config);
+    WorldStatus_t load_planes(std::shared_ptr<cpptoml::table_array> array);
+    WorldStatus_t load_spheres(std::shared_ptr<cpptoml::table_array> array);
+    WorldStatus_t load_cylinders(std::shared_ptr<cpptoml::table_array> array);
 
     const char *path_;
     std::list<Camera> cameras_;

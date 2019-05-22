@@ -64,47 +64,40 @@ WorldStatus_t World::initialize() {
     lights_.push_back(light);
     ptr_light_ = &lights_.back();
 
-    WorldStatus_t status;
+    WorldStatus_t check;
 
-    if ((status = load_planes(config)) != ws_ok) { return status; }
-    if ((status = load_spheres(config)) != ws_ok) { return status; }
-    if ((status = load_cylinders(config)) != ws_ok) { return status; }
+    if ((check = load_planes(config->get_table_array("planes"))) != ws_ok) { return check; }
+    if ((check = load_spheres(config->get_table_array("spheres"))) != ws_ok) { return check; }
+    if ((check = load_cylinders(config->get_table_array("cylinders"))) != ws_ok) { return check; }
 
-    size_t num_actors = planes_.size() + spheres_.size() + cylinders_.size();
-    if (num_actors < 1) { return ws_no_actors; }
+    if (ptr_actors_.empty()) { return ws_no_actors; }
 
     return ws_ok;
 }
 
-WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table> config) {
-    WorldStatus_t status = ws_ok;
-    auto actors = config->get_table_array("planes");
-    if (actors) {
-        for (const auto& items : *actors) {
-            if ((status = load_plane(items)) != ws_ok) { return status; }
-        }
+WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> array) {
+    if (!array) { return ws_ok; }
+    for (const auto& items : *array) {
+        WorldStatus_t check;
+        if ((check = load_plane(items)) != ws_ok) { return check; }
     }
     return ws_ok;
 }
 
-WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table> config) {
-    WorldStatus_t status = ws_ok;
-    auto actors = config->get_table_array("spheres");
-    if (actors) {
-        for (const auto& items : *actors) {
-            if ((status = load_sphere(items)) != ws_ok) { return status; }
-        }
+WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> array) {
+    if (!array) { return ws_ok; }
+    for (const auto& items : *array) {
+        WorldStatus_t check;
+        if ((check = load_sphere(items)) != ws_ok) { return check; }
     }
     return ws_ok;
 }
 
-WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table> config) {
-    WorldStatus_t status = ws_ok;
-    auto actors = config->get_table_array("cylinders");
-    if (actors) {
-        for (const auto& items : *actors) {
-            if ((status = load_cylinder(items)) != ws_ok) { return status; }
-        }
+WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> array) {
+    if (!array) { return ws_ok; }
+    for (const auto& items : *array) {
+        WorldStatus_t check;
+        if ((check = load_cylinder(items)) != ws_ok) { return check; }
     }
     return ws_ok;
 }
