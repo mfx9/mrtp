@@ -37,6 +37,7 @@ static const float kMaxFOV = 170.0f;
 
 static const float kDefaultDistance = 60.0f;
 static const float kDefaultShadow = 0.25f;
+static const float kDefaultBias = 0.001f;
 
 //Exit codes
 
@@ -255,9 +256,21 @@ int main(int argc, char **argv) {
         if (!quiet) { std::cout << "processing " << toml_file; }
 
         mrtp::World world(toml_file.c_str());
-        if (world.initialize() != mrtp::ws_ok) {
-            if (!quiet) { std::cerr << std::endl; }
-            std::cerr << "error initializing world" << std::endl;
+        mrtp::WorldStatus_t status = world.initialize();
+        if (status != mrtp::ws_ok) {
+            if (!quiet) { std::cout << std::endl; }
+
+            if (status == mrtp::ws_parse_error) { std::cerr << "error parsing file" << std::endl; }
+            else if (status == mrtp::ws_no_camera) { std::cerr << "camera not found" << std::endl; }
+            else if (status == mrtp::ws_camera_param) { std::cerr << "missing or invalid parameter in camera" << std::endl; }
+            else if (status == mrtp::ws_no_light) { std::cerr << "light not found" << std::endl; }
+            else if (status == mrtp::ws_light_param) { std::cerr << "missing or invalid parameter in light" << std::endl; }
+            else if (status == mrtp::ws_no_actors) { std::cerr << "no actors found" << std::endl; }
+            else if (status == mrtp::ws_no_texture) { std::cerr << "texture file not found" << std::endl; }
+            else if (status == mrtp::ws_plane_param) { std::cerr << "missing or invalid parameter in plane" << std::endl; }
+            else if (status == mrtp::ws_sphere_param) { std::cerr << "missing or invalid parameter in sphere" << std::endl; }
+            else if (status == mrtp::ws_cylinder_param) { std::cerr << "missing or invalid parameter in cylinder" << std::endl; }
+
             return exit_init_world;
         }
 
@@ -268,7 +281,7 @@ int main(int argc, char **argv) {
             png_file = foo + ".png";
         }
 
-        mrtp::Renderer renderer(&world, width, height, fov, distance, shadow, 0.001f, 
+        mrtp::Renderer renderer(&world, width, height, fov, distance, shadow, kDefaultBias, 
                                 recursion, threads, png_file.c_str());
         float time_used = renderer.render_scene();
         if (!quiet) { std::cout << " (render time: " << std::setprecision(2) << time_used << "s)" << std::endl; }

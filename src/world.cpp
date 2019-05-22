@@ -104,14 +104,17 @@ WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> array)
 
 WorldStatus_t World::load_plane(std::shared_ptr<cpptoml::table> items) {
     auto raw_center = items->get_array_of<double>("center");
+    if (!raw_center) { return ws_plane_param; }
     Eigen::Vector3d temp_center(raw_center->data());
     Eigen::Vector3f center = temp_center.cast<float>();
 
     auto raw_normal = items->get_array_of<double>("normal");
+    if (!raw_normal) { return ws_plane_param; }
     Eigen::Vector3d temp_normal(raw_normal->data());
     Eigen::Vector3f normal = temp_normal.cast<float>();
 
     auto raw_texture = items->get_as<std::string>("texture");
+    if (!raw_texture) { return ws_plane_param; }
     const char *texture = raw_texture->data();
     if (!file_exists(texture)) { return ws_no_texture; }
 
@@ -127,15 +130,19 @@ WorldStatus_t World::load_plane(std::shared_ptr<cpptoml::table> items) {
 
 WorldStatus_t World::load_sphere(std::shared_ptr<cpptoml::table> items) {
     auto raw_center = items->get_array_of<double>("center");
+    if (!raw_center) { return ws_sphere_param; }
     Eigen::Vector3d temp_center(raw_center->data());
     Eigen::Vector3f center = temp_center.cast<float>();
 
-    //TODO Axis is optional, set to <0, 0, 1>
+    Eigen::Vector3f axis(0.0f, 0.0f, 1.0f);
     auto raw_axis = items->get_array_of<double>("axis");
-    Eigen::Vector3d temp_axis(raw_center->data());
-    Eigen::Vector3f axis = temp_axis.cast<float>();
+    if (raw_axis) {
+        Eigen::Vector3d temp_axis(raw_axis->data());
+        axis = temp_axis.cast<float>();
+    }
 
     auto raw_texture = items->get_as<std::string>("texture");
+    if (!raw_texture) { return ws_sphere_param; }
     const char *texture = raw_texture->data();
     if (!file_exists(texture)) { return ws_no_texture; }
 
@@ -151,14 +158,17 @@ WorldStatus_t World::load_sphere(std::shared_ptr<cpptoml::table> items) {
 
 WorldStatus_t World::load_cylinder(std::shared_ptr<cpptoml::table> items) {
     auto raw_center = items->get_array_of<double>("center");
+    if (!raw_center) { return ws_cylinder_param; }
     Eigen::Vector3d temp_center(raw_center->data());
     Eigen::Vector3f center = temp_center.cast<float>();
 
     auto raw_direction = items->get_array_of<double>("direction");
+    if (!raw_direction) { return ws_cylinder_param; }
     Eigen::Vector3d temp_direction(raw_direction->data());
     Eigen::Vector3f direction = temp_direction.cast<float>();
 
     auto raw_texture = items->get_as<std::string>("texture");
+    if (!raw_texture) { return ws_cylinder_param; }
     const char *texture = raw_texture->data();
     if (!file_exists(texture)) { return ws_no_texture; }
 
