@@ -10,8 +10,9 @@ SRCEXT = cpp
 SOURCES = $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS = $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 
-CFLAGS = -W -Wall -pedantic -fPIC -O2
-LIB = -lm -lpng
+# To compile without OpenMP, comment out -fopenmp
+CFLAGS = -W -Wall -pedantic -O2 -fopenmp
+LIB = -lm -lpng -fopenmp
 INC = -I/usr/include/eigen3 -I/usr/include/png++ -I./include -I./cpptoml/include
 
 
