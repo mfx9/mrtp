@@ -28,6 +28,8 @@ Cylinder::Cylinder(Eigen::Vector3f *center, Eigen::Vector3f *direction, float ra
     texture_ = textureCollector.add(texture);
 }
 
+Cylinder::~Cylinder() {}
+
 /*
 Capital letters are vectors.
   A       Origin    of cylinder

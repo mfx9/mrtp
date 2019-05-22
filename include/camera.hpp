@@ -13,7 +13,7 @@ namespace mrtp {
 class Camera {
   public:
     Camera(Eigen::Vector3f *eye, Eigen::Vector3f *lookat, float roll);
-    ~Camera() {}
+    ~Camera();
     void calculate_window(int width, int height, float perspective);
     Eigen::Vector3f calculate_origin(int windowx, int windowy);
     Eigen::Vector3f calculate_direction(Eigen::Vector3f *origin);

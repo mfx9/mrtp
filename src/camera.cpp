@@ -17,6 +17,8 @@ Camera::Camera(Eigen::Vector3f *eye, Eigen::Vector3f *lookat, float roll) {
     roll_ = roll;
 }
 
+Camera::~Camera() {}
+
 void Camera::calculate_window(int width, int height, float perspective) {
     // i is a vector between the camera and the center of the window
     Eigen::Vector3f i = lookat_ - eye_;

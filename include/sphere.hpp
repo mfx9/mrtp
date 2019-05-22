@@ -16,7 +16,7 @@ class Sphere : public Actor {
   public:
     Sphere(Eigen::Vector3f *center, float radius, Eigen::Vector3f *axis, 
            float reflect, const char *texture);
-    ~Sphere() {}
+    ~Sphere();
     float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                 float maxd);
     Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal);

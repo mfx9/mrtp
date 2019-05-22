@@ -16,7 +16,7 @@ class Cylinder : public Actor {
   public:
     Cylinder(Eigen::Vector3f *center, Eigen::Vector3f *direction, float radius, 
              float span, float reflect, const char *texture);
-    ~Cylinder() {}
+    ~Cylinder();
     float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                 float maxd);
     Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal);

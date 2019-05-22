@@ -25,7 +25,7 @@ class Renderer {
     Renderer(World *world, int width, int height, float fov, float distance,
              float shadow, float bias, int maxdepth, int nthreads, 
              const char *path);
-    ~Renderer() {}
+    ~Renderer();
     float render_scene();
     bool write_scene();
 
