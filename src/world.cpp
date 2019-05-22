@@ -12,9 +12,23 @@ namespace mrtp {
 
 //Local functions
 
-static bool file_exists(const char *path) {
+static bool read_vector(std::shared_ptr<cpptoml::table> items, const char *id, 
+                        Eigen::Vector3f *vector) {
+    auto raw = items->get_array_of<double>(id);
+    if (!raw) { return false; }
+    Eigen::Vector3d tmp(raw->data());
+    *vector = tmp.cast<float>();
+    return true;
+}
+
+static bool read_texture(std::shared_ptr<cpptoml::table> items, std::string *output) {
+    auto raw = items->get_as<std::string>("texture");
+    if (!raw) { return false; }
+    const char *texture = raw->data();
     struct stat buffer;
-    return stat(path, &buffer) == 0;
+    if (stat(texture, &buffer) != 0) { return false; }
+    *output = texture;
+    return true;
 }
 
 //Member functions
@@ -103,25 +117,19 @@ WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> array)
 }
 
 WorldStatus_t World::load_plane(std::shared_ptr<cpptoml::table> items) {
-    auto raw_center = items->get_array_of<double>("center");
-    if (!raw_center) { return ws_plane_param; }
-    Eigen::Vector3d temp_center(raw_center->data());
-    Eigen::Vector3f center = temp_center.cast<float>();
+    Eigen::Vector3f center;
+    if (!read_vector(items, "center", &center)) { return ws_plane_param; }
 
-    auto raw_normal = items->get_array_of<double>("normal");
-    if (!raw_normal) { return ws_plane_param; }
-    Eigen::Vector3d temp_normal(raw_normal->data());
-    Eigen::Vector3f normal = temp_normal.cast<float>();
+    Eigen::Vector3f normal;
+    if (!read_vector(items, "normal", &normal)) { return ws_plane_param; }
 
-    auto raw_texture = items->get_as<std::string>("texture");
-    if (!raw_texture) { return ws_plane_param; }
-    const char *texture = raw_texture->data();
-    if (!file_exists(texture)) { return ws_no_texture; }
+    std::string texture;
+    if (!read_texture(items, &texture)) { return ws_plane_texture; }
 
     float scale = (float)items->get_as<double>("scale").value_or(0.15f);
     float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
 
-    Plane plane(&center, &normal, scale, reflect, texture);
+    Plane plane(&center, &normal, scale, reflect, texture.c_str());
     planes_.push_back(plane);
     ptr_actors_.push_back(&planes_.back());
 
@@ -129,27 +137,19 @@ WorldStatus_t World::load_plane(std::shared_ptr<cpptoml::table> items) {
 }
 
 WorldStatus_t World::load_sphere(std::shared_ptr<cpptoml::table> items) {
-    auto raw_center = items->get_array_of<double>("center");
-    if (!raw_center) { return ws_sphere_param; }
-    Eigen::Vector3d temp_center(raw_center->data());
-    Eigen::Vector3f center = temp_center.cast<float>();
+    Eigen::Vector3f center;
+    if (!read_vector(items, "center", &center)) { return ws_sphere_param; }
 
     Eigen::Vector3f axis(0.0f, 0.0f, 1.0f);
-    auto raw_axis = items->get_array_of<double>("axis");
-    if (raw_axis) {
-        Eigen::Vector3d temp_axis(raw_axis->data());
-        axis = temp_axis.cast<float>();
-    }
+    read_vector(items, "axis", &axis);
 
-    auto raw_texture = items->get_as<std::string>("texture");
-    if (!raw_texture) { return ws_sphere_param; }
-    const char *texture = raw_texture->data();
-    if (!file_exists(texture)) { return ws_no_texture; }
+    std::string texture;
+    if (!read_texture(items, &texture)) { return ws_sphere_texture; }
 
     float radius = (float)items->get_as<double>("radius").value_or(1.0f);
     float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
 
-    Sphere sphere(&center, radius, &axis, reflect, texture);
+    Sphere sphere(&center, radius, &axis, reflect, texture.c_str());
     spheres_.push_back(sphere);
     ptr_actors_.push_back(&spheres_.back());
 
@@ -157,26 +157,20 @@ WorldStatus_t World::load_sphere(std::shared_ptr<cpptoml::table> items) {
 }
 
 WorldStatus_t World::load_cylinder(std::shared_ptr<cpptoml::table> items) {
-    auto raw_center = items->get_array_of<double>("center");
-    if (!raw_center) { return ws_cylinder_param; }
-    Eigen::Vector3d temp_center(raw_center->data());
-    Eigen::Vector3f center = temp_center.cast<float>();
+    Eigen::Vector3f center;
+    if (!read_vector(items, "center", &center)) { return ws_cylinder_param; }
 
-    auto raw_direction = items->get_array_of<double>("direction");
-    if (!raw_direction) { return ws_cylinder_param; }
-    Eigen::Vector3d temp_direction(raw_direction->data());
-    Eigen::Vector3f direction = temp_direction.cast<float>();
+    Eigen::Vector3f direction;
+    if (!read_vector(items, "direction", &direction)) { return ws_cylinder_param; }
 
-    auto raw_texture = items->get_as<std::string>("texture");
-    if (!raw_texture) { return ws_cylinder_param; }
-    const char *texture = raw_texture->data();
-    if (!file_exists(texture)) { return ws_no_texture; }
+    std::string texture;
+    if (!read_texture(items, &texture)) { return ws_cylinder_texture; }
 
     float span = (float)items->get_as<double>("span").value_or(-1.0f);
     float radius = (float)items->get_as<double>("radius").value_or(1.0f);
     float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
 
-    Cylinder cylinder(&center, &direction, radius, span, reflect, texture);
+    Cylinder cylinder(&center, &direction, radius, span, reflect, texture.c_str());
     cylinders_.push_back(cylinder);
     ptr_actors_.push_back(&cylinders_.back());
 

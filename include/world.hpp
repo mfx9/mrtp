@@ -21,10 +21,11 @@
 
 namespace mrtp {
 
-enum WorldStatus_t {ws_ok, ws_fail, ws_parse_error, ws_no_camera, 
-                    ws_camera_param, ws_no_light, ws_light_param, 
-                    ws_no_actors, ws_no_texture, ws_plane_param, 
-                    ws_sphere_param, ws_cylinder_param};
+enum WorldStatus_t {ws_ok, ws_parse_error, ws_no_camera, ws_no_light, 
+                    ws_no_actors, ws_camera_param, ws_light_param, 
+                    ws_plane_param, ws_sphere_param, ws_cylinder_param, 
+                    ws_plane_texture, ws_sphere_texture, ws_cylinder_texture};
+
 
 class World {
   public:

@@ -262,14 +262,16 @@ int main(int argc, char **argv) {
 
             if (status == mrtp::ws_parse_error) { std::cerr << "error parsing file" << std::endl; }
             else if (status == mrtp::ws_no_camera) { std::cerr << "camera not found" << std::endl; }
-            else if (status == mrtp::ws_camera_param) { std::cerr << "missing or invalid parameter in camera" << std::endl; }
             else if (status == mrtp::ws_no_light) { std::cerr << "light not found" << std::endl; }
-            else if (status == mrtp::ws_light_param) { std::cerr << "missing or invalid parameter in light" << std::endl; }
             else if (status == mrtp::ws_no_actors) { std::cerr << "no actors found" << std::endl; }
-            else if (status == mrtp::ws_no_texture) { std::cerr << "texture file not found" << std::endl; }
+            else if (status == mrtp::ws_camera_param) { std::cerr << "missing or invalid parameter in camera" << std::endl; }
+            else if (status == mrtp::ws_light_param) { std::cerr << "missing or invalid parameter in light" << std::endl; }
             else if (status == mrtp::ws_plane_param) { std::cerr << "missing or invalid parameter in plane" << std::endl; }
             else if (status == mrtp::ws_sphere_param) { std::cerr << "missing or invalid parameter in sphere" << std::endl; }
             else if (status == mrtp::ws_cylinder_param) { std::cerr << "missing or invalid parameter in cylinder" << std::endl; }
+            else if (status == mrtp::ws_plane_texture) { std::cerr << "cannot load texture in plane" << std::endl; }
+            else if (status == mrtp::ws_sphere_texture) { std::cerr << "cannot load texture in sphere" << std::endl; }
+            else if (status == mrtp::ws_cylinder_texture) { std::cerr << "cannot load texture in cylinder" << std::endl; }
 
             return exit_init_world;
         }
