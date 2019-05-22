@@ -10,10 +10,18 @@
 
 namespace mrtp {
 
+//Local functions
+
 static bool file_exists(const char *path) {
     struct stat buffer;
     return stat(path, &buffer) == 0;
 }
+
+//Member functions
+
+World::World(const char *path): path_(path) {}
+
+World::~World() {}
 
 WorldStatus_t World::initialize() {
     std::shared_ptr<cpptoml::table> config;
@@ -56,98 +64,119 @@ WorldStatus_t World::initialize() {
     lights_.push_back(light);
     ptr_light_ = &lights_.back();
 
-    WorldStatus_t check = load_planes(config->get_table_array("planes"));
-    if (check != ws_ok) { return check; }
+    WorldStatus_t status;
 
-    check = load_spheres(config->get_table_array("spheres"));
-    if (check != ws_ok) { return check; }
-
-    check = load_cylinders(config->get_table_array("cylinders"));
-    if (check != ws_ok) { return check; }
+    if ((status = load_planes(config)) != ws_ok) { return status; }
+    if ((status = load_spheres(config)) != ws_ok) { return status; }
+    if ((status = load_cylinders(config)) != ws_ok) { return status; }
 
     size_t num_actors = planes_.size() + spheres_.size() + cylinders_.size();
     if (num_actors < 1) { return ws_no_actors; }
 
-    return check;
+    return ws_ok;
 }
 
-WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table_array> table) {
-    if (!table) { return ws_ok; }
-
-    for (const auto& items : *table) {
-        auto raw_center = items->get_array_of<double>("center");
-        Eigen::Vector3d temp_center(raw_center->data());
-        Eigen::Vector3f center = temp_center.cast<float>();
-
-        auto raw_normal = items->get_array_of<double>("normal");
-        Eigen::Vector3d temp_normal(raw_normal->data());
-        Eigen::Vector3f normal = temp_normal.cast<float>();
-
-        auto raw_texture = items->get_as<std::string>("texture");
-        const char *texture = raw_texture->data();
-        if (!file_exists(texture)) { return ws_no_texture; }
-
-        float scale = (float)items->get_as<double>("scale").value_or(0.15f);
-        float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
-
-        Plane plane(&center, &normal, scale, reflect, texture);
-        planes_.push_back(plane);
-        ptr_actors_.push_back(&planes_.back());
+WorldStatus_t World::load_planes(std::shared_ptr<cpptoml::table> config) {
+    WorldStatus_t status = ws_ok;
+    auto actors = config->get_table_array("planes");
+    if (actors) {
+        for (const auto& items : *actors) {
+            if ((status = load_plane(items)) != ws_ok) { return status; }
+        }
     }
     return ws_ok;
 }
 
-WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table_array> table) {
-    if (!table) { return ws_ok; }
-
-    for (const auto& items : *table) {
-        auto raw_center = items->get_array_of<double>("center");
-        Eigen::Vector3d temp_center(raw_center->data());
-        Eigen::Vector3f center = temp_center.cast<float>();
-
-        //TODO Axis is optional, set to <0, 0, 1>
-        auto raw_axis = items->get_array_of<double>("axis");
-        Eigen::Vector3d temp_axis(raw_center->data());
-        Eigen::Vector3f axis = temp_axis.cast<float>();
-
-        auto raw_texture = items->get_as<std::string>("texture");
-        const char *texture = raw_texture->data();
-        if (!file_exists(texture)) { return ws_no_texture; }
-
-        float radius = (float)items->get_as<double>("radius").value_or(1.0f);
-        float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
-
-        Sphere sphere(&center, radius, &axis, reflect, texture);
-        spheres_.push_back(sphere);
-        ptr_actors_.push_back(&spheres_.back());
+WorldStatus_t World::load_spheres(std::shared_ptr<cpptoml::table> config) {
+    WorldStatus_t status = ws_ok;
+    auto actors = config->get_table_array("spheres");
+    if (actors) {
+        for (const auto& items : *actors) {
+            if ((status = load_sphere(items)) != ws_ok) { return status; }
+        }
     }
     return ws_ok;
 }
 
-WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table_array> table) {
-    if (!table) { return ws_ok; }
-
-    for (const auto& items : *table) {
-        auto raw_center = items->get_array_of<double>("center");
-        Eigen::Vector3d temp_center(raw_center->data());
-        Eigen::Vector3f center = temp_center.cast<float>();
-
-        auto raw_direction = items->get_array_of<double>("direction");
-        Eigen::Vector3d temp_direction(raw_direction->data());
-        Eigen::Vector3f direction = temp_direction.cast<float>();
-
-        auto raw_texture = items->get_as<std::string>("texture");
-        const char *texture = raw_texture->data();
-        if (!file_exists(texture)) { return ws_no_texture; }
-
-        float span = (float)items->get_as<double>("span").value_or(-1.0f);
-        float radius = (float)items->get_as<double>("radius").value_or(1.0f);
-        float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
-
-        Cylinder cylinder(&center, &direction, radius, span, reflect, texture);
-        cylinders_.push_back(cylinder);
-        ptr_actors_.push_back(&cylinders_.back());
+WorldStatus_t World::load_cylinders(std::shared_ptr<cpptoml::table> config) {
+    WorldStatus_t status = ws_ok;
+    auto actors = config->get_table_array("cylinders");
+    if (actors) {
+        for (const auto& items : *actors) {
+            if ((status = load_cylinder(items)) != ws_ok) { return status; }
+        }
     }
+    return ws_ok;
+}
+
+WorldStatus_t World::load_plane(std::shared_ptr<cpptoml::table> items) {
+    auto raw_center = items->get_array_of<double>("center");
+    Eigen::Vector3d temp_center(raw_center->data());
+    Eigen::Vector3f center = temp_center.cast<float>();
+
+    auto raw_normal = items->get_array_of<double>("normal");
+    Eigen::Vector3d temp_normal(raw_normal->data());
+    Eigen::Vector3f normal = temp_normal.cast<float>();
+
+    auto raw_texture = items->get_as<std::string>("texture");
+    const char *texture = raw_texture->data();
+    if (!file_exists(texture)) { return ws_no_texture; }
+
+    float scale = (float)items->get_as<double>("scale").value_or(0.15f);
+    float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
+
+    Plane plane(&center, &normal, scale, reflect, texture);
+    planes_.push_back(plane);
+    ptr_actors_.push_back(&planes_.back());
+
+    return ws_ok;
+}
+
+WorldStatus_t World::load_sphere(std::shared_ptr<cpptoml::table> items) {
+    auto raw_center = items->get_array_of<double>("center");
+    Eigen::Vector3d temp_center(raw_center->data());
+    Eigen::Vector3f center = temp_center.cast<float>();
+
+    //TODO Axis is optional, set to <0, 0, 1>
+    auto raw_axis = items->get_array_of<double>("axis");
+    Eigen::Vector3d temp_axis(raw_center->data());
+    Eigen::Vector3f axis = temp_axis.cast<float>();
+
+    auto raw_texture = items->get_as<std::string>("texture");
+    const char *texture = raw_texture->data();
+    if (!file_exists(texture)) { return ws_no_texture; }
+
+    float radius = (float)items->get_as<double>("radius").value_or(1.0f);
+    float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
+
+    Sphere sphere(&center, radius, &axis, reflect, texture);
+    spheres_.push_back(sphere);
+    ptr_actors_.push_back(&spheres_.back());
+
+    return ws_ok;
+}
+
+WorldStatus_t World::load_cylinder(std::shared_ptr<cpptoml::table> items) {
+    auto raw_center = items->get_array_of<double>("center");
+    Eigen::Vector3d temp_center(raw_center->data());
+    Eigen::Vector3f center = temp_center.cast<float>();
+
+    auto raw_direction = items->get_array_of<double>("direction");
+    Eigen::Vector3d temp_direction(raw_direction->data());
+    Eigen::Vector3f direction = temp_direction.cast<float>();
+
+    auto raw_texture = items->get_as<std::string>("texture");
+    const char *texture = raw_texture->data();
+    if (!file_exists(texture)) { return ws_no_texture; }
+
+    float span = (float)items->get_as<double>("span").value_or(-1.0f);
+    float radius = (float)items->get_as<double>("radius").value_or(1.0f);
+    float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
+
+    Cylinder cylinder(&center, &direction, radius, span, reflect, texture);
+    cylinders_.push_back(cylinder);
+    ptr_actors_.push_back(&cylinders_.back());
+
     return ws_ok;
 }
 
