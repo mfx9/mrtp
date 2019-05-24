@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
     //Iterate over all input files
     for (; iter != iter_end; ++iter) {
         std::string toml_file = *iter;
-        if (!quiet) { std::cout << "processing " << toml_file; }
+        if (!quiet) { std::cout << "processing " << toml_file << std::flush; }
 
         mrtp::World world(toml_file.c_str());
         mrtp::WorldStatus_t status = world.initialize();
