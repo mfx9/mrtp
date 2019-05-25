@@ -10,13 +10,14 @@
 
 #include "actor.hpp"
 
+
 namespace mrtp {
 
 class Plane : public Actor {
   public:
     Plane(Eigen::Vector3f *center, Eigen::Vector3f *normal, float scale, 
           float reflect, const char *texture);
-    ~Plane() {}
+    ~Plane();
     float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                 float maxd);
     Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal);

@@ -49,6 +49,8 @@ Renderer::Renderer(World *world, int width, int height, float fov,
     framebuffer_.assign(width_ * height_, dummy);
 }
 
+Renderer::~Renderer() {}
+
 bool Renderer::write_scene() {
     png::image<png::rgb_pixel> image(width_, height_);
     Pixel *in = &framebuffer_[0];

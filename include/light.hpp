@@ -8,12 +8,13 @@
 
 #include <Eigen/Core>
 
+
 namespace mrtp {
 
 class Light {
   public:
     Light(Eigen::Vector3f *center);
-    ~Light() {}
+    ~Light();
     Eigen::Vector3f calculate_ray(Eigen::Vector3f *hit);
 
   private:

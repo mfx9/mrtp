@@ -27,6 +27,8 @@ Plane::Plane(Eigen::Vector3f *center, Eigen::Vector3f *normal, float scale,
     texture_ = textureCollector.add(texture);
 }
 
+Plane::~Plane() {}
+
 Pixel Plane::pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) {
     Eigen::Vector3f v = (*hit) - center_;
     // Calculate components of v (dot products)

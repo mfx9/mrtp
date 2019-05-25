@@ -16,7 +16,7 @@ namespace mrtp {
 class Texture {
   public:
     Texture(const char *path);
-    ~Texture() {}
+    ~Texture();
     void load_texture();
     bool check_path(const char *path);
     Pixel pick_pixel(float fracx, float fracy, float scale);

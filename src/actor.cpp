@@ -11,6 +11,10 @@
 
 namespace mrtp {
 
+Actor::Actor() {}
+
+Actor::~Actor() {}
+
 bool Actor::has_shadow() { return has_shadow_; }
 
 float Actor::get_reflect() { return reflect_; }

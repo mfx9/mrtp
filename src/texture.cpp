@@ -19,6 +19,8 @@ TextureCollector textureCollector;
 
 Texture::Texture(const char *path) { spath_ = path; }
 
+Texture::~Texture() {}
+
 /*
 fracx, fracy are within a range of <0..1> and
 define fractions of the x- and y-dimension

@@ -15,8 +15,8 @@ namespace mrtp {
 
 class Actor {
   public:
-    Actor() {}
-    virtual ~Actor() {}
+    Actor();
+    virtual ~Actor();
     bool has_shadow();
     float get_reflect();
     virtual float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction,

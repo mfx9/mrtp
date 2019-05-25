@@ -29,6 +29,8 @@ Sphere::Sphere(Eigen::Vector3f *center, float radius, Eigen::Vector3f *axis,
     texture_ = textureCollector.add(texture);
 }
 
+Sphere::~Sphere() {}
+
 float Sphere::solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
                     float maxd) {
     Eigen::Vector3f t = (*origin) - center_;
