@@ -287,5 +287,6 @@ int main(int argc, char **argv) {
             return exit_write_scene;
         }
     }
+    
     return exit_ok;
 }

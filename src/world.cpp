@@ -3,7 +3,7 @@
  * Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
-#include <sys/stat.h>
+#include <fstream>
 
 #include "world.hpp"
 
@@ -13,8 +13,8 @@ namespace mrtp {
 //Local functions
 
 static bool file_exists(const char *path) {
-    struct stat buffer;
-    return stat(path, &buffer) == 0;
+    std::fstream check(path);
+    return check.good();
 }
 
 static bool read_vector(std::shared_ptr<cpptoml::table> items, const char *id, 
