@@ -27,9 +27,10 @@ mkdir bin build
 make
 ```
 
-In order to test the program, run from inside the examples directory:
+In order to test the program:
 
 ```
+cd examples
 ../bin/mrtp_cli scene*toml
 ```
 
