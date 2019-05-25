@@ -53,7 +53,6 @@ void help_message() {
     -d, --light-distance     distance to darken light (def. 60)
     -f, --fov                field of vision, in degrees (def. 93)
     -h, --help               print this help screen
-    -m, --light-mode         mode of darkening light: none, linear, quadratic (def.)
     -o, --output-file        output filename in PNG format
     -q, --quiet              suppress all messages, except errors
     -r, --resolution         resolution: 640x480 (def.), 1024x768, etc.
@@ -120,13 +119,6 @@ int main(int argc, char **argv) {
         } else if (option == "-h" || option == "--help") {
             help_message();
             return exit_ok;
-
-        } else if (option == "-m" || option == "--light-mode") {
-            if (i + 1 >= argc) {
-                std::cerr << "mode of light requires argument" << std::endl;
-                return exit_light_mode;
-            }
-            std::string argument(argv[++i]);
 
         } else if (option == "-o" || option == "--output-file") {
             if (i + 1 >= argc) {
@@ -286,6 +278,7 @@ int main(int argc, char **argv) {
 
         mrtp::Renderer renderer(&world, width, height, fov, distance, shadow, kDefaultBias, 
                                 recursion, threads, png_file.c_str());
+
         float time_used = renderer.render_scene();
         if (!quiet) { std::cout << " (render time: " << std::setprecision(2) << time_used << "s)" << std::endl; }
 
