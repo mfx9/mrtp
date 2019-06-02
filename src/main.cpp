@@ -39,12 +39,20 @@ static const float kDefaultDistance = 60.0f;
 static const float kDefaultShadow = 0.25f;
 static const float kDefaultBias = 0.001f;
 
+static const std::vector<std::string> kUseArgument{ {"-d", "--light-distance", 
+                                                     "-f", "--fov", 
+                                                     "-o", "--output-file", 
+                                                     "-r", "--resolution", 
+                                                     "-R", "--recursion-levels", 
+                                                     "-s", "--shadow-factor", 
+                                                     "-t", "--threads"} };
+
 //Exit codes
 
-enum ExitCode_t {exit_ok, exit_no_options, exit_unknown_option, exit_light_distance, 
-                 exit_fov, exit_light_mode, exit_output_file, exit_resolution, 
-                 exit_recursion_levels, exit_shadow_factor, exit_threads, exit_png, 
-                 exit_toml, exit_init_world, exit_write_scene};
+enum ExitCode_t {exit_ok, exit_no_options, exit_unknown_option, exit_no_argument, 
+                 exit_light_distance, exit_fov, exit_light_mode, exit_output_file, 
+                 exit_resolution, exit_recursion_levels, exit_shadow_factor, 
+                 exit_threads, exit_png, exit_toml, exit_init_world, exit_write_scene};
 
 
 void help_message() {
@@ -86,11 +94,19 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; ++i) {
         std::string option(argv[i]);
 
-        if (option == "-d" || option == "--light-distance") {
-            if (i + 1 >= argc) {
-                std::cerr << "distance requires argument" << std::endl;
-                return exit_light_distance;
+        std::vector<std::string>::const_iterator iter = kUseArgument.begin();
+        std::vector<std::string>::const_iterator iter_end = kUseArgument.end();
+
+        for (; iter != iter_end; ++iter) {
+            if (*iter == option) {
+                if (i + 1 >= argc) {
+                    std::cerr << "option " << option << " requires argument" << std::endl;
+                    return exit_no_argument;
+                }
             }
+        }
+
+        if (option == "-d" || option == "--light-distance") {
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> distance;
@@ -100,10 +116,6 @@ int main(int argc, char **argv) {
             }
 
         } else if (option == "-f" || option == "--fov") {
-            if (i + 1 >= argc) {
-                std::cerr << "field of vision requires argument" << std::endl;
-                return exit_fov;
-            }
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> fov;
@@ -121,10 +133,6 @@ int main(int argc, char **argv) {
             return exit_ok;
 
         } else if (option == "-o" || option == "--output-file") {
-            if (i + 1 >= argc) {
-                std::cerr << "output file requires argument" << std::endl;
-                return exit_output_file;
-            }
             png_file = argv[++i];
             //TODO Check for a valid filename
 
@@ -132,10 +140,6 @@ int main(int argc, char **argv) {
             quiet = true;
 
         } else if (option == "-R" || option == "--recursion-levels") {
-            if (i + 1 >= argc) {
-                std::cerr << "recursion requires argument" << std::endl;
-                return exit_recursion_levels;
-            }
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> recursion;
@@ -149,10 +153,6 @@ int main(int argc, char **argv) {
             }
 
         } else if (option == "-r" || option == "--resolution") {
-            if (i + 1 >= argc) {
-                std::cerr << "resolution requires argument" << std::endl;
-                return exit_resolution;
-            }
             std::string argument(argv[++i]);
             size_t pos = argument.find('x');
             if (pos == std::string::npos) {
@@ -186,10 +186,6 @@ int main(int argc, char **argv) {
             }
 
         } else if (option == "-s" || option == "--shadow-factor") {
-            if (i + 1 >= argc) {
-                std::cerr << "shadow factor requires argument" << std::endl;
-                return exit_shadow_factor;
-            }
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> shadow;
@@ -199,10 +195,6 @@ int main(int argc, char **argv) {
             }
 
         } else if (option == "-t" || option == "--threads") {
-            if (i + 1 >= argc) {
-                std::cerr << "number of threads requires argument" << std::endl;
-                return exit_threads;
-            }
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> threads;
@@ -249,6 +241,7 @@ int main(int argc, char **argv) {
 
         mrtp::World world(toml_file.c_str());
         mrtp::WorldStatus_t status = world.initialize();
+
         if (status != mrtp::ws_ok) {
             if (!quiet) { std::cout << std::endl; }
 
