@@ -39,14 +39,6 @@ static const float kDefaultDistance = 60.0f;
 static const float kDefaultShadow = 0.25f;
 static const float kDefaultBias = 0.001f;
 
-static const std::vector<std::string> kUseArgument{ {"-d", "--light-distance", 
-                                                     "-f", "--fov", 
-                                                     "-o", "--output-file", 
-                                                     "-r", "--resolution", 
-                                                     "-R", "--recursion-levels", 
-                                                     "-s", "--shadow-factor", 
-                                                     "-t", "--threads"} };
-
 //Exit codes
 
 enum ExitCode_t {exit_ok, exit_no_options, exit_unknown_option, exit_no_argument, 
@@ -54,20 +46,46 @@ enum ExitCode_t {exit_ok, exit_no_options, exit_unknown_option, exit_no_argument
                  exit_resolution, exit_recursion_levels, exit_shadow_factor, 
                  exit_threads, exit_png, exit_toml, exit_init_world, exit_write_scene};
 
+//Command line options
+
+enum OptionId_t {option_unassigned, option_light_distance, option_fov, option_help, 
+                 option_output_file, option_quiet, option_resolution, 
+                 option_recursion_levels, option_shadow_factor, option_threads};
+
+struct Option_t {
+    OptionId_t id;
+    bool use_argument;
+    std::string long_name;
+    std::string short_name;
+    std::string info;
+};
+
+static const std::vector<Option_t> kOptions = {
+    {option_light_distance, true, "--light-distance", "-d", "distance to darken light (def. 60)"}, 
+    {option_fov, true, "--fov", "-f", "field of vision, in degrees (def. 93)"}, 
+    {option_help, false, "--help", "-h", "print this help screen"}, 
+    {option_output_file, true, "--output-file", "-o", "output filename in PNG format"}, 
+    {option_quiet, false, "--quiet", "-q", "suppress all messages, except errors"}, 
+    {option_resolution, true, "--resolution", "-r", "resolution: 640x480 (def.), 1024x768, etc."}, 
+    {option_recursion_levels, true, "--recursion-levels", "-R", "levels of recursion for reflected rays (def. 3)"}, 
+    {option_shadow_factor, true, "--shadow-factor", "-s", "shadow factor (def. 0.25)"}, 
+    {option_threads, true, "--threads", "-t", "rendering threads: 0 (auto), 1 (def.), 2, 4, etc."}, 
+};
+
 
 void help_message() {
     std::cout << R"(Usage: mrtp_cli [OPTION]... FILE...
-  Options:
-    -d, --light-distance     distance to darken light (def. 60)
-    -f, --fov                field of vision, in degrees (def. 93)
-    -h, --help               print this help screen
-    -o, --output-file        output filename in PNG format
-    -q, --quiet              suppress all messages, except errors
-    -r, --resolution         resolution: 640x480 (def.), 1024x768, etc.
-    -R, --recursion-levels   levels of recursion for reflected rays (def. 3)
-    -s, --shadow-factor      shadow factor (def. 0.25)
-    -t, --threads            rendering threads: 0 (auto), 1 (def.), 2, 4, etc.
+Options:)" << std::endl;
 
+    std::vector<Option_t>::const_iterator iter = kOptions.begin();
+    std::vector<Option_t>::const_iterator iter_end = kOptions.end();
+
+    for (; iter != iter_end; ++iter) {
+        std::cout << std::setw(4) << iter->short_name << ", " << std::left << std::setw(21) 
+                  << iter->long_name << std::right << iter->info << std::endl;
+    }
+
+   std::cout << R"(
 Example:
   mrtp_cli -r 1620x1080 -f 110.0 -o scene2.png scene2.toml)" << std::endl;
 }
@@ -93,20 +111,24 @@ int main(int argc, char **argv) {
     //Begin working on options
     for (int i = 1; i < argc; ++i) {
         std::string option(argv[i]);
+        OptionId_t current_id = option_unassigned;
 
-        std::vector<std::string>::const_iterator iter = kUseArgument.begin();
-        std::vector<std::string>::const_iterator iter_end = kUseArgument.end();
+        std::vector<Option_t>::const_iterator iter = kOptions.begin();
+        std::vector<Option_t>::const_iterator iter_end = kOptions.end();
 
         for (; iter != iter_end; ++iter) {
-            if (*iter == option) {
-                if (i + 1 >= argc) {
-                    std::cerr << "option " << option << " requires argument" << std::endl;
-                    return exit_no_argument;
+            if (iter->long_name == option || iter->short_name == option) {
+                current_id = iter->id;
+                if (iter->use_argument) {
+                    if (i + 1 >= argc) {
+                        std::cerr << "option " << option << " requires argument" << std::endl;
+                        return exit_no_argument;
+                    }
                 }
             }
         }
 
-        if (option == "-d" || option == "--light-distance") {
+        if (current_id == option_light_distance) {
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> distance;
@@ -115,7 +137,7 @@ int main(int argc, char **argv) {
                 return exit_light_distance;
             }
 
-        } else if (option == "-f" || option == "--fov") {
+        } else if (current_id == option_fov) {
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> fov;
@@ -128,18 +150,18 @@ int main(int argc, char **argv) {
                 return exit_fov;
             }
 
-        } else if (option == "-h" || option == "--help") {
+        } else if (current_id == option_help) {
             help_message();
             return exit_ok;
 
-        } else if (option == "-o" || option == "--output-file") {
+        } else if (current_id == option_output_file) {
             png_file = argv[++i];
             //TODO Check for a valid filename
 
-        } else if (option == "-q" || option == "--quiet") {
+        } else if (current_id == option_quiet) {
             quiet = true;
 
-        } else if (option == "-R" || option == "--recursion-levels") {
+        } else if (current_id == option_recursion_levels) {
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> recursion;
@@ -152,7 +174,7 @@ int main(int argc, char **argv) {
                 return exit_recursion_levels;
             }
 
-        } else if (option == "-r" || option == "--resolution") {
+        } else if (current_id == option_resolution) {
             std::string argument(argv[++i]);
             size_t pos = argument.find('x');
             if (pos == std::string::npos) {
@@ -185,7 +207,7 @@ int main(int argc, char **argv) {
                 return exit_resolution;
             }
 
-        } else if (option == "-s" || option == "--shadow-factor") {
+        } else if (current_id == option_shadow_factor) {
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> shadow;
@@ -194,7 +216,7 @@ int main(int argc, char **argv) {
                 return exit_shadow_factor;
             }
 
-        } else if (option == "-t" || option == "--threads") {
+        } else if (current_id == option_threads) {
             std::string argument(argv[++i]);
             std::stringstream convert(argument);
             convert >> threads;
