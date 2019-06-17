@@ -8,7 +8,7 @@
 
 namespace mrtp {
 
-Light::Light(Eigen::Vector3f *center) { center_ = *center; }
+Light::Light(Eigen::Vector3f *center) : center_(*center) {}
 
 Light::~Light() {}
 

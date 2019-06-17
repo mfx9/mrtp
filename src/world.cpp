@@ -37,7 +37,7 @@ static bool read_texture(std::shared_ptr<cpptoml::table> items, std::string *out
 
 //Member functions
 
-World::World(const char *path): path_(path) {}
+World::World(const char *path) : path_(path) {}
 
 World::~World() {}
 

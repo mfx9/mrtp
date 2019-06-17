@@ -30,17 +30,17 @@ maxdepth: number of recursion levels of a reflected ray
 */
 Renderer::Renderer(World *world, int width, int height, float fov,
                    float distance, float shadow, float bias, int maxdepth,
-                   int nthreads, const char *path) {
-    world_ = world;
-    width_ = width;
-    height_ = height;
-    fov_ = fov;
-    maxdist_ = distance;
-    shadow_ = shadow;
-    bias_ = bias;
-    maxdepth_ = maxdepth;
-    nthreads_ = nthreads;
-    path_ = path;
+                   int nthreads, const char *path) : 
+    world_(world), 
+    width_(width), 
+    height_(height), 
+    fov_(fov), 
+    maxdist_(distance), 
+    shadow_(shadow), 
+    bias_(bias), 
+    maxdepth_(maxdepth), 
+    nthreads_(nthreads), 
+    path_(path) {
 
     ratio_ = (float)width_ / (float)height_;
     perspective_ = ratio_ / (2.0f * std::tan(kDegreeToRadian * fov_ / 2.0f));

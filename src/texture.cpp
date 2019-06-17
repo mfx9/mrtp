@@ -17,7 +17,7 @@ static const float kByteToReal = 1.0f / kRealToByte;
 TextureCollector textureCollector;
 
 
-Texture::Texture(const char *path) { spath_ = path; }
+Texture::Texture(const char *path) : spath_(path) {}
 
 Texture::~Texture() {}
 

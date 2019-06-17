@@ -11,11 +11,11 @@
 
 namespace mrtp {
 
-Camera::Camera(Eigen::Vector3f *eye, Eigen::Vector3f *lookat, float roll) {
-    eye_ = *eye;
-    lookat_ = *lookat;
-    roll_ = roll;
-}
+Camera::Camera(Eigen::Vector3f *eye, Eigen::Vector3f *lookat, float roll) : 
+    eye_(*eye), 
+    lookat_(*lookat), 
+    roll_(roll) 
+    {}
 
 Camera::~Camera() {}
 
