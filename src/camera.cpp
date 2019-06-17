@@ -67,4 +67,4 @@ Eigen::Vector3f Camera::calculate_direction(Eigen::Vector3f *origin) {
     return (direction * (1.0f / direction.norm()));
 }
 
-} //end namespace mrtp
+} //namespace mrtp

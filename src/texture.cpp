@@ -78,4 +78,4 @@ Texture *TextureCollector::add(const char *path) {
     return last;
 }
 
-} //end namespace mrtp
+} //namespace mrtp

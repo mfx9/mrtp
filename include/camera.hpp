@@ -27,6 +27,6 @@ class Camera {
     Eigen::Vector3f wv_;
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_CAMERA_H

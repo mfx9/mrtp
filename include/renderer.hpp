@@ -53,6 +53,6 @@ class Renderer {
     void render_block(int block, int nlines);
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_RENDERER_H

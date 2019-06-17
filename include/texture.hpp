@@ -37,6 +37,6 @@ class TextureCollector {
 };
 
 extern TextureCollector textureCollector;
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_TEXTURE_H

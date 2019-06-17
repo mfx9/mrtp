@@ -184,4 +184,4 @@ WorldStatus_t World::load_cylinder(std::shared_ptr<cpptoml::table> items) {
     return ws_ok;
 }
 
-} //end namespace mrtp
+} //namespace mrtp

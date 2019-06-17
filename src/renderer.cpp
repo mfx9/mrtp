@@ -220,4 +220,4 @@ float Renderer::render_scene() {
     return time_used;
 }
 
-} //end namespace mrtp
+} //namespace mrtp

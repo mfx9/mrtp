@@ -30,6 +30,6 @@ class Sphere : public Actor {
     float R_;
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_SPHERE_H

@@ -54,4 +54,4 @@ float Plane::solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mi
 
 Eigen::Vector3f Plane::calculate_normal(Eigen::Vector3f *hit) { return normal_; }
 
-} //end namespace mrtp
+} //namespace mrtp

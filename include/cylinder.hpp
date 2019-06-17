@@ -31,6 +31,6 @@ class Cylinder : public Actor {
     float span_;
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_CYLINDER_H
