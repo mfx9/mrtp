@@ -28,8 +28,8 @@ of a texture.
 A reasonable scale for a 256x256 texture is 0.15.
 */
 Pixel Texture::pick_pixel(float fracx, float fracy, float scale) {
-    unsigned u = ((unsigned)(fracx * width_ * scale)) % width_;
-    unsigned v = ((unsigned)(fracy * height_ * scale)) % height_;
+    unsigned u = (static_cast<unsigned>(fracx * width_ * scale)) % width_;
+    unsigned v = (static_cast<unsigned>(fracy * height_ * scale)) % height_;
 
     return data_[u + v * width_];
 }
@@ -49,8 +49,7 @@ void Texture::load_texture() {
         png::rgb_pixel *in = &image[i][0];
 
         for (int j = 0; j < width_; j++, in++) {
-            Pixel out;
-            out << (float)in->red, (float)in->green, (float)in->blue;
+            Pixel out(static_cast<float>(in->red), static_cast<float>(in->green), static_cast<float>(in->blue));
             out *= kByteToReal;
             data_.push_back(out);
         }

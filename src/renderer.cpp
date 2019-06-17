@@ -42,7 +42,7 @@ Renderer::Renderer(World *world, int width, int height, float fov,
     nthreads_(nthreads), 
     path_(path) {
 
-    ratio_ = (float)width_ / (float)height_;
+    ratio_ = static_cast<float>(width_) / static_cast<float>(height_);
     perspective_ = ratio_ / (2.0f * std::tan(kDegreeToRadian * fov_ / 2.0f));
 
     Pixel dummy;
@@ -60,9 +60,9 @@ bool Renderer::write_scene() {
 
         for (int j = 0; j < width_; j++, in++, out++) {
             Pixel bytes = kRealToByte * (*in);
-            out->red = (unsigned char)bytes[0];
-            out->green = (unsigned char)bytes[1];
-            out->blue = (unsigned char)bytes[2];
+            out->red = static_cast<unsigned char>(bytes[0]);
+            out->green = static_cast<unsigned char>(bytes[1]);
+            out->blue = static_cast<unsigned char>(bytes[2]);
         }
     }
     image.write(path_);
@@ -213,9 +213,9 @@ float Renderer::render_scene() {
 #endif //!_OPENMP
 
     int time_stop = std::clock();
-    float time_used = (float)(time_stop - time_start) / CLOCKS_PER_SEC;
+    float time_used = static_cast<float>(time_stop - time_start) / CLOCKS_PER_SEC;
     if (nthreads_ > 1) {
-        time_used *= (1.0f / (float)nthreads_);
+        time_used *= 1.0f / static_cast<float>(nthreads_);
     }
     return time_used;
 }
