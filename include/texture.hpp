@@ -36,7 +36,9 @@ class TextureCollector {
     std::list<Texture> textures_;
 };
 
+
 extern TextureCollector textureCollector;
+
 } //namespace mrtp
 
 #endif //_TEXTURE_H

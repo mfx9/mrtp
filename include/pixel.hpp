@@ -8,6 +8,7 @@
 
 #include <Eigen/Core>
 
+
 namespace mrtp {
 
 typedef Eigen::Vector3f Pixel;

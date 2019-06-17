@@ -10,6 +10,7 @@
 
 #include "actor.hpp"
 
+
 namespace mrtp {
 
 class Sphere : public Actor {
