@@ -21,6 +21,6 @@ class Light {
     Eigen::Vector3f center_;
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_LIGHT_H

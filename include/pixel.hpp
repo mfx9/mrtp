@@ -8,10 +8,11 @@
 
 #include <Eigen/Core>
 
+
 namespace mrtp {
 
 typedef Eigen::Vector3f Pixel;
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_PIXEL_H

@@ -20,6 +20,7 @@ namespace mrtp {
 
 enum RendererStatus_t {rs_ok, rs_fail};
 
+
 class Renderer {
   public:
     Renderer(World *world, int width, int height, float fov, float distance,
@@ -53,6 +54,6 @@ class Renderer {
     void render_block(int block, int nlines);
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_RENDERER_H

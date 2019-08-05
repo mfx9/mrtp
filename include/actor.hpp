@@ -34,6 +34,6 @@ class Actor {
     static Eigen::Vector3f generate_unit_vector(Eigen::Vector3f *vector);
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_ACTOR_H

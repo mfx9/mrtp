@@ -10,6 +10,7 @@
 
 #include "actor.hpp"
 
+
 namespace mrtp {
 
 class Sphere : public Actor {
@@ -30,6 +31,6 @@ class Sphere : public Actor {
     float R_;
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_SPHERE_H

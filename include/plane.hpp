@@ -31,6 +31,6 @@ class Plane : public Actor {
     float scale_;
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_PLANE_H

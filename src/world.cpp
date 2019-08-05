@@ -3,7 +3,7 @@
  * Copyright : Mikolaj Feliks  <mikolaj.feliks@gmail.com>
  * License   : LGPL v3  (http://www.gnu.org/licenses/gpl-3.0.en.html)
  */
-#include <sys/stat.h>
+#include <fstream>
 
 #include "world.hpp"
 
@@ -13,8 +13,8 @@ namespace mrtp {
 //Local functions
 
 static bool file_exists(const char *path) {
-    struct stat buffer;
-    return stat(path, &buffer) == 0;
+    std::fstream check(path);
+    return check.good();
 }
 
 static bool read_vector(std::shared_ptr<cpptoml::table> items, const char *id, 
@@ -37,7 +37,7 @@ static bool read_texture(std::shared_ptr<cpptoml::table> items, std::string *out
 
 //Member functions
 
-World::World(const char *path): path_(path) {}
+World::World(const char *path) : path_(path) {}
 
 World::~World() {}
 
@@ -56,7 +56,7 @@ WorldStatus_t World::initialize() {
     auto raw_lookat = tab_camera->get_array_of<double>("target");
     if (!raw_lookat) { return ws_camera_param; }
 
-    float camera_roll = (float)tab_camera->get_as<double>("roll").value_or(0.0f);
+    float camera_roll = static_cast<float>(tab_camera->get_as<double>("roll").value_or(0.0f));
 
     Eigen::Vector3d temp_eye(raw_eye->data());
     Eigen::Vector3f camera_eye = temp_eye.cast<float>();
@@ -133,8 +133,8 @@ WorldStatus_t World::load_plane(std::shared_ptr<cpptoml::table> items) {
     std::string texture;
     if (!read_texture(items, &texture)) { return ws_plane_texture; }
 
-    float scale = (float)items->get_as<double>("scale").value_or(0.15f);
-    float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
+    float scale = static_cast<float>(items->get_as<double>("scale").value_or(0.15f));
+    float reflect = static_cast<float>(items->get_as<double>("reflect").value_or(0.0f));
 
     Plane plane(&center, &normal, scale, reflect, texture.c_str());
     planes_.push_back(plane);
@@ -153,8 +153,8 @@ WorldStatus_t World::load_sphere(std::shared_ptr<cpptoml::table> items) {
     std::string texture;
     if (!read_texture(items, &texture)) { return ws_sphere_texture; }
 
-    float radius = (float)items->get_as<double>("radius").value_or(1.0f);
-    float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
+    float radius = static_cast<float>(items->get_as<double>("radius").value_or(1.0f));
+    float reflect = static_cast<float>(items->get_as<double>("reflect").value_or(0.0f));
 
     Sphere sphere(&center, radius, &axis, reflect, texture.c_str());
     spheres_.push_back(sphere);
@@ -173,9 +173,9 @@ WorldStatus_t World::load_cylinder(std::shared_ptr<cpptoml::table> items) {
     std::string texture;
     if (!read_texture(items, &texture)) { return ws_cylinder_texture; }
 
-    float span = (float)items->get_as<double>("span").value_or(-1.0f);
-    float radius = (float)items->get_as<double>("radius").value_or(1.0f);
-    float reflect = (float)items->get_as<double>("reflect").value_or(0.0f);
+    float span = static_cast<float>(items->get_as<double>("span").value_or(-1.0f));
+    float radius = static_cast<float>(items->get_as<double>("radius").value_or(1.0f));
+    float reflect = static_cast<float>(items->get_as<double>("reflect").value_or(0.0f));
 
     Cylinder cylinder(&center, &direction, radius, span, reflect, texture.c_str());
     cylinders_.push_back(cylinder);
@@ -184,4 +184,4 @@ WorldStatus_t World::load_cylinder(std::shared_ptr<cpptoml::table> items) {
     return ws_ok;
 }
 
-} //end namespace mrtp
+} //namespace mrtp

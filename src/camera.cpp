@@ -11,11 +11,7 @@
 
 namespace mrtp {
 
-Camera::Camera(Eigen::Vector3f *eye, Eigen::Vector3f *lookat, float roll) {
-    eye_ = *eye;
-    lookat_ = *lookat;
-    roll_ = roll;
-}
+Camera::Camera(Eigen::Vector3f *eye, Eigen::Vector3f *lookat, float roll) : eye_(*eye), lookat_(*lookat), roll_(roll) {}
 
 Camera::~Camera() {}
 
@@ -54,12 +50,12 @@ void Camera::calculate_window(int width, int height, float perspective) {
     Eigen::Vector3f v = wo_ - k;
 
     // Find vectors spanning the window
-    wh_ = (1.0f / (float)width) * (h - wo_);
-    wv_ = (1.0f / (float)height) * (v - wo_);
+    wh_ = 1.0f / static_cast<float>(width) * (h - wo_);
+    wv_ = 1.0f / static_cast<float>(height) * (v - wo_);
 }
 
 Eigen::Vector3f Camera::calculate_origin(int windowx, int windowy) {
-    return (wo_ + (float)windowx * wh_ + (float)windowy * wv_);
+    return (wo_ + static_cast<float>(windowx) * wh_ + static_cast<float>(windowy) * wv_);
 }
 
 Eigen::Vector3f Camera::calculate_direction(Eigen::Vector3f *origin) {
@@ -67,4 +63,4 @@ Eigen::Vector3f Camera::calculate_direction(Eigen::Vector3f *origin) {
     return (direction * (1.0f / direction.norm()));
 }
 
-} //end namespace mrtp
+} //namespace mrtp

@@ -63,4 +63,4 @@ Pixel Sphere::pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) {
     return texture_->pick_pixel(fracx, fracy, 1.0f);
 }
 
-} //end namespace mrtp
+} //namespace mrtp

@@ -55,6 +55,6 @@ class World {
     std::list<Cylinder> cylinders_;
 };
 
-} //end namespace mrtp
+} //namespace mrtp
 
 #endif //_WORLD_H

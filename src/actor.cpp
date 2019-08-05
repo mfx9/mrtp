@@ -66,4 +66,4 @@ Eigen::Vector3f Actor::generate_unit_vector(Eigen::Vector3f *vector) {
     return unit;
 }
 
-} //end namespace mrtp
+} //namespace mrtp
