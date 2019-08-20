@@ -17,11 +17,11 @@ class Plane : public Actor {
   public:
     Plane(Eigen::Vector3f *center, Eigen::Vector3f *normal, float scale, 
           float reflect, const char *texture);
-    ~Plane();
-    float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
-                float maxd);
-    Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal);
-    Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit);
+    virtual ~Plane();
+    virtual float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, 
+                        float mind, float maxd) override;
+    virtual Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) override;
+    virtual Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit) override;
 
   private:
     Eigen::Vector3f center_;

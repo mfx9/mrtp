@@ -17,11 +17,11 @@ class Sphere : public Actor {
   public:
     Sphere(Eigen::Vector3f *center, float radius, Eigen::Vector3f *axis, 
            float reflect, const char *texture);
-    ~Sphere();
-    float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
-                float maxd);
-    Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal);
-    Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit);
+    virtual ~Sphere();
+    virtual float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, 
+                        float mind, float maxd) override;
+    virtual Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) override;
+    virtual Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit) override;
 
   private:
     Eigen::Vector3f center_;

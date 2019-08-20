@@ -14,13 +14,13 @@ namespace mrtp {
 
 class Cylinder : public Actor {
   public:
-    Cylinder(Eigen::Vector3f *center, Eigen::Vector3f *direction, float radius, 
-             float span, float reflect, const char *texture);
-    ~Cylinder();
-    float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, float mind,
-                float maxd);
-    Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal);
-    Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit);
+    Cylinder(Eigen::Vector3f *center, Eigen::Vector3f *direction, 
+             float radius, float span, float reflect, const char *texture);
+    virtual ~Cylinder();
+    virtual float solve(Eigen::Vector3f *origin, Eigen::Vector3f *direction, 
+                        float mind, float maxd) override;
+    virtual Pixel pick_pixel(Eigen::Vector3f *hit, Eigen::Vector3f *normal) override;
+    virtual Eigen::Vector3f calculate_normal(Eigen::Vector3f *hit) override;
 
   private:
     Eigen::Vector3f A_;
