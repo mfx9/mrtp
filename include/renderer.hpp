@@ -9,7 +9,7 @@
 #include <Eigen/Core>
 #include <vector>
 
-#include "actor.hpp"
+#include "actors.hpp"
 #include "camera.hpp"
 #include "light.hpp"
 #include "pixel.hpp"

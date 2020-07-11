@@ -11,12 +11,9 @@
 #include <list>
 #include "cpptoml.h"
 
-#include "actor.hpp"
+#include "actors.hpp"
 #include "camera.hpp"
-#include "cylinder.hpp"
 #include "light.hpp"
-#include "plane.hpp"
-#include "sphere.hpp"
 
 
 namespace mrtp {
